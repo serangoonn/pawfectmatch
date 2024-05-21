@@ -1,6 +1,15 @@
 // Import the functions you need from the SDKs you need
+// functions for firebase login/signup
 import { initializeApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
+
+//functions for forgot password
+import firebase from 'firebase/compat/app';
+import 'firebase/compat/auth';
+import 'firebase/compat/firestore';
+
+//functions for storing user profile
+import { getFirestore } from 'firebase/firestore';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -18,7 +27,19 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
+// for login/signup
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
+// for forgot password
+if (!firebase.apps.length){
+  firebase.initializeApp(firebaseConfig);
+}
+
+// for storing user profiles
+const firestore = getFirestore(app);
+
+// exporting
 export { auth };
+export { firebase }; 
+export { firestore };

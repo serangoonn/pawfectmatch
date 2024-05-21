@@ -7,7 +7,7 @@ export default function MyBtn({text, onPress}) {
         style={{
             backgroundColor: "lightblue",
             padding: 10,
-            borderRadius: "20%",
+            borderRadius: 20,
             width: "60%",
         }}
             onPress={(e) => {

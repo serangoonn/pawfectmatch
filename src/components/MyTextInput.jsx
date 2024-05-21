@@ -8,7 +8,7 @@ export default function MyTextInput({ value, onChange, placeholder }) {
         borderWidth: 1,
         borderColor: "black",
         width: "80%",
-        borderRadius: "40%",
+        borderRadius: 40,
         padding: 10,
         margin: 6,
       }}

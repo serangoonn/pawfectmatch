@@ -23,7 +23,7 @@ export default function Home() {
       <Text>Email: {auth.currentUser?.email} </Text>
       <TouchableOpacity
       onPress = {handleSignOut}
-      style={StyleSheet.button}
+      style={styles.button}
       >
         <Text styles={styles.buttonText}> sign out </Text>
       </TouchableOpacity>
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "lightblue",
     padding: 10,
-    borderRadius: "20%",
+    borderRadius: 20,
     width: "60%",
   },
   buttonText: {

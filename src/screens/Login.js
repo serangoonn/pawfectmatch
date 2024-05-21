@@ -1,13 +1,13 @@
 //login screen 
 
-import { StyleSheet, Text, View, TextInput } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
 import MyTextInput from "../components/MyTextInput";
 import MyBtn from "../components/MyBtn";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigation } from'@react-navigation/core';
-
+import { firebase } from "../utils/firebase";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -46,11 +46,22 @@ export default function Login() {
    });
    }
 
+   //change the password
+   const handleForgotPassword = () => {
+    firebase.auth().sendPasswordResetEmail(email)
+    .then(() => {
+      alert("Password reset email sent")
+    }).catch((error) => {
+      alert(error)
+    })
+  }
+
+
    //navigation
    useEffect(()=>{
     const unsubscribe = auth.onAuthStateChanged(user=> {
       if (user) {
-        navigation.replace("Home")
+        navigation.replace("PetOrOwner")
       }
     })
     return unsubscribe}, [])
@@ -93,6 +104,22 @@ export default function Login() {
       handleLogin();
     }}
     />
+
+    <TouchableOpacity 
+      style={{
+            padding: 10,
+        }}
+            onPress={() => {
+            handleForgotPassword();
+        }}
+        >
+            <Text
+                style={{
+                    color: "black",
+                    textAlign: "center"
+                }}
+                > Forgot Password </Text>
+        </TouchableOpacity>
     </View>
   );
 }
