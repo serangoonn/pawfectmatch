@@ -9,9 +9,20 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PetOrOwner from '../src/screens/PetOrOwner';
 import CreatePetProfile from '../src/screens/CreatePetProfile';
 import CreateUserProfile from '../src/screens/CreateUserProfile';
-
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import ProfileScreen from '../src/screens/Profile'
+import ChatScreen from '../src/screens/Chat'
 
 const Stack = createNativeStackNavigator();
+const Tab = createBottomTabNavigator();
+
+const HomeTabNavigator = () => (
+    <Tab.Navigator>
+        <Tab.Screen name = "Home" component={HomeScreen} />
+        <Tab.Screen name = "Profile" component={ProfileScreen} />
+        <Tab.Screen name = "Chat" component={ChatScreen} />
+    </Tab.Navigator>
+);
 
 export default function App() {
     return (
@@ -21,7 +32,7 @@ export default function App() {
                  <Stack.Screen name="PetOrOwner" component={PetOrOwner}/>
                  <Stack.Screen name="Pets" component={CreatePetProfile}/>
                  <Stack.Screen name="Aspiring Pet Owners" component={CreateUserProfile}/>
-                 <Stack.Screen name="Home" component={HomeScreen}/>
+                 <Stack.Screen name="PawfectMatch" component={HomeTabNavigator}/>
             </Stack.Navigator>
             </GestureHandlerRootView>
     );

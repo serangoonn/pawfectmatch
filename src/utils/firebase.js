@@ -10,6 +10,7 @@ import 'firebase/compat/firestore';
 
 //functions for storing user profile
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -38,8 +39,17 @@ if (!firebase.apps.length){
 
 // for storing user profiles
 const firestore = getFirestore(app);
+const storage = getStorage(app);
+
+const uploadImage = async (uri, name) => {
+
+  const fetchResponse = await fetch(uri);
+  const theBlob = await fetchRespoanse.blob();
+};
 
 // exporting
 export { auth };
 export { firebase }; 
 export { firestore };
+export { storage };
+export { uploadImage };
