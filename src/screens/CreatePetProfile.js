@@ -3,20 +3,17 @@ import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore, storage, uploadImage } from "../utils/firebase"
 import { collection, addDoc, doc, getDocs } from 'firebase/firestore';
-//import ImagePicker from 'react-native-image-picker';
-import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
+//import * as ImagePicker from 'expo-image-picker';import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 //import DocumentPicker from 'react-native-document-picker';
 
 export default function CreatePetProfile () {
     // navigation
     const navigation = useNavigation();
 
-    // upload image
-//   const [uploading, setUploading] = useState(false);
-//   const [transferred, setTransferred] = useState(0);
-
-    // user information
+    // upload 
     const [image, setImage] = useState(null);
+  
+    // user information
     const [username, setUsername] = useState('');
     const [petname, setPetName] = useState('');
     const [location, setLocation] = useState('');
@@ -90,21 +87,20 @@ export default function CreatePetProfile () {
 
     // select image from camera roll
     /*const pickImage = async () => {
-        try {
-          const res = await DocumentPicker.pick({
-            type: [DocumentPicker.types.images],
-          });
-          setImageURI(res.uri);
-        } catch (err) {
-          if (DocumentPicker.isCancel(err)) {
-            // User cancelled the picker
-            console.log('User cancelled image picker');
-          } else {
-            // Error occurred while picking the image
-            console.error('Error picking image:', err);
-          }
-        }
-      };*/
+      // No permissions request is necessary for launching the image library
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      console.log(result);
+  
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    };
 
     // upload image (new)
     /*const uploadImageToFirebase = async () => {
@@ -147,12 +143,16 @@ export default function CreatePetProfile () {
         // failed upload image
        /* <Button title="Select Image" onPress={pickImage} />
         {imageURI && <Image source={{ uri: imageURI }} style={{ width: 200, height: 200 }} />}
-        <Button title="Upload Image" onPress={uploadImageToFirebase} />*/
+        <Button title="Upload Image" onPress={uploadImageToFirebase} />
+        <View style={styles.container}>
+      <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={styles.image} />}
+    </View>
+    <Button title="Pick an image from camera roll" onPress={pickImage} />
+      {image && <Image source={{ uri: image }} style={styles.image} />}*/
 
     return (
-        <View style={styles.container}>
-            <Text>Upload your pet's picture!</Text>
-
+      <View style={styles.container}>
             <Text>Username</Text>
             <TextInput
                 style={styles.input}

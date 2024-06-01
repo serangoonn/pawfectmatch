@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/(tabs)/Login.jsx", "app/(tabs)/home.jsx"  ]
+, "app/(tabs)/Login.jsx", "app/(tabs)/home.jsx", "src/screens/Home.js", "src/screens/CreateUserProfile.js", "src/screens/PetOrOwner.js", "src/screens/Profile.js", "src/screens/CreatePetProfile.js", "src/screens/Login.js", "src/screens/Login.js", "src/screens/Chat.js"  ]
 }

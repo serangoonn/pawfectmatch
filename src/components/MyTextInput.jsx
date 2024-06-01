@@ -14,6 +14,7 @@ export default function MyTextInput({ value, onChange, placeholder }) {
       }}
       value={value}
       placeholder={placeholder}
+      placeholderTextColor="black"
       onChangeText={(e) => {
      onChange(e);
       }}

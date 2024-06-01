@@ -9,6 +9,7 @@ export default function MyBtn({text, onPress}) {
             padding: 10,
             borderRadius: 20,
             width: "60%",
+            margin: 6,
         }}
             onPress={(e) => {
             onPress(e);
