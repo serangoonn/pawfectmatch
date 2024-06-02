@@ -1,8 +1,9 @@
-import { StyleSheet, Text, View, TextInput, Button, Image, SafeAreaView, TouchableOpacity } from 'react-native'
+import { ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
-import { firestore, storage, uploadImage } from "../utils/firebase"
+import { firestore } from "../utils/firebase"
 import { collection, addDoc, doc, getDocs } from 'firebase/firestore';
+import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 //import * as ImagePicker from 'expo-image-picker';import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 //import DocumentPicker from 'react-native-document-picker';
 
@@ -38,13 +39,13 @@ export default function CreatePetProfile () {
     const [description, setDescription] = useState('');
     const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
     const characteristicsOptions = [
-        {key:'1', value:'Mobiles'},
-        {key:'2', value:'Appliances'},
-        {key:'3', value:'Cameras'},
-        {key:'4', value:'Computers'},
-        {key:'5', value:'Vegetables'},
-        {key:'6', value:'Diary Products'},
-        {key:'7', value:'Drinks'},
+        {key:'1', value:'small'},
+        {key:'2', value:'big'},
+        {key:'3', value:'active'},
+        {key:'4', value:'playful'},
+        {key:'5', value:'disciplined'},
+        {key:'6', value:'quiet'},
+        {key:'7', value:'open to rescue animals'},
     ];
 
     // save user information
@@ -76,7 +77,6 @@ export default function CreatePetProfile () {
         alert('Error saving profile or Username is already taken.');
     }
 };
-
     // check if username is available
     const checkUsernameAvailability = async () => {
         const userProfilesRef = collection(firestore, 'userProfiles');
@@ -85,128 +85,102 @@ export default function CreatePetProfile () {
         return !existingUsernames.includes(username);
     };
 
-    // select image from camera roll
-    /*const pickImage = async () => {
-      // No permissions request is necessary for launching the image library
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-  
-      console.log(result);
-  
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
-      }
-    };
-
-    // upload image (new)
-    /*const uploadImageToFirebase = async () => {
-        if (!imageURI) {
-          Alert.alert('No image selected', 'Please select an image first');
-          return;
-        }
-      
-        try {
-          const response = await fetch(imageURI);
-          const blob = await response.blob();
-      
-          const fileName = imageURI.substring(imageURI.lastIndexOf('/') + 1);
-          const storageRef = storage().ref(`images/${fileName}`);
-      
-          const uploadTask = storageRef.put(blob);
-      
-          // Monitoring upload progress
-          uploadTask.on('state_changed', 
-            snapshot => {
-              const progress = Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100);
-              console.log('Upload is ' + progress + '% done');
-            }, 
-            error => {
-              console.error('Error uploading image:', error);
-              Alert.alert('Upload failed', 'Failed to upload image to Firebase Storage');
-            }, 
-            () => {
-              // Upload completed successfully, handle success here
-              console.log('Upload successful');
-              Alert.alert('Upload successful', 'Image has been uploaded to Firebase Storage');
-            }
-          );
-        } catch (error) {
-          console.error('Error uploading image to Firebase:', error);
-          Alert.alert('Upload failed', 'Failed to upload image to Firebase Storage');
-        }
-      };*/
-
-        // failed upload image
-       /* <Button title="Select Image" onPress={pickImage} />
-        {imageURI && <Image source={{ uri: imageURI }} style={{ width: 200, height: 200 }} />}
-        <Button title="Upload Image" onPress={uploadImageToFirebase} />
-        <View style={styles.container}>
-      <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}
-    </View>
-    <Button title="Pick an image from camera roll" onPress={pickImage} />
-      {image && <Image source={{ uri: image }} style={styles.image} />}*/
-
+    
     return (
+      <ImageBackground
+      source={require('../images/createpetprofilebackground.png')}
+      style={styles.background}
+    >
+
+<ScrollView contentContainerStyle={styles.scrollViewContent}>
+
       <View style={styles.container}>
-            <Text>Username</Text>
+            <Text style={{color: 'white'}}> Username</Text>
             <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
             />
 
-            <Text>Pet Name</Text>
+            <Text style={{color: 'white'}}> Pet Name</Text>
             <TextInput
                 style={styles.input}
                 value={petname}
                 onChangeText={setPetName}
             />
 
-            <Text>Location</Text>
-            <SelectList 
-            setSelected = {setLocation} 
-            data={locationOptions} 
-            save="value"
-            placeholder="Select a location"
-            />
+            <Text style={{color: 'white'}}> Location</Text>
+            <SelectList
+           setSelected={setLocation}
+           data={locationOptions}
+           save="value"
+           placeholder="Select a location"
+           boxStyles={styles.selectList} // Custom styles for the select list box
+           inputStyles={styles.inputStyles} // Custom styles for the input text
+           dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+           dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+           />
 
-            <Text>Type of Animal Preference</Text>
+            <Text style={{color: 'white', marginTop:15}}> Type of Animal Preference</Text>
             <SelectList 
             setSelected = {setAnimalPreference} 
             data={animalOptions} 
             save="value"
             placeholder="Select an Animal Preference"
-            />
+            boxStyles={styles.selectList} // Custom styles for the select list box
+            inputStyles={styles.inputStyles} // Custom styles for the input text
+            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+           />
 
-            <Text>Breed</Text>
+            <Text style={{color: 'white', marginTop: 10}}> Breed</Text>
             <TextInput
                 style={styles.input}
                 value={breed}
                 onChangeText={setBreed}
             />
 
-            <Text>Description of pet</Text>
+            <Text style={{color: 'white'}}> Description of pet</Text>
             <TextInput
                 style={styles.input}
                 value={description}
                 onChangeText={setDescription}
+                placeholder="Include the age of your pet here."
+                placeholderTextColor="white" // Change this to your desired color
             />
 
-            <Text>Fixed Characteristics</Text>
+            <Text style={{color: 'white'}}> Fixed Characteristics</Text>
             <MultipleSelectList 
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
             save="value"
             //onSelect={() => alert(fixedCharacteristics)} 
             label="Categories"
+            boxStyles={styles.selectList} // Custom styles for the select list box
+            inputStyles={styles.inputStyles} // Custom styles for the input text
+            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+            placeholderTextColor="white" // Change this to your desired color
             />
-            <Button title="Save Profile" onPress={handleSave} />
+          <SafeAreaView style={styles.buttonContainer}>
+          <TouchableOpacity 
+          onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../images/gobackbutton.png')}
+              style={{width: 100, height: 30, alignItems: 'center', borderRadius: 20}}
+              />
+          </TouchableOpacity>
+            <TouchableOpacity 
+          onPress={handleSave}>
+            <Image
+              source={require('../images/saveprofilebutton.png')}
+              style={{width: 100, height: 30, alignItems: 'center', borderRadius: 20}}
+              />
+          </TouchableOpacity>
+          </SafeAreaView>
         </View>
+        </ScrollView>
+        </ImageBackground>
     );
 };
 
@@ -214,14 +188,17 @@ export default function CreatePetProfile () {
 const styles = StyleSheet.create({
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: 'white',
         borderWidth: 1,
         marginBottom: 20,
         paddingHorizontal: 10,
+        borderRadius: 20,
+        marginTop: 5,
     },
     container: {
         flex: 1,
         padding: 20,
+        marginTop: 120,
     },
   selectButton: {
     borderRadius: 5,
@@ -256,5 +233,36 @@ const styles = StyleSheet.create({
   imageBox: {
     width: 300,
     height: 300
-  }
+  },
+  goback: {
+    alignItems: 'center'
+  },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectList: {
+    backgroundColor: 'lightbrown', // Custom background color for select list box
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'white',
+    padding: 8,
+    borderRadius: 20,
+    marginTop: 5,
+  },
+  inputStyles: {
+    color: 'white', // Placeholder and input text color
+  },
+  dropdownStyles: {
+    backgroundColor: 'lightbrown', // Custom background color for dropdown list
+  },
+  dropdownItemStyles: {
+    padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+  },
 });

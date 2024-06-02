@@ -3,8 +3,6 @@
 import { Image, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
 import MyTextInput from "../components/MyTextInput";
-import MyBtn from "../components/MyBtn";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigation } from'@react-navigation/core';
 import { firebase } from "../utils/firebase";

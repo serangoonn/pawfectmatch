@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View, TextInput, Button } from 'react-native'
+import { ScrollView, Image, TouchableOpacity, SafeAreaView, ImageBackground, StyleSheet, Text, View, TextInput } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from "../utils/firebase"
-import { collection, addDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 
 export default function CreateUserProfile () {
@@ -77,67 +77,174 @@ export default function CreateUserProfile () {
     };
 
     return (
+            <ImageBackground
+      source={require('../images/createuserprofilebackground.png')}
+      style={styles.background}>
+        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+
         <View style={styles.container}>
-            <Text>Username</Text>
+            <Text style={{color: 'white'}}>Username</Text>
             <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
             />
 
-            <Text>Location</Text>
+            <Text style={{color: 'white'}}>Location</Text>
             <SelectList 
-            setSelected = {setLocation} 
-            data={locationOptions} 
+            setSelected={setLocation}
+            data={locationOptions}
             save="value"
             placeholder="Select a location"
+            boxStyles={styles.selectList} // Custom styles for the select list box
+            inputStyles={styles.inputStyles} // Custom styles for the input text
+            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
             />
 
-            <Text>Type of Animal Preference</Text>
+            <Text style={{color: 'white', marginTop: 15}}>Type of Animal Preference</Text>
             <SelectList 
             setSelected = {setAnimalPreference} 
             data={animalOptions} 
             save="value"
             placeholder="Select an Animal Preference"
-            />
+            boxStyles={styles.selectList} // Custom styles for the select list box
+            inputStyles={styles.inputStyles} // Custom styles for the input text
+            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+           />
 
-            <Text>Breed Preference</Text>
-            <TextInput
-                style={styles.input}
-                value={breedPreference}
-                onChangeText={setBreedPreference}
-            />
-
-            <Text>Experience Level</Text>
-            <TextInput
-                style={styles.input}
-                value={experienceLevel}
-                onChangeText={setExperienceLevel}
-            />
-
-            <Text>Fixed Characteristics</Text>
+<Text style={{color: 'white', marginTop:10}}> Fixed Characteristics</Text>
             <MultipleSelectList 
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
             save="value"
             //onSelect={() => alert(fixedCharacteristics)} 
             label="Categories"
+            boxStyles={styles.selectList} // Custom styles for the select list box
+            inputStyles={styles.inputStyles} // Custom styles for the input text
+            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
+            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+            placeholderTextColor="white" // Change this to your desired color
             />
-            <Button title="Save Profile" onPress={handleSave} />
+
+            <Text style={{color: 'white', marginTop: 10}}>Breed Preference</Text>
+            <TextInput
+                style={styles.input}
+                value={breedPreference}
+                onChangeText={setBreedPreference}
+            />
+
+            <Text style={{color: 'white'}}>Experience Level</Text>
+            <TextInput
+                style={styles.input}
+                value={experienceLevel}
+                onChangeText={setExperienceLevel}
+            />
+
+            <SafeAreaView style={styles.buttonContainer}>
+          <TouchableOpacity 
+          onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../images/gobackbutton.png')}
+              style={{width: 100, height: 30, alignItems: 'center', borderRadius: 20}}
+              />
+          </TouchableOpacity>
+            <TouchableOpacity 
+          onPress={handleSave}>
+            <Image
+              source={require('../images/saveprofilebutton.png')}
+              style={{width: 100, height: 30, alignItems: 'center', borderRadius: 20}}
+              />
+          </TouchableOpacity>
+          </SafeAreaView>
         </View>
-    );
+        </ScrollView>
+        </ImageBackground>
+        );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 20,
-    },
     input: {
         height: 40,
-        borderColor: 'gray',
+        borderColor: 'white',
         borderWidth: 1,
         marginBottom: 20,
         paddingHorizontal: 10,
+        borderRadius: 20,
+        marginTop: 5,
     },
+    scrollViewContent: {
+        flexGrow: 1,
+    },
+    container: {
+        flex: 1,
+        padding: 20,
+        marginTop: 120,
+    },
+  selectButton: {
+    borderRadius: 5,
+    width: 150,
+    height: 50,
+    backgroundColor: '#8ac6d1',
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
+  uploadButton: {
+    borderRadius: 5,
+    width: 150,
+    height: 50,
+    backgroundColor: '#ffb6b9',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 20
+  },
+  buttonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold'
+  },
+  imageContainer: {
+    marginTop: 30,
+    marginBottom: 50,
+    alignItems: 'center'
+  },
+  progressBarContainer: {
+    marginTop: 20
+  },
+  imageBox: {
+    width: 300,
+    height: 300
+  },
+  goback: {
+    alignItems: 'center'
+  },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  selectList: {
+    backgroundColor: 'lightbrown', // Custom background color for select list box
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'white',
+    padding: 8,
+    borderRadius: 20,
+    marginTop: 5,
+  },
+  inputStyles: {
+    color: 'white', // Placeholder and input text color
+  },
+  dropdownStyles: {
+    backgroundColor: 'lightbrown', // Custom background color for dropdown list
+  },
+  dropdownItemStyles: {
+    padding: 10,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '80%',
+  },
 });

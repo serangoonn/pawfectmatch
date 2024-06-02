@@ -49,7 +49,11 @@ export default function App() {
                     headerShown: false,
                     }}
                     />
-                 <Stack.Screen name="Aspiring Pet Owners" component={CreateUserProfile}/>
+                 <Stack.Screen name="Aspiring Pet Owners" component={CreateUserProfile}
+                 options ={{ 
+                    headerShown: false,
+                    }}
+                    />
                  <Stack.Screen name="PawfectMatch" component={HomeTabNavigator}/>
             </Stack.Navigator>
             </GestureHandlerRootView>

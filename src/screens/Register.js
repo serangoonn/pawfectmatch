@@ -1,11 +1,9 @@
-import { Image, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity, Button } from 'react-native';
-import { useState, useEffect } from 'react';
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { useState } from 'react';
 import MyTextInput from "../components/MyTextInput";
-import MyBtn from "../components/MyBtn";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../utils/firebase";
 import { useNavigation } from'@react-navigation/core';
-import { firebase } from "../utils/firebase";
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function Register() {
@@ -32,7 +30,7 @@ export default function Register() {
 
   return (
     <ImageBackground
-      source={require('../images/loginbackground.png')}
+      source={require('../images/registerbackground.png')}
       style={styles.background}
     > 
       <SafeAreaView style={styles.container}>
@@ -49,15 +47,22 @@ export default function Register() {
           onChange={(e) => setPassword(e)}
         />
 
-        <TouchableOpacity
+          <TouchableOpacity 
+          onPress={handleSignup}>
+            <Image
+              source={require('../images/registerbutton.png')}
+              style={{width: 200, height: 60}}
+              />
+          </TouchableOpacity>
+
+          <TouchableOpacity
           style={styles.forgotPassword} 
-          onPress={handleSignup}
-        >
+          onPress={() => navigation.goBack()}>
+
           <Text style={styles.signupText}> 
-            Sign up! 
+            Go Back 
           </Text>
           </TouchableOpacity>
-          <Button title="Go to Home" onPress={() => navigation.goBack()} />
     </SafeAreaView>
     </ImageBackground>
   );
@@ -89,7 +94,7 @@ const styles = StyleSheet.create({
       width: '100%',
     },
     forgotPassword: {
-      padding: 10,
+      padding: 30,
     },
     signupText: {
       color: 'black',
