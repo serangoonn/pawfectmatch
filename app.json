@@ -19,12 +19,8 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-<<<<<<< HEAD
       },
       "package": "com.xhuinn.pawfectmatch"
-=======
-      }
->>>>>>> 83ec5fe23bbbf5d35b87eda05d2620f63fd828ae
     },
     "web": {
       "bundler": "metro",
@@ -36,7 +32,6 @@
     ],
     "experiments": {
       "typedRoutes": true
-<<<<<<< HEAD
     },
     "extra": {
       "router": {
@@ -45,8 +40,6 @@
       "eas": {
         "projectId": "17170bc3-4ec2-4c31-9098-f4d661b656c9"
       }
-=======
->>>>>>> 83ec5fe23bbbf5d35b87eda05d2620f63fd828ae
     }
   }
 }
