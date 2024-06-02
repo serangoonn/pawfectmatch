@@ -7,6 +7,7 @@ import { auth } from "../utils/firebase";
 import { useNavigation } from'@react-navigation/core';
 import { firebase } from "../utils/firebase";
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function Login() {
   const [email, setEmail] = useState("");
