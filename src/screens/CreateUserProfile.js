@@ -32,13 +32,13 @@ export default function CreateUserProfile () {
     const [experienceLevel, setExperienceLevel] = useState('');
     const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
     const characteristicsOptions = [
-        {key:'1', value:'Mobiles'},
-        {key:'2', value:'Appliances'},
-        {key:'3', value:'Cameras'},
-        {key:'4', value:'Computers'},
-        {key:'5', value:'Vegetables'},
-        {key:'6', value:'Diary Products'},
-        {key:'7', value:'Drinks'},
+        {key:'1', value:'Small'},
+        {key:'2', value:'Big'},
+        {key:'3', value:'Active'},
+        {key:'4', value:'CPlayful'},
+        {key:'5', value:'Disciplined'},
+        {key:'6', value:'Quiet'},
+        {key:'7', value:'Open to rescue animals'},
     ];
 
     // save user information

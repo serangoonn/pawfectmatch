@@ -4,22 +4,37 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StyleSheet, Text, View } from 'react-native';
 import LoginScreen from '../src/screens/Login';
-import HomeScreen from '../src/screens/Home.js';
+import HomeScreen from '../src/screens/Tabs/HomeStack/Home';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import PetOrOwner from '../src/screens/PetOrOwner';
 import CreatePetProfile from '../src/screens/CreatePetProfile';
 import CreateUserProfile from '../src/screens/CreateUserProfile';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfileScreen from '../src/screens/Profile';
-import ChatScreen from '../src/screens/Chat';
+import ProfileScreen from '../src/screens/Tabs/Profile';
+import ChatScreen from '../src/screens/Tabs/Chat';
 import RegisterScreen from '../src/screens/Register';
-
+import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe'
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const HomeStack = () => (
+   <Stack.Navigator>
+      <Stack.Screen name = "Home" component={HomeScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
+      <Stack.Screen name = "Swipe" component={SwipingScreen} />
+   </Stack.Navigator>
+)
+
 const HomeTabNavigator = () => (
     <Tab.Navigator>
-        <Tab.Screen name = "Home" component={HomeScreen} />
+        <Tab.Screen name = "HomeStack" component={HomeStack} 
+        options ={{ 
+         headerShown: false,
+         }}
+         />
         <Tab.Screen name = "Profile" component={ProfileScreen} />
         <Tab.Screen name = "Chat" component={ChatScreen} />
     </Tab.Navigator>
@@ -54,7 +69,11 @@ export default function App() {
                     headerShown: false,
                     }}
                     />
-                 <Stack.Screen name="PawfectMatch" component={HomeTabNavigator}/>
+                 <Stack.Screen name="PawfectMatch" component={HomeTabNavigator}
+                 options ={{ 
+                  headerShown: false,
+                  }}
+                  />
             </Stack.Navigator>
             </GestureHandlerRootView>
     );

@@ -1,12 +1,11 @@
-//home screen after successful log in
-
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { auth } from "../utils/firebase"
+import { auth } from "../../utils/firebase"
 import { useNavigation } from'@react-navigation/core';
 
-export default function Home() {
+export default function Profile () {
+
   const navigation = useNavigation();
 
   const handleSignOut = () => {
@@ -16,10 +15,9 @@ export default function Home() {
         navigation.replace("Login")
       })
       .catch(error => alert(error.message))
-  }
-
+    }
   return (
-    <View style={StyleSheet.container}>
+   <View style={StyleSheet.container}>
       <Text>Email: {auth.currentUser?.email} </Text>
       <TouchableOpacity
       onPress = {handleSignOut}
@@ -30,6 +28,7 @@ export default function Home() {
     </View>
   )
 }
+
 
 const styles = StyleSheet.create({
   container: {

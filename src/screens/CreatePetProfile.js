@@ -1,19 +1,17 @@
-import { ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity } from 'react-native'
+import { ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, Button } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from "../utils/firebase"
-import { collection, addDoc, doc, getDocs } from 'firebase/firestore';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
-//import * as ImagePicker from 'expo-image-picker';import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
-//import DocumentPicker from 'react-native-document-picker';
+import { uploadBytes, ref } from 'firebase/storage';
+import { storage } from '../utils/firebase';
+import * as ImagePicker from 'expo-image-picker';
 
 export default function CreatePetProfile () {
     // navigation
     const navigation = useNavigation();
 
-    // upload 
-    const [image, setImage] = useState(null);
-  
     // user information
     const [username, setUsername] = useState('');
     const [petname, setPetName] = useState('');
@@ -49,13 +47,11 @@ export default function CreatePetProfile () {
     ];
 
     // save user information
-    const handleSave = async (imageUri) => {
+    const handleSave = async () => {
         try {
             const isUsernameAvailable = await checkUsernameAvailability();
             if (isUsernameAvailable) {
-           // const imageUrl = await uploadImage(imageUri, `profile_images/${username}`);
-            await addDoc(collection(firestore, 'petProfiles'),{
-                //imageUrl,
+              await addDoc(collection(firestore, 'petProfiles'),{
                 username,
                 location,
                 animal,
@@ -85,15 +81,59 @@ export default function CreatePetProfile () {
         return !existingUsernames.includes(username);
     };
 
-    
+    const [image, setImage] = useState('');
+
+    const handleImagePick = async () => {
+      // No permissions request is necessary for launching the image library
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+  
+      console.log(result);
+  
+      if (!result.canceled) {
+        setImage(result.assets[0].uri);
+      }
+    };
+
+  
+    const submitData = async () => {
+      if (image) {
+        const fileName = image.substring(image.lastIndexOf('/') + 1);
+        const storageRef = ref(storage, `images/${fileName}`);
+  
+        const response = await fetch(image);
+        const blob = await response.blob();
+  
+        uploadBytes(storageRef, blob).then(() => {
+          console.log('Image uploaded to Firebase storage');
+        }).catch((error) => {
+          console.error('Error uploading image: ', error);
+        });
+      } else {
+        console.log('No image selected');
+      }
+    };
+
     return (
       <ImageBackground
       source={require('../images/createpetprofilebackground.png')}
       style={styles.background}
     >
 
-<ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ScrollView>
 
+      <Button title="Pick an image from camera roll" onPress={handleImagePick} />
+      {image && <Image source={{ uri: image }} style={styles.image} />}
+
+      <Button 
+      onPress={submitData} 
+      title = "upload"
+      />
+            
       <View style={styles.container}>
             <Text style={{color: 'white'}}> Username</Text>
             <TextInput
@@ -198,7 +238,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        marginTop: 120,
+        marginTop: 20,
     },
   selectButton: {
     borderRadius: 5,
@@ -264,5 +304,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '80%',
+  },
+  image: {
+    width: 200,
+    height: 200,
   },
 });

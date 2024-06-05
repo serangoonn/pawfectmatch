@@ -1,12 +1,14 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 
-export default function Profile () {
+const swipe = () => {
   return (
     <View>
-      <Text>Profile</Text>
+      <Text>swipe</Text>
     </View>
   )
 }
+
+export default swipe
 
 const styles = StyleSheet.create({})
