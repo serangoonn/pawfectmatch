@@ -4,8 +4,11 @@ import { Image, ScrollView, ImageBackground, StyleSheet, Text, View, Button } fr
 import React from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
 import MyTextInput from '@/src/components/MyTextInput';
+import { useNavigation } from'@react-navigation/core';
 
 const Home = () => {
+  const navigation = useNavigation();
+
   return (
     <ImageBackground 
       source={require('../HomeStack/images/lightbrown.png')}
@@ -22,7 +25,7 @@ const Home = () => {
         welcome back!
       </Text>
 
-        <TouchableOpacity onPress={() => navigation.push('Pets')}> 
+        <TouchableOpacity onPress={() => navigation.push('Swipe')}> 
             <Image
               source={require('../HomeStack/images/adoptnowbutton.png')}
               style={styles.imageButtonAdoptNow}

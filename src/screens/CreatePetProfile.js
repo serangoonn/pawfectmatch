@@ -1,16 +1,21 @@
+// custom text font not working yet
+
 import { ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, Button } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from "../utils/firebase"
 import { collection, addDoc, getDocs } from 'firebase/firestore';
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
-import { uploadBytes, ref } from 'firebase/storage';
+import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../utils/firebase';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function CreatePetProfile () {
     // navigation
     const navigation = useNavigation();
+
+    // upload images onto firebase storage
+    const [image, setImage] = useState('');
 
     // user information
     const [username, setUsername] = useState('');
@@ -48,31 +53,33 @@ export default function CreatePetProfile () {
 
     // save user information
     const handleSave = async () => {
-        try {
-            const isUsernameAvailable = await checkUsernameAvailability();
-            if (isUsernameAvailable) {
-              await addDoc(collection(firestore, 'petProfiles'),{
-                username,
-                location,
-                animal,
-                breed,
-                description,
-                fixedCharacteristics,
-            });
-            alert('Profile saved successfully!');
-            navigation.reset({
-                index: 0,
-                routes: [{ name: "PawfectMatch"}],
-            }); 
-
-        } else {
-            alert('Error saving profile or Username is already taken.');
-        }
-    } catch (error) {
-        console.error("Error saving profile: ", error);
-        alert('Error saving profile or Username is already taken.');
-    }
-};
+      try {
+          const isUsernameAvailable = await checkUsernameAvailability();
+          if (isUsernameAvailable) {
+              const imageUrl = await submitData(); // Get the image URL from submitData
+              await addDoc(collection(firestore, 'petProfiles'), {
+                  username,
+                  location,
+                  animal,
+                  breed,
+                  description,
+                  fixedCharacteristics,
+                  imageUrl, // Save the image URL
+              });
+              alert('Profile saved successfully!');
+              navigation.reset({
+                  index: 0,
+                  routes: [{ name: "PawfectMatch" }],
+              });
+          } else {
+              alert('Error saving profile or Username is already taken.');
+          }
+      } catch (error) {
+          console.error("Error saving profile: ", error);
+          alert('Error saving profile or Username is already taken.');
+      }
+  };
+  
     // check if username is available
     const checkUsernameAvailability = async () => {
         const userProfilesRef = collection(firestore, 'userProfiles');
@@ -81,8 +88,7 @@ export default function CreatePetProfile () {
         return !existingUsernames.includes(username);
     };
 
-    const [image, setImage] = useState('');
-
+    // open gallery to select image
     const handleImagePick = async () => {
       // No permissions request is necessary for launching the image library
       let result = await ImagePicker.launchImageLibraryAsync({
@@ -99,42 +105,53 @@ export default function CreatePetProfile () {
       }
     };
 
-  
+    // uploads image onto firebase storage
     const submitData = async () => {
-      if (image) {
-        const fileName = image.substring(image.lastIndexOf('/') + 1);
-        const storageRef = ref(storage, `images/${fileName}`);
+      if (image && username) {
+          const fileName = username + image.substring(image.lastIndexOf('.'));
+          const storageRef = ref(storage, `petprofile/${fileName}`);
   
-        const response = await fetch(image);
-        const blob = await response.blob();
+          const response = await fetch(image);
+          const blob = await response.blob();
   
-        uploadBytes(storageRef, blob).then(() => {
+          await uploadBytes(storageRef, blob);
           console.log('Image uploaded to Firebase storage');
-        }).catch((error) => {
-          console.error('Error uploading image: ', error);
-        });
+          
+          // Get the download URL
+          const downloadURL = await getDownloadURL(storageRef);
+          console.log('Download URL: ', downloadURL); // Add this line for debugging
+          return downloadURL;
       } else {
-        console.log('No image selected');
+          console.log('No image selected');
+          return null;
       }
-    };
+  };
+  
+  
 
     return (
       <ImageBackground
-      source={require('../images/createpetprofilebackground.png')}
+      source={require('../images/createprofilesbackground.png')}
       style={styles.background}
     >
 
+      <View style={styles.container}>
       <ScrollView>
 
-      <Button title="Pick an image from camera roll" onPress={handleImagePick} />
+        <Text style={styles.customText}>
+          Pets
+        </Text>
+
+        <TouchableOpacity 
+          onPress={handleImagePick}>
+            <Image
+              source={require('../images/pickpetimagebutton.png')}
+              style={styles.imagebutton}
+              />
+          </TouchableOpacity>
+
       {image && <Image source={{ uri: image }} style={styles.image} />}
 
-      <Button 
-      onPress={submitData} 
-      title = "upload"
-      />
-            
-      <View style={styles.container}>
             <Text style={{color: 'white'}}> Username</Text>
             <TextInput
                 style={styles.input}
@@ -142,7 +159,7 @@ export default function CreatePetProfile () {
                 onChangeText={setUsername}
             />
 
-            <Text style={{color: 'white'}}> Pet Name</Text>
+            <Text style={{color: 'white'}}> Pet's Name</Text>
             <TextInput
                 style={styles.input}
                 value={petname}
@@ -161,7 +178,7 @@ export default function CreatePetProfile () {
            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
            />
 
-            <Text style={{color: 'white', marginTop:15}}> Type of Animal Preference</Text>
+            <Text style={{color: 'white', marginTop:15}}> Animal Preference</Text>
             <SelectList 
             setSelected = {setAnimalPreference} 
             data={animalOptions} 
@@ -173,7 +190,7 @@ export default function CreatePetProfile () {
             dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
            />
 
-            <Text style={{color: 'white', marginTop: 10}}> Breed</Text>
+            <Text style={{color: 'white', marginTop: 10}}> Breed Preference</Text>
             <TextInput
                 style={styles.input}
                 value={breed}
@@ -189,7 +206,7 @@ export default function CreatePetProfile () {
                 placeholderTextColor="white" // Change this to your desired color
             />
 
-            <Text style={{color: 'white'}}> Fixed Characteristics</Text>
+            <Text style={{color: 'white'}}> Characteristics of the pet </Text>
             <MultipleSelectList 
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
@@ -218,8 +235,8 @@ export default function CreatePetProfile () {
               />
           </TouchableOpacity>
           </SafeAreaView>
-        </View>
         </ScrollView>
+        </View>
         </ImageBackground>
     );
 };
@@ -239,15 +256,11 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         marginTop: 20,
+        borderWidth: 1,  // Border for the container
+        borderColor: 'black', // Border color
+        borderRadius: 30,
+        backgroundColor: '#5b4636',
     },
-  selectButton: {
-    borderRadius: 5,
-    width: 150,
-    height: 50,
-    backgroundColor: '#8ac6d1',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
   uploadButton: {
     borderRadius: 5,
     width: 150,
@@ -256,26 +269,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 20
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  imageContainer: {
-    marginTop: 30,
-    marginBottom: 50,
-    alignItems: 'center'
-  },
-  progressBarContainer: {
-    marginTop: 20
-  },
-  imageBox: {
-    width: 300,
-    height: 300
-  },
-  goback: {
-    alignItems: 'center'
   },
   background: {
     flex: 1,
@@ -308,5 +301,19 @@ const styles = StyleSheet.create({
   image: {
     width: 200,
     height: 200,
+    alignSelf: 'center',
+  },
+  customText: {
+    fontFamily: 'Roxborough CF Bold', // Use the actual font family name
+    fontSize: 40, // Adjust the font size as needed
+    alignSelf: 'center'
+  },
+  imagebutton: {
+    width: 160, 
+    height: 50, 
+    alignSelf: 'center', 
+    borderRadius: 20,
+    marginTop: 5,
+    marginBottom: 5,
   },
 });

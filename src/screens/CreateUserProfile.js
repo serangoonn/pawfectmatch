@@ -77,12 +77,18 @@ export default function CreateUserProfile () {
     };
 
     return (
-            <ImageBackground
-      source={require('../images/createuserprofilebackground.png')}
-      style={styles.background}>
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <ImageBackground
+      source={require('../images/createprofilesbackground.png')}
+      style={styles.background}
+    >
 
-        <View style={styles.container}>
+      <View style={styles.container}>
+      <ScrollView>
+
+        <Text style={styles.customText}>
+          Aspiring Pet Owners
+        </Text>
+
             <Text style={{color: 'white'}}>Username</Text>
             <TextInput
                 style={styles.input}
@@ -158,8 +164,8 @@ export default function CreateUserProfile () {
               />
           </TouchableOpacity>
           </SafeAreaView>
+          </ScrollView>
         </View>
-        </ScrollView>
         </ImageBackground>
         );
 };
@@ -174,50 +180,14 @@ const styles = StyleSheet.create({
         borderRadius: 20,
         marginTop: 5,
     },
-    scrollViewContent: {
-        flexGrow: 1,
-    },
     container: {
-        flex: 1,
-        padding: 20,
-        marginTop: 120,
-    },
-  selectButton: {
-    borderRadius: 5,
-    width: 150,
-    height: 50,
-    backgroundColor: '#8ac6d1',
-    alignItems: 'center',
-    justifyContent: 'center'
-  },
-  uploadButton: {
-    borderRadius: 5,
-    width: 150,
-    height: 50,
-    backgroundColor: '#ffb6b9',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold'
-  },
-  imageContainer: {
-    marginTop: 30,
-    marginBottom: 50,
-    alignItems: 'center'
-  },
-  progressBarContainer: {
-    marginTop: 20
-  },
-  imageBox: {
-    width: 300,
-    height: 300
-  },
-  goback: {
-    alignItems: 'center'
+      flex: 1,
+      padding: 20,
+      marginTop: 20,
+      borderWidth: 1,  // Border for the container
+      borderColor: 'black', // Border color
+      borderRadius: 30,
+      backgroundColor: '#5b4636',
   },
   background: {
     flex: 1,
@@ -246,5 +216,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '80%',
+  },
+  customText: {
+    fontFamily: 'Roxborough CF Bold', // Use the actual font family name
+    fontSize: 40, // Adjust the font size as needed
+    alignSelf: 'center'
   },
 });

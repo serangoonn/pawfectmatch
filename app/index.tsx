@@ -24,7 +24,11 @@ const HomeStack = () => (
          headerShown: false,
          }}
          />
-      <Stack.Screen name = "Swipe" component={SwipingScreen} />
+      <Stack.Screen name = "Swipe" component={SwipingScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
    </Stack.Navigator>
 )
 
