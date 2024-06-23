@@ -21,15 +21,17 @@ export default function Swipe() {
     try {
       const petProfilesRef = collection(firestore, 'petProfiles');
       const querySnapshot = await getDocs(petProfilesRef);
-      const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));      // Filter out previously dismissed users
-      
+      const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
       setPets(petsData);
 
       const availablePets = petsData.filter(pet => !previousUsers.includes(pet.id));
-      const randomPet = availablePets[Math.floor(Math.random() * availablePets.length)];
-
-      setUserData(randomPet);
-      position.setValue({ x: 0, y: 0 }); // Reset position
+      if (availablePets.length > 0) {
+        const randomPet = availablePets[Math.floor(Math.random() * availablePets.length)];
+        setUserData(randomPet);
+        position.setValue({ x: 0, y: 0 });
+      } else {
+        setUserData(null);
+      }
     } catch (error) {
       console.error('Error fetching user profiles: ', error);
     }
@@ -53,6 +55,7 @@ export default function Swipe() {
   };
 
   const handleLike = () => {
+    if (userData) {
     Alert.alert(
       "Like",
       "Do you want to message this user or continue swiping?",
@@ -63,12 +66,16 @@ export default function Swipe() {
         },
         {
           text: "Continue",
-          onPress: () => fetchRandomUser(),
+          onPress: () => {
+            setPreviousUsers([...previousUsers, userData.id]);
+            fetchRandomUser();
         },
+      },
       ],
       { cancelable: true }
     );
   };
+};
 
   const handleStar = () => {
     if (userData) {
@@ -87,7 +94,6 @@ export default function Swipe() {
       ),
       onPanResponderRelease: (evt, gestureState) => {
         if (gestureState.dx > 120) {
-          // Handle swipe to the right (like action)
           Animated.spring(position, {
             toValue: { x: 500, y: 0 },
             useNativeDriver: true,
@@ -96,18 +102,14 @@ export default function Swipe() {
             position.setValue({ x: 0, y: 0 });
           });
         } else if (gestureState.dx < -120) {
-          // Handle swipe to the left (cancel action)
           Animated.spring(position, {
             toValue: { x: -500, y: 0 },
             useNativeDriver: true,
           }).start(() => {
-            if (userData) {
-              setPreviousUsers([...previousUsers, userData.id]);
-              fetchRandomUser();
-            }
+            handleCancel();
+            position.setValue({ x: 0, y: 0 });
           });
         } else {
-          // Handle no significant swipe (reset position)
           Animated.spring(position, {
             toValue: { x: 0, y: 0 },
             friction: 4,

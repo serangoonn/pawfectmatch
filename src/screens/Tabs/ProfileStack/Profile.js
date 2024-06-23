@@ -1,7 +1,7 @@
 import { Alert, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { TouchableOpacity } from 'react-native-gesture-handler'
-import { auth } from "../../utils/firebase"
+import { auth } from "../../../utils/firebase"
 import { useNavigation } from'@react-navigation/core';
 
 export default function Profile () {

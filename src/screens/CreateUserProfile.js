@@ -41,8 +41,19 @@ export default function CreateUserProfile () {
         {key:'7', value:'Open to rescue animals'},
     ];
 
+
+    // error if a field is not filled in
+    const validateFields = () => {
+      if (!username || !animalPreference || !location || !experienceLevel || !breedPreference || !fixedCharacteristics.length ) {
+          Alert.alert("Error", "All fields must be filled.");
+          return false;
+      }
+      return true;
+  };
+
     // save user information
     const handleSave = async () => {
+      if (!validateFields()) return;
         try {
             const isUsernameAvailable = await checkUsernameAvailability();
             if (isUsernameAvailable) {
@@ -102,10 +113,10 @@ export default function CreateUserProfile () {
             data={locationOptions}
             save="value"
             placeholder="Select a location"
-            boxStyles={styles.selectList} // Custom styles for the select list box
-            inputStyles={styles.inputStyles} // Custom styles for the input text
-            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+            boxStyles={styles.selectList}
+            inputStyles={styles.inputStyles} 
+            dropdownStyles={styles.dropdownStyles} 
+            dropdownItemStyles={styles.dropdownItemStyles} 
             />
 
             <Text style={{color: 'white', marginTop: 15}}>Type of Animal Preference</Text>
@@ -114,10 +125,10 @@ export default function CreateUserProfile () {
             data={animalOptions} 
             save="value"
             placeholder="Select an Animal Preference"
-            boxStyles={styles.selectList} // Custom styles for the select list box
-            inputStyles={styles.inputStyles} // Custom styles for the input text
-            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+            boxStyles={styles.selectList} 
+            inputStyles={styles.inputStyles} 
+            dropdownStyles={styles.dropdownStyles} 
+            dropdownItemStyles={styles.dropdownItemStyles}
            />
 
 <Text style={{color: 'white', marginTop:10}}> Fixed Characteristics</Text>
@@ -125,13 +136,12 @@ export default function CreateUserProfile () {
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
             save="value"
-            //onSelect={() => alert(fixedCharacteristics)} 
             label="Categories"
-            boxStyles={styles.selectList} // Custom styles for the select list box
-            inputStyles={styles.inputStyles} // Custom styles for the input text
-            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
-            placeholderTextColor="white" // Change this to your desired color
+            boxStyles={styles.selectList} 
+            inputStyles={styles.inputStyles} 
+            dropdownStyles={styles.dropdownStyles} 
+            dropdownItemStyles={styles.dropdownItemStyles} 
+            placeholderTextColor="white" 
             />
 
             <Text style={{color: 'white', marginTop: 10}}>Breed Preference</Text>
@@ -184,8 +194,8 @@ const styles = StyleSheet.create({
       flex: 1,
       padding: 20,
       marginTop: 20,
-      borderWidth: 1,  // Border for the container
-      borderColor: 'black', // Border color
+      borderWidth: 1,  
+      borderColor: 'black', 
       borderRadius: 30,
       backgroundColor: '#5b4636',
   },
@@ -195,7 +205,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectList: {
-    backgroundColor: 'lightbrown', // Custom background color for select list box
+    backgroundColor: 'lightbrown', 
     borderRadius: 4,
     borderWidth: 1,
     borderColor: 'white',
@@ -204,10 +214,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   inputStyles: {
-    color: 'white', // Placeholder and input text color
+    color: 'white', 
   },
   dropdownStyles: {
-    backgroundColor: 'lightbrown', // Custom background color for dropdown list
+    backgroundColor: 'lightbrown', 
   },
   dropdownItemStyles: {
     padding: 10,
@@ -218,8 +228,8 @@ const styles = StyleSheet.create({
     width: '80%',
   },
   customText: {
-    fontFamily: 'Roxborough CF Bold', // Use the actual font family name
-    fontSize: 40, // Adjust the font size as needed
+    fontFamily: 'Roxborough CF Bold', 
+    fontSize: 40, 
     alignSelf: 'center'
   },
 });
