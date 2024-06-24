@@ -11,7 +11,7 @@ import CreatePetProfile from '../src/screens/CreatePetProfile';
 import CreateUserProfile from '../src/screens/CreateUserProfile';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ProfileScreen from '../src/screens/Tabs/ProfileStack/Profile';
-import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
+import ChatScreen from '../src/screens/Tabs/ChatStack/chat';
 import RegisterScreen from '../src/screens/Register';
 import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
 import SocialScreen from '../src/screens/Tabs/Social Stack/Social';
