@@ -37,14 +37,14 @@ export default function Login() {
    }
 
    //change the password
-   const handleForgotPassword = () => {
+   /*const handleForgotPassword = () => {
     firebase.auth().sendPasswordResetEmail(email)
     .then(() => {
       alert("Password reset email sent")
     }).catch((error) => {
       alert(error)
     })
-  }
+  }*/
 
 
    //navigation
@@ -77,10 +77,8 @@ export default function Login() {
           onChange={(e) => setPassword(e)}
         />
 
-      <TouchableOpacity 
-          style={styles.forgotPassword}
-          onPress={handleForgotPassword}
-        >
+<TouchableOpacity onPress={() => navigation.push('ForgotPassword')} 
+          style={styles.forgotPassword}>
           <Text style={styles.forgotPasswordText}> 
             Forgot Password? 
           </Text>

@@ -1,10 +1,14 @@
 // custom text font not working yet
 
-import { ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, Button } from 'react-native'
+import { Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, Button } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from "../utils/firebase"
+<<<<<<< HEAD
 import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
+=======
+import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
+>>>>>>> main
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../utils/firebase';
@@ -34,6 +38,7 @@ export default function CreatePetProfile () {
       {key:'6', value:'Rabbit'},
   ];
 
+<<<<<<< HEAD
   const [breed, setBreed] = useState('');
   const [description, setDescription] = useState('');
   const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
@@ -46,6 +51,28 @@ export default function CreatePetProfile () {
       {key:'6', value:'quiet'},
       {key:'7', value:'open to rescue animals'},
   ];
+=======
+    // user information
+    const [username, setUsername] = useState('');
+    const [petname, setPetName] = useState('');
+    const [location, setLocation] = useState('');
+    const locationOptions = [
+        {key:'1', value:'North Region'},
+        {key:'2', value:'North East Region'},
+        {key:'3', value:'East Region'},
+        {key:'4', value:'Central Region'},
+        {key:'5', value:'West Region'},
+    ];
+    const [animal, setAnimalType] = useState("");
+    const animalOptions = [
+        {key:'1', value:'Dog'},
+        {key:'2', value:'Cat'},
+        {key:'3', value:'Hamster'},
+        {key:'4', value:'Fish'},
+        {key:'5', value:'Bird'},
+        {key:'6', value:'Rabbit'},
+    ];
+>>>>>>> main
 
   const validateFields = () => {
       if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
@@ -55,21 +82,41 @@ export default function CreatePetProfile () {
       return true;
   };
 
+<<<<<<< HEAD
   const handleSave = async () => {
+=======
+    // error if a field is not filled in
+    const validateFields = () => {
+      if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
+          Alert.alert("Error", "All fields must be filled.");
+          return false;
+      }
+      return true;
+  };
+
+    // save user information
+    const handleSave = async () => {
+>>>>>>> main
       if (!validateFields()) return;
       try {
           const isUsernameAvailable = await checkUsernameAvailability();
           if (isUsernameAvailable) {
+<<<<<<< HEAD
               const imageUrl = await submitData(username); // Pass the username to submitData
               await setDoc(doc(firestore, 'petProfiles', username), { // Set document ID to username
                   username,
                   petname,
+=======
+              const imageUrl = await submitData(); // Get the image URL from submitData
+              await addDoc(collection(firestore, 'petProfiles'),{
+                username,
+>>>>>>> main
                   location,
                   animal,
                   breed,
                   description,
                   fixedCharacteristics,
-                  imageUrl, // Save the image URL
+                  imageUrl, 
               });
               Alert.alert('Profile saved successfully!');
               navigation.reset({
@@ -85,6 +132,7 @@ export default function CreatePetProfile () {
       }
   };
 
+<<<<<<< HEAD
   const checkUsernameAvailability = async () => {
       const userProfilesRef = collection(firestore, 'userProfiles');
       const querySnapshot = await getDocs(userProfilesRef);
@@ -93,15 +141,17 @@ export default function CreatePetProfile () {
   };
 
   const handleImagePick = async () => {
+=======
+    // open gallery to select image
+    const handleImagePick = async () => {
+>>>>>>> main
       let result = await ImagePicker.launchImageLibraryAsync({
           mediaTypes: ImagePicker.MediaTypeOptions.All,
           allowsEditing: true,
           aspect: [4, 3],
           quality: 1,
       });
-  
       console.log(result);
-  
       if (!result.canceled) {
           setImage(result.assets[0].uri);
       }
@@ -111,15 +161,16 @@ export default function CreatePetProfile () {
       if (image) {
           const fileName = username + image.substring(image.lastIndexOf('.'));
           const storageRef = ref(storage, `petprofile/${fileName}`);
-  
           const response = await fetch(image);
           const blob = await response.blob();
 
           await uploadBytes(storageRef, blob);
           console.log('Image uploaded to Firebase storage');
-          
-          // Get the download URL
           const downloadURL = await getDownloadURL(storageRef);
+<<<<<<< HEAD
+=======
+          //console.log('Download URL: ', downloadURL);
+>>>>>>> main
           return downloadURL;
       } else {
           console.log('No image selected');
@@ -149,7 +200,7 @@ export default function CreatePetProfile () {
               />
           </TouchableOpacity>
 
-      {image && <Image source={{ uri: image }} style={styles.image} />}
+          {image && <Image source={{ uri: image }} style={styles.image} />}
 
             <Text style={{color: 'white'}}> Username</Text>
             <TextInput
@@ -171,25 +222,25 @@ export default function CreatePetProfile () {
            data={locationOptions}
            save="value"
            placeholder="Select a location"
-           boxStyles={styles.selectList} // Custom styles for the select list box
-           inputStyles={styles.inputStyles} // Custom styles for the input text
-           dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-           dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+           boxStyles={styles.selectList} 
+           inputStyles={styles.inputStyles} 
+           dropdownStyles={styles.dropdownStyles} 
+           dropdownItemStyles={styles.dropdownItemStyles} 
            />
 
-            <Text style={{color: 'white', marginTop:15}}> Animal Preference</Text>
+            <Text style={{color: 'white', marginTop:15}}> Animal Type</Text>
             <SelectList 
-            setSelected = {setAnimalPreference} 
+            setSelected = {setAnimalType} 
             data={animalOptions} 
             save="value"
-            placeholder="Select an Animal Preference"
-            boxStyles={styles.selectList} // Custom styles for the select list box
-            inputStyles={styles.inputStyles} // Custom styles for the input text
-            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
+            placeholder="Select an Animal Type"
+            boxStyles={styles.selectList} 
+            inputStyles={styles.inputStyles} 
+            dropdownStyles={styles.dropdownStyles} 
+            dropdownItemStyles={styles.dropdownItemStyles} 
            />
 
-            <Text style={{color: 'white', marginTop: 10}}> Breed Preference</Text>
+            <Text style={{color: 'white', marginTop: 10}}> Breed </Text>
             <TextInput
                 style={styles.input}
                 value={breed}
@@ -202,7 +253,7 @@ export default function CreatePetProfile () {
                 value={description}
                 onChangeText={setDescription}
                 placeholder="Include the age of your pet here."
-                placeholderTextColor="white" // Change this to your desired color
+                placeholderTextColor="white" 
             />
 
             <Text style={{color: 'white'}}> Characteristics of the pet </Text>
@@ -210,13 +261,12 @@ export default function CreatePetProfile () {
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
             save="value"
-            //onSelect={() => alert(fixedCharacteristics)} 
-            label="Categories"
-            boxStyles={styles.selectList} // Custom styles for the select list box
-            inputStyles={styles.inputStyles} // Custom styles for the input text
-            dropdownStyles={styles.dropdownStyles} // Custom styles for the dropdown list
-            dropdownItemStyles={styles.dropdownItemStyles} // Custom styles for dropdown items
-            placeholderTextColor="white" // Change this to your desired color
+            label="Characteristics"
+            boxStyles={styles.selectList} 
+            inputStyles={styles.inputStyles} 
+            dropdownStyles={styles.dropdownStyles} 
+            dropdownItemStyles={styles.dropdownItemStyles} 
+            placeholderTextColor="white" 
             />
           <SafeAreaView style={styles.buttonContainer}>
           <TouchableOpacity 
@@ -255,8 +305,8 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         marginTop: 20,
-        borderWidth: 1,  // Border for the container
-        borderColor: 'black', // Border color
+        borderWidth: 1,  
+        borderColor: 'black', 
         borderRadius: 30,
         backgroundColor: '#5b4636',
     },
@@ -275,7 +325,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   selectList: {
-    backgroundColor: 'lightbrown', // Custom background color for select list box
+    backgroundColor: 'lightbrown',
     borderRadius: 4,
     borderWidth: 1,
     borderColor: 'white',
@@ -284,10 +334,10 @@ const styles = StyleSheet.create({
     marginTop: 5,
   },
   inputStyles: {
-    color: 'white', // Placeholder and input text color
+    color: 'white', 
   },
   dropdownStyles: {
-    backgroundColor: 'lightbrown', // Custom background color for dropdown list
+    backgroundColor: 'lightbrown', 
   },
   dropdownItemStyles: {
     padding: 10,
@@ -303,8 +353,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   customText: {
-    fontFamily: 'Roxborough CF Bold', // Use the actual font family name
-    fontSize: 40, // Adjust the font size as needed
+    fontFamily: 'Roxborough CF Bold', 
+    fontSize: 40, 
     alignSelf: 'center'
   },
   imagebutton: {

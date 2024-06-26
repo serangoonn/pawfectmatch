@@ -10,12 +10,31 @@ import PetOrOwner from '../src/screens/PetOrOwner';
 import CreatePetProfile from '../src/screens/CreatePetProfile';
 import CreateUserProfile from '../src/screens/CreateUserProfile';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfileScreen from '../src/screens/Tabs/Profile';
-import ChatScreen from '../src/screens/Tabs/Chat';
+import ProfileScreen from '../src/screens/Tabs/ProfileStack/Profile';
+import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
 import RegisterScreen from '../src/screens/Register';
-import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe'
+import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
+import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
+import PostScreen from '../src/screens/Tabs/Social Stack/Post';
+import ForgotPasswordScreen from '../src/screens/ForgotPassword';
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const SocialStack = () => (
+   <Stack.Navigator>
+      <Stack.Screen name = "Feed" component={FeedScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
+      <Stack.Screen name = "Post" component={PostScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
+   </Stack.Navigator>
+)
 
 const HomeStack = () => (
    <Stack.Navigator>
@@ -39,8 +58,13 @@ const HomeTabNavigator = () => (
          headerShown: false,
          }}
          />
-        <Tab.Screen name = "Profile" component={ProfileScreen} />
         <Tab.Screen name = "Chat" component={ChatScreen} />
+        <Tab.Screen name = "SocialStack" component={SocialStack} 
+        options ={{ 
+         headerShown: false,
+         }}
+         />
+        <Tab.Screen name = "Profile" component={ProfileScreen} />
     </Tab.Navigator>
 );
 
@@ -54,6 +78,11 @@ export default function App() {
                     }}
                     />
                  <Stack.Screen name="Register" component={RegisterScreen}
+                 options ={{ 
+                    headerShown: false,
+                    }}
+                    />
+                    <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen}
                  options ={{ 
                     headerShown: false,
                     }}
