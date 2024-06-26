@@ -4,19 +4,54 @@ import { Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, 
 import React, { useState } from 'react'
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from "../utils/firebase"
+<<<<<<< HEAD
+import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
+=======
 import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
+>>>>>>> main
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
 import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import { storage } from '../utils/firebase';
 import * as ImagePicker from 'expo-image-picker';
 
 export default function CreatePetProfile () {
-    // navigation
-    const navigation = useNavigation();
+  const navigation = useNavigation();
 
-    // upload images onto firebase storage
-    const [image, setImage] = useState('');
+  const [image, setImage] = useState('');
+  const [username, setUsername] = useState('');
+  const [petname, setPetName] = useState('');
+  const [location, setLocation] = useState('');
+  const locationOptions = [
+      {key:'1', value:'North Region'},
+      {key:'2', value:'North East Region'},
+      {key:'3', value:'East Region'},
+      {key:'4', value:'Central Region'},
+      {key:'5', value:'West Region'},
+  ];
+  const [animal, setAnimalType] = useState("");
+  const animalOptions = [
+      {key:'1', value:'Dog'},
+      {key:'2', value:'Cat'},
+      {key:'3', value:'Hamster'},
+      {key:'4', value:'Fish'},
+      {key:'5', value:'Bird'},
+      {key:'6', value:'Rabbit'},
+  ];
 
+<<<<<<< HEAD
+  const [breed, setBreed] = useState('');
+  const [description, setDescription] = useState('');
+  const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
+  const characteristicsOptions = [
+      {key:'1', value:'small'},
+      {key:'2', value:'big'},
+      {key:'3', value:'active'},
+      {key:'4', value:'playful'},
+      {key:'5', value:'disciplined'},
+      {key:'6', value:'quiet'},
+      {key:'7', value:'open to rescue animals'},
+  ];
+=======
     // user information
     const [username, setUsername] = useState('');
     const [petname, setPetName] = useState('');
@@ -37,20 +72,19 @@ export default function CreatePetProfile () {
         {key:'5', value:'Bird'},
         {key:'6', value:'Rabbit'},
     ];
+>>>>>>> main
 
-    const [breed, setBreed] = useState('');
-    const [description, setDescription] = useState('');
-    const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
-    const characteristicsOptions = [
-        {key:'1', value:'small'},
-        {key:'2', value:'big'},
-        {key:'3', value:'active'},
-        {key:'4', value:'playful'},
-        {key:'5', value:'disciplined'},
-        {key:'6', value:'quiet'},
-        {key:'7', value:'open to rescue animals'},
-    ];
+  const validateFields = () => {
+      if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
+          Alert.alert("Error", "All fields must be filled.");
+          return false;
+      }
+      return true;
+  };
 
+<<<<<<< HEAD
+  const handleSave = async () => {
+=======
     // error if a field is not filled in
     const validateFields = () => {
       if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
@@ -62,13 +96,21 @@ export default function CreatePetProfile () {
 
     // save user information
     const handleSave = async () => {
+>>>>>>> main
       if (!validateFields()) return;
       try {
           const isUsernameAvailable = await checkUsernameAvailability();
           if (isUsernameAvailable) {
+<<<<<<< HEAD
+              const imageUrl = await submitData(username); // Pass the username to submitData
+              await setDoc(doc(firestore, 'petProfiles', username), { // Set document ID to username
+                  username,
+                  petname,
+=======
               const imageUrl = await submitData(); // Get the image URL from submitData
               await addDoc(collection(firestore, 'petProfiles'),{
                 username,
+>>>>>>> main
                   location,
                   animal,
                   breed,
@@ -76,61 +118,65 @@ export default function CreatePetProfile () {
                   fixedCharacteristics,
                   imageUrl, 
               });
-              alert('Profile saved successfully!');
+              Alert.alert('Profile saved successfully!');
               navigation.reset({
                   index: 0,
                   routes: [{ name: "PawfectMatch" }],
               });
           } else {
-              alert('Error saving profile or Username is already taken.');
+              Alert.alert('Error saving profile or Username is already taken.');
           }
       } catch (error) {
           console.error("Error saving profile: ", error);
-          alert('Error saving profile or Username is already taken.');
+          Alert.alert('Error saving profile or Username is already taken.');
       }
   };
-  
-    // check if username is available
-    const checkUsernameAvailability = async () => {
-        const userProfilesRef = collection(firestore, 'userProfiles');
-        const querySnapshot = await getDocs(userProfilesRef);
-        const existingUsernames = querySnapshot.docs.map(doc => doc.data().username);
-        return !existingUsernames.includes(username);
-    };
 
+<<<<<<< HEAD
+  const checkUsernameAvailability = async () => {
+      const userProfilesRef = collection(firestore, 'userProfiles');
+      const querySnapshot = await getDocs(userProfilesRef);
+      const existingUsernames = querySnapshot.docs.map(doc => doc.data().username);
+      return !existingUsernames.includes(username);
+  };
+
+  const handleImagePick = async () => {
+=======
     // open gallery to select image
     const handleImagePick = async () => {
+>>>>>>> main
       let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          allowsEditing: true,
+          aspect: [4, 3],
+          quality: 1,
       });
       console.log(result);
       if (!result.canceled) {
-        setImage(result.assets[0].uri);
+          setImage(result.assets[0].uri);
       }
-    };
+  };
 
-    // uploads image onto firebase storage
-    const submitData = async () => {
-      if (image && username) {
+  const submitData = async (username) => {
+      if (image) {
           const fileName = username + image.substring(image.lastIndexOf('.'));
           const storageRef = ref(storage, `petprofile/${fileName}`);
           const response = await fetch(image);
           const blob = await response.blob();
-  
+
           await uploadBytes(storageRef, blob);
           console.log('Image uploaded to Firebase storage');
           const downloadURL = await getDownloadURL(storageRef);
+<<<<<<< HEAD
+=======
           //console.log('Download URL: ', downloadURL);
+>>>>>>> main
           return downloadURL;
       } else {
           console.log('No image selected');
           return null;
       }
   };
-  
   
 
     return (
