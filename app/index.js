@@ -14,7 +14,7 @@ import ProfileScreen from '../src/screens/Tabs/ProfileStack/Profile';
 import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
 import RegisterScreen from '../src/screens/Register';
 import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
-import SocialScreen from '../src/screens/Tabs/Social Stack/Social';
+import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
 import PostScreen from '../src/screens/Tabs/Social Stack/Post';
 import ForgotPasswordScreen from '../src/screens/ForgotPassword';
 
@@ -23,7 +23,7 @@ const Tab = createBottomTabNavigator();
 
 const SocialStack = () => (
    <Stack.Navigator>
-      <Stack.Screen name = "Social" component={SocialScreen} 
+      <Stack.Screen name = "Feed" component={FeedScreen} 
       options ={{ 
          headerShown: false,
          }}
