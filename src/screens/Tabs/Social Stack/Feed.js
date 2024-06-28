@@ -1,38 +1,88 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Image, FlatList, StyleSheet, Button } from 'react-native';
-import { firestore } from '../../../utils/firebase';
+import React, { useEffect, useState } from 'react';
+import { ImageBackground, View, Text, Image, FlatList, StyleSheet, Button, RefreshControl } from 'react-native';
+import { firestore, storage, auth } from '../../../utils/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/core';
+import { getDownloadURL, ref } from 'firebase/storage';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
+  const [username, setUsername] = useState('');
+  const [loading, setLoading] = useState(true);
+
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchPosts = async () => {
+  const fetchPosts = async () => {
+    try {
       const querySnapshot = await getDocs(collection(firestore, 'posts'));
-      const postsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const postsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
+        const data = doc.data();
+        const photoURL = await getDownloadURL(ref(storage, `petprofile/${data.username}.jpg`));
+        return { id: doc.id, ...data, photoURL };
+      }));
       setPosts(postsData);
-    };
+    } catch (error) {
+      console.error('Error fetching posts:', error);
+    }
+  };
 
+  useEffect(() => {
     fetchPosts();
   }, []);
 
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchPosts();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUsername(user.displayName || '');
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   return (
-    <View style={styles.container}>
-      <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.post}>
-            <Image source={{ uri: item.imageUrl }} style={styles.image} />
-            <Text>{item.caption}</Text>
-            <Text>Posted by: {item.username}</Text>
-          </View>
-        )}
+    <ImageBackground
+      source={require('../HomeStack/images/lightbrown.png')}
+      style={styles.background}
+    >
+      <Image
+        source={require('../HomeStack/images/header.png')}
       />
-      <Button title="Create Post" onPress={() => navigation.push('Post')} />
-    </View>
+      <View style={styles.container}>
+        <FlatList
+          data={posts}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <View style={styles.post}>
+              <View style={styles.userInfo}>
+                <Image source={{ uri: item.photoURL }} style={styles.userPhoto} />
+                <Text style={styles.username}>@{item.username}</Text>
+              </View>
+              <Image source={{ uri: item.imageUrl }} style={styles.image} />
+              <Text style={styles.caption}>{item.caption}</Text>
+            </View>
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
+        />
+        <TouchableOpacity 
+         onPress={() => navigation.push('Post')} >
+         <Image
+              source={require('../Social Stack/images/uploadbutton.png')}
+              style={styles.imagebutton}
+              />
+        </TouchableOpacity>
+      </View>
+    </ImageBackground>
   );
 }
 
@@ -43,9 +93,41 @@ const styles = StyleSheet.create({
   },
   post: {
     marginBottom: 20,
+    width: 300,
   },
   image: {
     width: '100%',
     height: 200,
+    borderRadius: 20,
+  },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  userPhoto: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginRight: 10,
+  },
+  caption: {
+    marginLeft: 15,
+    marginTop: 5,
+    fontWeight: "bold",
+  },
+  username: {
+    fontWeight: "bold",
+  },
+  imagebutton: {
+    height: 50,
+    width: 50,
+    alignSelf: 'center',
+    marginTop: 5,
   },
 });
