@@ -199,7 +199,8 @@ export default function Swipe() {
   const styles = StyleSheet.create({
     backbutton: {
       alignSelf: 'left',
-      marginLeft: 20,      
+      marginLeft: 20,
+      marginTop: 10,           
     },
     background: {
       flex: 1,
