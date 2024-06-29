@@ -14,7 +14,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { getAuth, updateProfile, onAuthStateChanged } from 'firebase/auth';
 import { chatkitty } from '../screens/Tabs/ChatStack/chatkitty/index';
 
-export default function CreatePetProfile() {
+export default function CreateUserProfile() {
   const navigation = useNavigation();
   const [image, setImage] = useState('');
   const [username, setUsername] = useState('');
@@ -103,7 +103,7 @@ export default function CreatePetProfile() {
           console.log('User photoURL:', user.photoURL);
     
           // Save the user profile to Firestore with username as document ID
-          await setDoc(doc(firestore, 'petProfiles', username), {
+          await setDoc(doc(firestore, 'userProfiles', username), {
             uid: user.uid,
             username,
             experiencelevel,

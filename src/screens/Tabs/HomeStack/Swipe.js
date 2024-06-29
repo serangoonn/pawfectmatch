@@ -8,23 +8,23 @@ export default function Swipe() {
   const navigation = useNavigation();
   const [userData, setUserData] = useState(null);
   const [previousUsers, setPreviousUsers] = useState([]);
-  const [savedUsers, setSavedUsers] = useState([]);
   const position = useRef(new Animated.ValueXY()).current;
   const [pets, setPets] = useState([]);
 
-  // Fetch all user profiles and select a random user
+  // Fetch all pet profiles and select a random pet
   useEffect(() => {
-    fetchRandomUser();
+    fetchRandomPet();
   }, []);
 
-  const fetchRandomUser = async () => {
+  const fetchRandomPet = async () => {
     try {
       const petProfilesRef = collection(firestore, 'petProfiles');
       const querySnapshot = await getDocs(petProfilesRef);
       const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPets(petsData);
 
+      // Filter out pets that have been swiped before
       const availablePets = petsData.filter(pet => !previousUsers.includes(pet.id));
+
       if (availablePets.length > 0) {
         const randomPet = availablePets[Math.floor(Math.random() * availablePets.length)];
         setUserData(randomPet);
@@ -33,7 +33,7 @@ export default function Swipe() {
         setUserData(null);
       }
     } catch (error) {
-      console.error('Error fetching user profiles: ', error);
+      console.error('Error fetching pet profiles: ', error);
     }
   };
 
@@ -50,36 +50,36 @@ export default function Swipe() {
   const handleCancel = () => {
     if (userData) {
       setPreviousUsers([...previousUsers, userData.id]);
-      fetchRandomUser();
+      fetchRandomPet();
     }
   };
 
   const handleLike = () => {
     if (userData) {
-    Alert.alert(
-      "Like",
-      "Do you want to message this user or continue swiping?",
-      [
-        {
-          text: "Message",
-          onPress: () => console.log("Message pressed"),
-        },
-        {
-          text: "Continue",
-          onPress: () => {
-            setPreviousUsers([...previousUsers, userData.id]);
-            fetchRandomUser();
-        },
-      },
-      ],
-      { cancelable: true }
-    );
+      Alert.alert(
+        "Like",
+        "Do you want to message this user or continue swiping?",
+        [
+          {
+            text: "Message",
+            onPress: () => console.log("Message pressed"),
+          },
+          {
+            text: "Continue",
+            onPress: () => {
+              setPreviousUsers([...previousUsers, userData.id]);
+              fetchRandomPet();
+            },
+          },
+        ],
+        { cancelable: true }
+      );
+    }
   };
-};
 
   const handleStar = () => {
     if (userData) {
-      setSavedUsers([...savedUsers, userData]);
+      // Implement saving logic here
       Alert.alert('User Saved', 'This pet profile has been saved!');
     }
   };
@@ -122,107 +122,94 @@ export default function Swipe() {
 
   return (
     <ImageBackground 
-    source={require('../HomeStack/images/lightbrown.png')}
-    style={styles.background}
-  >
+      source={require('../HomeStack/images/lightbrown.png')}
+      style={styles.background}
+    >
 
       <Image 
-      source={require('../HomeStack/images/header.png')}
+        source={require('../HomeStack/images/header.png')}
       />
 
-    <TouchableOpacity 
-    onPress={() => navigation.goBack()}>
-    <Image
-      source={require('../HomeStack/images/backbutton.png')}
-      style={styles.backbutton}
-      />
+      <TouchableOpacity 
+        onPress={() => navigation.goBack()}>
+        <Image
+          source={require('../HomeStack/images/backbutton.png')}
+          style={styles.backbutton}
+        />
       </TouchableOpacity>
 
-     <View style={styles.containerWrapper}>
+      <View style={styles.containerWrapper}>
         <Animated.View
           {...panResponder.panHandlers}
           style={[styles.container, { transform: position.getTranslateTransform() }]}
         >
-      <ScrollView>
-      {userData ? (
-            <View>
-              {userData.imageUrl ? (
-                <Image source={{ uri: userData.imageUrl }} style={styles.profileImage} />
-              ) : null}
-              <Text style={styles.text}>Username: {userData.username}</Text>
-              <Text style={styles.text}>Location: {userData.location}</Text>
-              <Text style={styles.text}>Animal: {userData.animal}</Text>
-              <Text style={styles.text}>Breed: {userData.breed}</Text>
-              <Text style={styles.text}>Description: {userData.description}</Text>
-              {/* Add more fields as needed */}
-            </View>
-          ) : (
-            <Text style={styles.text}>Loading...</Text>
-          )}
-  </ScrollView>
-  <View style={styles.buttons}>
+          <ScrollView>
+            {userData ? (
+              <View>
+                {userData.imageUrl ? (
+                  <Image source={{ uri: userData.imageUrl }} style={styles.profileImage} />
+                ) : null}
+                <Text style={styles.text}>Username: {userData.username}</Text>
+                <Text style={styles.text}>Location: {userData.location}</Text>
+                <Text style={styles.text}>Animal: {userData.animal}</Text>
+                <Text style={styles.text}>Breed: {userData.breed}</Text>
+                <Text style={styles.text}>Description: {userData.description}</Text>
+                {/* Add more fields as needed */}
+              </View>
+            ) : (
+              <Text style={styles.text}>No more pets to show.</Text>
+            )}
+          </ScrollView>
 
-  <TouchableOpacity 
-    onPress= {handleUndo}>
-    <Image
-      source={require('../HomeStack/images/undobutton.png')}
-      />
-    </TouchableOpacity>
+          <View style={styles.buttons}>
+            <TouchableOpacity onPress={handleUndo}>
+              <Image source={require('../HomeStack/images/undobutton.png')} />
+            </TouchableOpacity>
 
-    <TouchableOpacity 
-    onPress= {handleCancel}>
-    <Image
-      source={require('../HomeStack/images/cancelbutton.png')}
-      />
-    </TouchableOpacity>
+            <TouchableOpacity onPress={handleCancel}>
+              <Image source={require('../HomeStack/images/cancelbutton.png')} />
+            </TouchableOpacity>
 
-    <TouchableOpacity 
-    onPress= {handleLike}>
-    <Image
-      source={require('../HomeStack/images/likebutton.png')}
-      />
-    </TouchableOpacity>
+            <TouchableOpacity onPress={handleLike}>
+              <Image source={require('../HomeStack/images/likebutton.png')} />
+            </TouchableOpacity>
 
-    <TouchableOpacity 
-    onPress= {handleStar}>
-    <Image
-      source={require('../HomeStack/images/starbutton.png')}
-      />
-    </TouchableOpacity>
-    </View>
-    </Animated.View>
-  </View>
-  </ImageBackground>
+            <TouchableOpacity onPress={handleStar}>
+              <Image source={require('../HomeStack/images/starbutton.png')} />
+            </TouchableOpacity>
+          </View>
+        </Animated.View>
+      </View>
+    </ImageBackground>
   );
-  }
+}
 
-  const styles = StyleSheet.create({
-    backbutton: {
-      alignSelf: 'left',
-      marginLeft: 20,
-      marginTop: 10,           
-    },
-    background: {
-      flex: 1,
-      alignSelf: 'center',
-    },
-    containerWrapper: {
-      flex: 1,
-      marginTop: 20,
-      width: 300,
-      alignSelf: 'center',
-    },
-    container: {
-      flex: 0.8,
-      padding: 20,
-      marginTop: 20,
-      borderWidth: 1,  // Border for the container
-      borderColor: 'black', // Border color
-      borderRadius: 30,
-      backgroundColor: '#5b4636',
-      width :300,
-      //eight: 100,
-      alignSelf: 'center',
+const styles = StyleSheet.create({
+  backbutton: {
+    alignSelf: 'left',
+    marginLeft: 20,
+    marginTop: 10,           
+  },
+  background: {
+    flex: 1,
+    alignSelf: 'center',
+  },
+  containerWrapper: {
+    flex: 1,
+    marginTop: 20,
+    width: 300,
+    alignSelf: 'center',
+  },
+  container: {
+    flex: 0.8,
+    padding: 20,
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: 'black',
+    borderRadius: 30,
+    backgroundColor: '#5b4636',
+    width :300,
+    alignSelf: 'center',
   },
   text: {
     color: 'white',
@@ -235,8 +222,8 @@ export default function Swipe() {
     alignSelf: 'center',
     marginBottom: 20,
   },
-  buttons : {
+  buttons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
-  });
+});
