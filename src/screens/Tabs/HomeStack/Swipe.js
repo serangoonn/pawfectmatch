@@ -2,7 +2,9 @@ import { Animated, PanResponder, Alert, ScrollView, ImageBackground, StyleSheet,
 import React, { useRef, useEffect, useState } from 'react';
 import { useNavigation } from'@react-navigation/core';
 import { firestore } from '../../../utils/firebase';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, setDoc, getDocs, doc, arrayUnion } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+
 
 export default function Swipe() {
   const navigation = useNavigation();
@@ -15,6 +17,11 @@ export default function Swipe() {
   useEffect(() => {
     fetchRandomPet();
   }, []);
+
+  // Get the current user ID
+  const auth = getAuth();
+  const currentUser = auth.currentUser ? auth.currentUser.uid : null;
+
 
   const fetchRandomPet = async () => {
     try {
@@ -54,28 +61,82 @@ export default function Swipe() {
     }
   };
 
-  const handleLike = () => {
-    if (userData) {
-      Alert.alert(
-        "Like",
-        "Do you want to message this user or continue swiping?",
-        [
-          {
-            text: "Message",
-            onPress: () => console.log("Message pressed"),
-          },
-          {
-            text: "Continue",
-            onPress: () => {
-              setPreviousUsers([...previousUsers, userData.id]);
-              fetchRandomPet();
-            },
-          },
-        ],
-        { cancelable: true }
-      );
+  const getCurrentUsername = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        return user.displayName || '';
+      } else {
+        return '';
+      }
+    } catch (error) {
+      console.error('Error fetching current username:', error);
+      return '';
     }
   };
+  
+
+  const handleLike = async () => {
+    if (userData && currentUser) {
+      try {
+        // Get current user's username
+        const username = await getCurrentUsername();
+  
+        // Update current user's liked profiles
+        const currentUserLikedProfilesRef = doc(firestore, 'likedProfiles', currentUser);
+        await setDoc(
+          currentUserLikedProfilesRef,
+          {
+            profiles: arrayUnion({
+              id: userData.id,
+              username: userData.username,
+              imageUrl: userData.imageUrl,
+            }),
+          },
+          { merge: true }
+        );
+  
+        // Update pet's contact list (assuming it's stored under 'petProfiles')
+        const petProfileRef = doc(firestore, 'likedProfiles', userData.uid);
+        await setDoc(
+          petProfileRef,
+          {
+            profiles: arrayUnion({
+              id: currentUser,
+              username: username,
+              imageUrl: auth.currentUser.photoURL,
+            }),
+          },
+          { merge: true }
+        );
+  
+        Alert.alert(
+          "Like",
+          "Do you want to message this user or continue swiping?",
+          [
+            {
+              text: "Message",
+              onPress: () => console.log("Message pressed"),
+            },
+            {
+              text: "Continue",
+              onPress: () => {
+                setPreviousUsers([...previousUsers, userData.id]);
+                fetchRandomPet();
+              },
+            },
+          ],
+          { cancelable: true }
+        );
+      } catch (error) {
+        console.error("Error liking profile: ", error);
+      }
+    }
+  };
+  
+  
+  
+  
 
   const handleStar = () => {
     if (userData) {

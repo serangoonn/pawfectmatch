@@ -12,7 +12,6 @@ import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-lis
 import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth, updateProfile, onAuthStateChanged } from 'firebase/auth';
-import { chatkitty } from '../screens/Tabs/ChatStack/chatkitty/index';
 
 export default function CreateUserProfile() {
   const navigation = useNavigation();
@@ -94,9 +93,6 @@ export default function CreateUserProfile() {
             displayName: username,
             photoURL: imageUrl,
           });
-    
-          // Start ChatKitty session
-          chatkitty.startSession({ username: user.uid, authParams: { idToken: await auth.currentUser.getIdToken() } });
     
           // Log user profile to verify
           console.log('User displayName:', user.displayName);

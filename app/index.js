@@ -1,8 +1,6 @@
 //navigation between screens
 
-import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { StyleSheet, Text, View } from 'react-native';
 import LoginScreen from '../src/screens/Login';
 import HomeScreen from '../src/screens/Tabs/HomeStack/Home';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -17,9 +15,26 @@ import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
 import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
 import PostScreen from '../src/screens/Tabs/Social Stack/Post';
 import ForgotPasswordScreen from '../src/screens/ForgotPassword';
+import ChatScreen from '../src/screens/Tabs/ChatStack/Chat'
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+
+const ChatStack = () => (
+   <Stack.Navigator>
+      <Stack.Screen name = "ContactList" component={ContactListScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
+      <Stack.Screen name = "Chat" component={ChatScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
+   </Stack.Navigator>
+)
+
 
 const SocialStack = () => (
    <Stack.Navigator>
@@ -58,7 +73,11 @@ const HomeTabNavigator = () => (
          headerShown: false,
          }}
          />
-        <Tab.Screen name = "ContactList" component={ContactListScreen} />
+        <Tab.Screen name = "ChatStack" component={ChatStack}
+        options ={{ 
+         headerShown: false,
+         }}
+         />
         <Tab.Screen name = "SocialStack" component={SocialStack} 
         options ={{ 
          headerShown: false,
