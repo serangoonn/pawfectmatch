@@ -11,7 +11,7 @@ import CreatePetProfile from '../src/screens/CreatePetProfile';
 import CreateUserProfile from '../src/screens/CreateUserProfile';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import ProfileScreen from '../src/screens/Tabs/ProfileStack/Profile';
-import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
+import ContactListScreen from '../src/screens/Tabs/ChatStack/ContactList';
 import RegisterScreen from '../src/screens/Register';
 import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
 import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
@@ -58,7 +58,7 @@ const HomeTabNavigator = () => (
          headerShown: false,
          }}
          />
-        <Tab.Screen name = "Chat" component={ChatScreen} />
+        <Tab.Screen name = "ContactList" component={ContactListScreen} />
         <Tab.Screen name = "SocialStack" component={SocialStack} 
         options ={{ 
          headerShown: false,

@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "app/(tabs)/Login.jsx", "app/(tabs)/home.jsx", "src/screens/Tabs/HomeStack/Home.js", "src/screens/CreateUserProfile.js", "src/screens/PetOrOwner.js", "src/screens/Tabs/Profile.js", "src/screens/CreatePetProfile.js", "src/screens/Login.jsx", "src/screens/Login.jsx", "src/screens/Tabs/ChatStack/Chat.js"  ]
+, "app/(tabs)/Login.jsx", "app/(tabs)/home.jsx", "src/screens/Tabs/HomeStack/Home.js", "src/screens/CreateUserProfile.js", "src/screens/PetOrOwner.js", "src/screens/Tabs/Profile.js", "src/screens/CreatePetProfile.js", "src/screens/Login.jsx", "src/screens/Login.jsx", "src/screens/Tabs/ChatStack/ContactList.js"  ]
 }
