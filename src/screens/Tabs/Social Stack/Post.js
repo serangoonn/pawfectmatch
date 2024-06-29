@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, Text, View, TextInput, Image, Button } from 'react-native';
+import { TouchableOpacity, ImageBackground, ScrollView, StyleSheet, Text, View, TextInput, Image, Button } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { firestore, storage, auth } from '../../../utils/firebase';
 import { collection, addDoc } from 'firebase/firestore';
@@ -85,19 +85,49 @@ export default function Post() {
   }
 
   return (
+    <ImageBackground
+      source={require('../HomeStack/images/lightbrown.png')}
+      style={styles.background}
+    >
+      <Image
+        source={require('../HomeStack/images/header.png')}
+      />
+      <View style={styles.backbuttontext}>
+
+      <TouchableOpacity 
+    onPress={() => navigation.goBack()}>
+    <Image
+      source={require('../HomeStack/images/backbutton.png')}
+      style={styles.backbutton}
+      />
+      </TouchableOpacity>
+
+      <Text style={styles.text}> Make a new post </Text>
+      </View>
+
     <View style={styles.container}>
       <ScrollView>
-        <Button onPress={handleImagePick} title="Pick Image" />
+        <Button color="#866629" onPress={handleImagePick} title="Select a picture from your gallery:" />
         {image && <Image source={{ uri: image }} style={styles.image} />}
+        <View style={{}} >
+        <Text style={{fontSize:20, color:"#7D5F26", fontWeight:"bold", }}> Caption: </Text>
         <TextInput
-          placeholder="Enter a caption"
+          placeholder="Type here..."
           style={styles.input}
           value={caption}
           onChangeText={setCaption}
         />
-        <Button onPress={submitData} title="Post!" />
+        <TouchableOpacity
+        style={styles.postbutton} 
+        onPress={submitData}>
+        <Text style={styles.posttext}>
+          Post!
+        </Text>
+        </TouchableOpacity>
+        </View>
       </ScrollView>
     </View>
+    </ImageBackground>
   );
 }
 
@@ -106,12 +136,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 20,
+    //padding: 20,
   },
   image: {
-    width: 200,
+    width: '100%',
     height: 200,
     marginBottom: 20,
+    alignSelf: 'center',
+    borderRadius: 30,
   },
   input: {
     width: '100%',
@@ -119,5 +151,39 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#ccc',
     marginBottom: 20,
+    borderRadius: 30,
+    backgroundColor: '#A78446',
   },
+  background: {
+    flex: 1,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  backbutton: {
+    alignSelf: 'left',
+    marginLeft: 20, 
+    marginTop: 10,     
+  },
+  backbuttontext: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 25,
+    color: '#7D5F26',
+    fontWeight: 'bold'
+  },
+  postbutton: {
+    backgroundColor: "#7D5F26",
+    borderRadius: 30,
+    width: 80,
+    height: 30,
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
+  posttext: {
+    alignSelf: 'center',
+    color: 'white',
+    fontWeight: 'bold',
+  }
 });
