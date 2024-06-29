@@ -1,78 +1,66 @@
 // custom text font not working yet
 
-import { Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput, Image, SafeAreaView, TouchableOpacity, Button } from 'react-native'
-import React, { useState } from 'react'
-import { useNavigation } from'@react-navigation/core';
-import { firestore } from "../utils/firebase"
-<<<<<<< HEAD
-import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
-=======
-import { collection, addDoc, getDocs, doc } from 'firebase/firestore';
->>>>>>> main
-import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list'
+import {
+  Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput,
+  Image, SafeAreaView, TouchableOpacity
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/core';
+import { firestore, storage } from '../utils/firebase';
+import { collection, addDoc, getDocs } from 'firebase/firestore';
+import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list';
 import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
-import { storage } from '../utils/firebase';
 import * as ImagePicker from 'expo-image-picker';
+import { getAuth, updateProfile, onAuthStateChanged } from 'firebase/auth';
 
-export default function CreatePetProfile () {
+export default function CreatePetProfile() {
   const navigation = useNavigation();
-
   const [image, setImage] = useState('');
   const [username, setUsername] = useState('');
   const [petname, setPetName] = useState('');
   const [location, setLocation] = useState('');
   const locationOptions = [
-      {key:'1', value:'North Region'},
-      {key:'2', value:'North East Region'},
-      {key:'3', value:'East Region'},
-      {key:'4', value:'Central Region'},
-      {key:'5', value:'West Region'},
+      { key: '1', value: 'North Region' },
+      { key: '2', value: 'North East Region' },
+      { key: '3', value: 'East Region' },
+      { key: '4', value: 'Central Region' },
+      { key: '5', value: 'West Region' },
   ];
-  const [animal, setAnimalType] = useState("");
+  const [animal, setAnimalType] = useState('');
   const animalOptions = [
-      {key:'1', value:'Dog'},
-      {key:'2', value:'Cat'},
-      {key:'3', value:'Hamster'},
-      {key:'4', value:'Fish'},
-      {key:'5', value:'Bird'},
-      {key:'6', value:'Rabbit'},
+      { key: '1', value: 'Dog' },
+      { key: '2', value: 'Cat' },
+      { key: '3', value: 'Hamster' },
+      { key: '4', value: 'Fish' },
+      { key: '5', value: 'Bird' },
+      { key: '6', value: 'Rabbit' },
   ];
-
-<<<<<<< HEAD
   const [breed, setBreed] = useState('');
   const [description, setDescription] = useState('');
   const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
   const characteristicsOptions = [
-      {key:'1', value:'small'},
-      {key:'2', value:'big'},
-      {key:'3', value:'active'},
-      {key:'4', value:'playful'},
-      {key:'5', value:'disciplined'},
-      {key:'6', value:'quiet'},
-      {key:'7', value:'open to rescue animals'},
+      { key: '1', value: 'small' },
+      { key: '2', value: 'big' },
+      { key: '3', value: 'active' },
+      { key: '4', value: 'playful' },
+      { key: '5', value: 'disciplined' },
+      { key: '6', value: 'quiet' },
+      { key: '7', value: 'open to rescue animals' },
   ];
-=======
-    // user information
-    const [username, setUsername] = useState('');
-    const [petname, setPetName] = useState('');
-    const [location, setLocation] = useState('');
-    const locationOptions = [
-        {key:'1', value:'North Region'},
-        {key:'2', value:'North East Region'},
-        {key:'3', value:'East Region'},
-        {key:'4', value:'Central Region'},
-        {key:'5', value:'West Region'},
-    ];
-    const [animal, setAnimalType] = useState("");
-    const animalOptions = [
-        {key:'1', value:'Dog'},
-        {key:'2', value:'Cat'},
-        {key:'3', value:'Hamster'},
-        {key:'4', value:'Fish'},
-        {key:'5', value:'Bird'},
-        {key:'6', value:'Rabbit'},
-    ];
->>>>>>> main
+
+  useEffect(() => {
+      const auth = getAuth();
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+          if (user) {
+              console.log('User is logged in:', user);
+          } else {
+              console.log('User is not logged in');
+              navigation.navigate('Login'); // Redirect to login page if not logged in
+          }
+      });
+
+      return () => unsubscribe(); // Cleanup subscription on unmount
+  }, []);
 
   const validateFields = () => {
       if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
@@ -82,101 +70,133 @@ export default function CreatePetProfile () {
       return true;
   };
 
-<<<<<<< HEAD
   const handleSave = async () => {
-=======
-    // error if a field is not filled in
-    const validateFields = () => {
-      if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
-          Alert.alert("Error", "All fields must be filled.");
-          return false;
-      }
-      return true;
-  };
-
-    // save user information
-    const handleSave = async () => {
->>>>>>> main
       if (!validateFields()) return;
+
       try {
           const isUsernameAvailable = await checkUsernameAvailability();
-          if (isUsernameAvailable) {
-<<<<<<< HEAD
-              const imageUrl = await submitData(username); // Pass the username to submitData
-              await setDoc(doc(firestore, 'petProfiles', username), { // Set document ID to username
+          if (!isUsernameAvailable) {
+              alert('Username is already taken.');
+              return;
+          }
+
+          const imageUrl = await submitData(); // Get the image URL from submitData
+          if (!imageUrl) {
+              alert('Failed to upload image.');
+              return;
+          }
+
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (user) {
+              // Update the user profile in Firebase Authentication
+              await updateProfile(user, {
+                  displayName: username,
+                  photoURL: imageUrl,
+              });
+
+              // Log user profile to verify
+              console.log('User displayName:', user.displayName);
+              console.log('User photoURL:', user.photoURL);
+
+              // Save the petname to Firestore
+              await addDoc(collection(firestore, 'petNames'), {
                   username,
                   petname,
-=======
-              const imageUrl = await submitData(); // Get the image URL from submitData
-              await addDoc(collection(firestore, 'petProfiles'),{
-                username,
->>>>>>> main
-                  location,
-                  animal,
-                  breed,
-                  description,
-                  fixedCharacteristics,
-                  imageUrl, 
               });
-              Alert.alert('Profile saved successfully!');
+
+              // Save the location to Firestore
+              await addDoc(collection(firestore, 'locations'), {
+                  username,
+                  location,
+              });
+
+              // Save the animal type to Firestore
+              await addDoc(collection(firestore, 'animals'), {
+                  username,
+                  animal,
+              });
+
+              // Save the breed to Firestore
+              await addDoc(collection(firestore, 'breeds'), {
+                  username,
+                  breed,
+              });
+
+              // Save the description to Firestore
+              await addDoc(collection(firestore, 'descriptions'), {
+                  username,
+                  description,
+              });
+
+              // Save the fixedCharacteristics to Firestore
+              await addDoc(collection(firestore, 'characteristics'), {
+                  username,
+                  fixedCharacteristics,
+              });
+
+              alert('Profile saved successfully!');
               navigation.reset({
                   index: 0,
-                  routes: [{ name: "PawfectMatch" }],
+                  routes: [{ name: 'PawfectMatch' }],
               });
           } else {
-              Alert.alert('Error saving profile or Username is already taken.');
+              alert('User not logged in');
           }
       } catch (error) {
           console.error("Error saving profile: ", error);
-          Alert.alert('Error saving profile or Username is already taken.');
+          alert('Error saving profile.');
       }
   };
 
-<<<<<<< HEAD
   const checkUsernameAvailability = async () => {
-      const userProfilesRef = collection(firestore, 'userProfiles');
-      const querySnapshot = await getDocs(userProfilesRef);
-      const existingUsernames = querySnapshot.docs.map(doc => doc.data().username);
-      return !existingUsernames.includes(username);
+      try {
+          const userProfilesRef = collection(firestore, 'userProfiles');
+          const querySnapshot = await getDocs(userProfilesRef);
+          const existingUsernames = querySnapshot.docs.map(doc => doc.data().username);
+          return !existingUsernames.includes(username);
+      } catch (error) {
+          console.error("Error checking username availability:", error);
+          return false;
+      }
   };
 
   const handleImagePick = async () => {
-=======
-    // open gallery to select image
-    const handleImagePick = async () => {
->>>>>>> main
-      let result = await ImagePicker.launchImageLibraryAsync({
-          mediaTypes: ImagePicker.MediaTypeOptions.All,
-          allowsEditing: true,
-          aspect: [4, 3],
-          quality: 1,
-      });
-      console.log(result);
-      if (!result.canceled) {
-          setImage(result.assets[0].uri);
+      try {
+          let result = await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.All,
+              allowsEditing: true,
+              aspect: [4, 3],
+              quality: 1,
+          });
+          if (!result.canceled) {
+              setImage(result.assets[0].uri);
+          }
+      } catch (error) {
+          console.error("Error picking image:", error);
       }
   };
 
-  const submitData = async (username) => {
-      if (image) {
-          const fileName = username + image.substring(image.lastIndexOf('.'));
-          const storageRef = ref(storage, `petprofile/${fileName}`);
-          const response = await fetch(image);
-          const blob = await response.blob();
+  const submitData = async () => {
+      if (image && username) {
+          try {
+              const fileName = username + image.substring(image.lastIndexOf('.'));
+              const storageRef = ref(storage, `petprofile/${fileName}`);
+              const response = await fetch(image);
+              const blob = await response.blob();
 
-          await uploadBytes(storageRef, blob);
-          console.log('Image uploaded to Firebase storage');
-          const downloadURL = await getDownloadURL(storageRef);
-<<<<<<< HEAD
-=======
-          //console.log('Download URL: ', downloadURL);
->>>>>>> main
-          return downloadURL;
+              await uploadBytes(storageRef, blob);
+              const downloadURL = await getDownloadURL(storageRef);
+              return downloadURL;
+          } catch (error) {
+              console.error("Error uploading image:", error);
+              return null;
+          }
       } else {
-          console.log('No image selected');
           return null;
       }
   };
+  
   
 
     return (
