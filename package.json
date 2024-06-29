@@ -15,6 +15,7 @@
     "preset": "jest-expo"
   },
   "dependencies": {
+    "@chatkitty/core": "^1.8.0",
     "@expo/vector-icons": "^14.0.0",
     "@react-native-async-storage/async-storage": "^1.23.1",
     "@react-native-community/checkbox": "^0.5.17",
