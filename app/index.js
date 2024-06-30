@@ -1,4 +1,5 @@
 //navigation between screens
+import { Image, Text } from 'react-native';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../src/screens/Login';
@@ -16,6 +17,12 @@ import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
 import PostScreen from '../src/screens/Tabs/Social Stack/Post';
 import ForgotPasswordScreen from '../src/screens/ForgotPassword';
 import ChatScreen from '../src/screens/Tabs/ChatStack/Chat'
+
+//icons
+import homeicon from '../app/icons/homeicon.png'
+import chaticon from '../app/icons/chaticon.png'
+import socialicon from '../app/icons/socialicon.png'
+import profileicon from '../app/icons/profileicon.png'
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -72,23 +79,55 @@ const HomeStack = () => (
 )
 
 const HomeTabNavigator = () => (
-    <Tab.Navigator>
+    <Tab.Navigator 
+      screenOptions={{
+      tabBarStyle: { backgroundColor: '#B39D7A' },
+    }}
+  >
         <Tab.Screen name = "HomeStack" component={HomeStack} 
         options ={{ 
          headerShown: false,
+         tabBarLabel: () => (
+         <Text style={{color:'#7D5F26', marginTop: 35, fontWeight: 'bold'}}>Home</Text>
+         ),
+          tabBarIcon: () => (
+            <Image source={homeicon} style={{ tintColor: '#EDD7B5', width: 25, height: 25, marginTop: 40, }} />
+         ),
          }}
          />
         <Tab.Screen name = "ChatStack" component={ChatStack}
         options ={{ 
          headerShown: false,
+         tabBarLabel: () => (
+         <Text style={{color:'#7D5F26', marginTop: 35, fontWeight: 'bold'}}>Chat</Text>
+         ),
+          tabBarIcon: () => (
+            <Image source={chaticon} style={{ tintColor: '#EDD7B5', width: 25, height: 25, marginTop: 40, }} />
+         ),
          }}
          />
         <Tab.Screen name = "SocialStack" component={SocialStack} 
         options ={{ 
          headerShown: false,
+         tabBarLabel: () => (
+         <Text style={{color:'#7D5F26', marginTop: 35, fontWeight: 'bold'}}>Social</Text>
+         ),
+          tabBarIcon: () => (
+            <Image source={socialicon} style={{ tintColor: '#EDD7B5', width: 25, height: 25, marginTop: 40, }} />
+         ),
          }}
          />
-        <Tab.Screen name = "Profile" component={ProfileScreen} />
+        <Tab.Screen name = "Profile" component={ProfileScreen} 
+        options ={{ 
+         headerShown: false,
+         tabBarLabel: () => (
+         <Text style={{color:'#7D5F26', marginTop: 35, fontWeight: 'bold'}}>Profile</Text>
+         ),
+          tabBarIcon: () => (
+            <Image source={profileicon} style={{ tintColor: '#EDD7B5', width: 25, height: 25, marginTop: 40, }} />
+         ),
+         }}
+         />
     </Tab.Navigator>
 );
 
