@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshControl, FlatList, Image, ScrollView, ImageBackground, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
-import {  doc, getDoc } from 'firebase/firestore';
+import { RefreshControl, FlatList, Image, ImageBackground, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { doc, getDoc } from 'firebase/firestore';
 import { useNavigation } from '@react-navigation/core';
 import { firestore } from '../../../utils/firebase';
 import { getAuth } from 'firebase/auth';
-
 
 const Home = () => {
   const navigation = useNavigation();
@@ -13,7 +12,6 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Get the current user ID
   const auth = getAuth();
 
   useEffect(() => {
@@ -27,8 +25,10 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetchStarredPets();
-  }, []);
+    if (username) {
+      fetchStarredPets();
+    }
+  }, [username]);
   
   const onRefresh = async () => {
     setRefreshing(true);
@@ -38,12 +38,18 @@ const Home = () => {
 
   const fetchStarredPets = async () => {
     try {
-      const docRef = doc(firestore, 'StarPets', username);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setStarredPets(docSnap.data().profiles);
+      console.log("Fetching pets for username: ", username); // Debugging line
+      if (username) {
+        const docRef = doc(firestore, 'StarPets', username);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          const profiles = docSnap.data().profiles || [];
+          setStarredPets(profiles.map((profile, index) => ({ ...profile, id: index.toString() })));
+        } else {
+          console.log("No liked profiles found!");
+        }
       } else {
-        console.log("No liked profiles found!");
+        console.log("Username is not set yet.");
       }
     } catch (error) {
       console.error("Error fetching liked profiles: ", error);
@@ -67,53 +73,51 @@ const Home = () => {
         source={require('../HomeStack/images/header.png')}
       />
 
-        <Text style={{ marginTop: 10, alignSelf: 'left', marginLeft: 10 }}>
-          Welcome back!
-        </Text>
+      <Text style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 10 }}>
+        Welcome back!
+      </Text>
 
-        <TouchableOpacity onPress={() => navigation.push('Swipe')}>
-          <Image
-            source={require('../HomeStack/images/adoptnowbutton.png')}
-            style={styles.imageButtonAdoptNow}
-          />
-        </TouchableOpacity>
+      <TouchableOpacity onPress={() => navigation.push('Swipe')}>
+        <Image
+          source={require('../HomeStack/images/adoptnowbutton.png')}
+          style={styles.imageButtonAdoptNow}
+        />
+      </TouchableOpacity>
 
-        <View style={{ flex: 1, height: 1, backgroundColor: 'brown', marginTop: 20 }} />
+      <View style={{ flex: 1, height: 1, backgroundColor: 'brown', marginTop: 20 }} />
 
-        <Text style={{alignSelf: 'left', marginLeft: 10}}>
-          Liked pets
-        </Text>
+      <Text style={{ alignSelf: 'flex-start', marginLeft: 10 }}>
+        Liked pets
+      </Text>
 
-        <Text style={{alignSelf: 'left', marginLeft: 10, marginBottom: 10}}>
-          Categories
-        </Text>
-
-        <FlatList
-        style={styles.accounts}
+      <FlatList
         data={starredPets}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <TouchableOpacity>
             <View style={styles.profile}>
               <Image source={{ uri: item.imageUrl }} style={styles.profileImage} />
-              <View style ={styles.information}>
-              <Text style={styles.username}>username: {item.username}</Text>
-              <Text style={styles.username}>location: {item.location}</Text>
-              <Text style={styles.username}>animal type: {item.animal}</Text>
-              <Text style={styles.username}>breed: {item.breed}</Text>
-              <Text style={styles.username}>description: {item.description}</Text>
+              <View style={styles.information}>
+                <Text style={styles.username}>username: {item.username}</Text>
+                <Text style={styles.username}>location: {item.location}</Text>
+                <Text style={styles.username}>animal type: {item.animal}</Text>
+                <Text style={styles.username}>breed: {item.breed}</Text>
+                <Text style={styles.username}>description: {item.description}</Text>
               </View>
             </View>
           </TouchableOpacity>
-          
+        )}
+        ListEmptyComponent={() => (
+          <Text style={{ alignSelf: 'center', marginTop: 20 }}>
+            No liked pets found.
+          </Text>
         )}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       />
 
-        {/* Replace with your category components */}
-
+      {/* Replace with your category components */}
     </ImageBackground>
   );
 };
@@ -151,7 +155,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   accounts: {
-    alignSelf: 'left'
+    alignSelf: 'flex-start'
   },
   profile: {
     flexDirection: 'row',
@@ -160,7 +164,7 @@ const styles = StyleSheet.create({
   },
   information: {
     flexDirection: 'column',
-    alignItems: 'center',
+    alignItems: 'flex-start',
   },
   profileImage: {
     width: 70,
@@ -171,6 +175,6 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 10,
-    alignSelf: 'left',
+    alignSelf: 'flex-start',
   },
 });
