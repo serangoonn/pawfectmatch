@@ -12,6 +12,18 @@ export default function Swipe() {
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
+  const [username, setUsername] = useState('');
+
+
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUsername(user.displayName || '');
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   // Get the current user ID
   const auth = getAuth();
@@ -156,7 +168,7 @@ export default function Swipe() {
           { cancelable: true }
         );
       } catch (error) {
-        console.error("Error liking profile: ", error);
+        console.error("Error star-ing profile: ", error);
       }
     }
   };
@@ -177,8 +189,31 @@ export default function Swipe() {
     }
   };
 
-  const handleStar = () => {
+  const handleStar = async (pet) => {
     Alert.alert('User Saved', 'This pet profile has been saved!');
+    if (pet && username) {
+      try {
+        // Get current user's username
+        // Update current user's liked profiles
+        const currentUserLikedProfilesRef = doc(firestore, 'StarPets', username);
+        await setDoc(
+          currentUserLikedProfilesRef,
+          {
+            profiles: arrayUnion({
+              username: pet.username,
+              imageUrl: pet.imageUrl,
+              location: pet.location,
+              breed: pet.breed,
+              description: pet.description,
+              animal: pet.animal,
+            }),
+          },
+          { merge: true }
+        );
+      } catch (error) {
+        console.error("Error star-ing profile: ", error);
+      }
+    }
   };
 
   const moveToNextCard = () => {
@@ -243,14 +278,15 @@ export default function Swipe() {
                 <Image source={require('../HomeStack/images/likebutton.png')} />
               </TouchableOpacity>
 
-              <TouchableOpacity onPress={handleStar}>
+              <TouchableOpacity onPress={() => handleStar(pet)}>
                 <Image source={require('../HomeStack/images/starbutton.png')} />
               </TouchableOpacity>
+
             </View>
           </View>
         )}
         onSwipedRight={(cardIndex) => handleLikeSwiped(pets[cardIndex])}
-        onSwipedLeft={() => {handleCancel()}} // No operation needed here
+        onSwipedLeft={() => {handleCancel}} // No operation needed here
         cardIndex={0}
         backgroundColor="#f2f2f2"
         stackSize={3}

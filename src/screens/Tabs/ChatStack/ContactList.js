@@ -21,6 +21,7 @@ export default function ContactList() {
     fetchLikedProfiles();
   }, []);
 
+
   const fetchLikedProfiles = async () => {
     try {
       const docRef = doc(firestore, 'likedProfiles', currentUser);
