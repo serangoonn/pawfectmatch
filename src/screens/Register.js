@@ -1,4 +1,4 @@
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Alert, Image, ImageBackground, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import MyTextInput from "../components/MyTextInput";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -22,8 +22,7 @@ export default function Register() {
     // ..
   })
   .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
+    Alert.alert("Error", "Invalid email address or password");
     // ..
   });
   }

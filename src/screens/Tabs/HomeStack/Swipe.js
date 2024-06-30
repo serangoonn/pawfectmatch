@@ -3,7 +3,7 @@ import { ImageBackground, StyleSheet, Text, View, Image, Alert, TouchableOpacity
 import Swiper from 'react-native-deck-swiper';
 import { useNavigation } from '@react-navigation/core';
 import { firestore } from '../../../utils/firebase';
-import { collection, setDoc, getDocs, doc, arrayUnion } from 'firebase/firestore';
+import { collection, setDoc, getDocs, getDoc, doc, arrayUnion } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 
 export default function Swipe() {
@@ -234,6 +234,9 @@ export default function Swipe() {
           },
           { merge: true }
         );
+        if (swiperRef.current) {
+          swiperRef.current.swipeLeft();
+        }
       } catch (error) {
         console.error("Error star-ing profile: ", error);
       }

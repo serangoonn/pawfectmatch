@@ -5,7 +5,7 @@ import { doc, getDoc, collection, query, orderBy, onSnapshot, addDoc } from 'fir
 import { firestore } from '../../../utils/firebase';
 import { useNavigation } from '@react-navigation/core';
 
-export default function ChatPage({ route }) {
+export default function Chat({ route }) {
   const chatPartner = route.params.profile;
   useEffect(() => {
     console.log('Chat partner:', chatPartner);

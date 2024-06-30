@@ -1,6 +1,6 @@
 //login screen 
 
-import { Image, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
+import { Alert, Image, ImageBackground, StyleSheet, Text, View, TextInput, TouchableOpacity } from 'react-native';
 import { useState, useEffect } from 'react';
 import MyTextInput from "../components/MyTextInput";
 import { auth } from "../utils/firebase";
@@ -30,21 +30,11 @@ export default function Login() {
      // ..
    })
    .catch((error) => {
-     const errorCode = error.code;
-     const errorMessage = error.message;
+    Alert.alert("Error", "Username and/or password incorrect");
+
      // ..
    });
    }
-
-   //change the password
-   /*const handleForgotPassword = () => {
-    firebase.auth().sendPasswordResetEmail(email)
-    .then(() => {
-      alert("Password reset email sent")
-    }).catch((error) => {
-      alert(error)
-    })
-  }*/
 
 
    //navigation

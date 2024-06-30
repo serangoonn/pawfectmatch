@@ -1,4 +1,4 @@
-import { TextInput, Image, ImageBackground, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Alert, TextInput, Image, ImageBackground, StyleSheet, Text, TouchableOpacity } from 'react-native';
 import { useState } from 'react';
 import { auth } from "../utils/firebase";
 import { useNavigation } from '@react-navigation/core';
@@ -15,7 +15,8 @@ export default function ForgotPassword() {
       .then(() => {
         alert("Password reset email sent");
       }).catch((error) => {
-        alert(error.message);
+        Alert.alert("Error", "Invalid email address");
+
       });
   }
 

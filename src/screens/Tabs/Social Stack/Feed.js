@@ -24,7 +24,14 @@ export default function Feed() {
         // Determine where to fetch photoURL based on data structure
         if (data.userType === 'pet') {
           // Fetch from petprofile
-          photoURL = await getDownloadURL(ref(storage, `petprofile/${data.username}.jpg`));
+          const petProfileRef = doc(firestore, 'petProfiles', data.username);
+          const petProfileSnap = await getDoc(petProfileRef);
+          if (petProfileSnap.exists()) {
+            photoURL = petProfileSnap.data().imageUrl;
+          } else {
+            console.log(`No pet profile found for username ${data.username}`);
+            // You can set a default photoURL or handle as needed
+          }
         } else {
           // Fetch from userprofile (assuming userprofile contains photoURL)
           photoURL = data.photoURL; // Adjust this based on your actual data structure
@@ -37,6 +44,7 @@ export default function Feed() {
       console.error('Error fetching posts:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchPosts();

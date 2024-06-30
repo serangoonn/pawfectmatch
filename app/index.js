@@ -1,5 +1,7 @@
 //navigation between screens
 import { Image, Text } from 'react-native';
+//import React, { useState, useEffect } from 'react';
+//import { useNavigation } from '@react-navigation/core';
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginScreen from '../src/screens/Login';
@@ -26,6 +28,22 @@ import profileicon from '../app/icons/profileicon.png'
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+//const [tabBarVisible, setTabBarVisible] = useState(true);
+//const navigation = useNavigation();
+
+/*useEffect(() => {
+   const unsubscribe = navigation.addListener('state', (e) => {
+      const routeName = e.data.state.routes[e.data.state.index].name;
+
+      if (routeName === 'Swipe') {
+         setTabBarVisible(false);
+      } else {
+         setTabBarVisible(true);
+      }
+   });
+
+   return unsubscribe;
+}, [navigation]);*/
 
 const ChatStack = () => (
    <Stack.Navigator>
@@ -81,7 +99,9 @@ const HomeStack = () => (
 const HomeTabNavigator = () => (
     <Tab.Navigator 
       screenOptions={{
-      tabBarStyle: { backgroundColor: '#B39D7A' },
+      tabBarStyle: { backgroundColor: '#B39D7A',
+      //display: tabBarVisible ? 'flex': 'none' 
+      },
     }}
   >
         <Tab.Screen name = "HomeStack" component={HomeStack} 
