@@ -233,6 +233,13 @@ export default function CreateUserProfile() {
               onChangeText={setExpereincelevel}
           />
 
+          <Text style={{color: 'white', marginTop: 10}}> Breed Preference</Text>
+          <TextInput
+              style={styles.input}
+              value={breed}
+              onChangeText={setBreed}
+          />
+
           <Text style={{color: 'white'}}> Where do you live?</Text>
           <SelectList
          setSelected={setLocation}
@@ -257,14 +264,7 @@ export default function CreateUserProfile() {
           dropdownItemStyles={styles.dropdownItemStyles} 
          />
 
-          <Text style={{color: 'white', marginTop: 10}}> Breed Preference</Text>
-          <TextInput
-              style={styles.input}
-              value={breed}
-              onChangeText={setBreed}
-          />
-
-          <Text style={{color: 'white'}}> Characteristics you are looking for </Text>
+          <Text style={{color: 'white', marginTop: 10}}> Characteristics you are looking for </Text>
           <MultipleSelectList 
           setSelected={(val) => setFixedCharacteristics(val)} 
           data={characteristicsOptions} 

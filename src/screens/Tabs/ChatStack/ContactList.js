@@ -1,5 +1,3 @@
-// search contact function not done up
-
 import React, { useEffect, useState } from 'react';
 import { RefreshControl, ImageBackground, View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -21,7 +19,6 @@ export default function ContactList() {
     fetchLikedProfiles();
   }, []);
 
-
   const fetchLikedProfiles = async () => {
     try {
       const docRef = doc(firestore, 'likedProfiles', currentUser);
@@ -40,7 +37,7 @@ export default function ContactList() {
     navigation.navigate('Chat', { profile });
   };
 
-  const onRefresh = async () => {
+  const refreshData = async () => {
     setRefreshing(true);
     await fetchLikedProfiles();
     setRefreshing(false);
@@ -49,36 +46,40 @@ export default function ContactList() {
   return (
     <View style={styles.container}>
       <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
-      style={styles.background}
-    >
+        source={require('../HomeStack/images/lightbrown.png')}
+        style={styles.background}
+      >
         <Image 
-        source={require('../HomeStack/images/header.png')}
+          source={require('../HomeStack/images/header.png')}
         />
 
-        <MyTextInput 
-          style={styles.input}
-          placeholder={"Search for contact"}
-          //onChange={}
-        />
-
-      <FlatList
-        style={styles.accounts}
-        data={likedProfiles}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
-            <View style={styles.profile}>
-              <Image source={{ uri: item.imageUrl }} style={styles.profileImage} />
-              <Text style={styles.username}>{item.username}</Text>
-            </View>
+        <View style={styles.inputContainer}>
+          <MyTextInput 
+            style={styles.input}
+            placeholder={"Search for contact"}
+            // onChange={}
+          />
+          <TouchableOpacity onPress={refreshData}>
+            <Image source={require('../ChatStack/images/refresh.png')} />
           </TouchableOpacity>
-          
-        )}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-        }
-      />
+        </View>
+
+        <FlatList
+          style={styles.accounts}
+          data={likedProfiles}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
+              <View style={styles.profile}>
+                <Image source={{ uri: item.imageUrl }} style={styles.profileImage} />
+                <Text style={styles.username}>{item.username}</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={refreshData} />
+          }
+        />
       </ImageBackground>
     </View>
   );
@@ -87,6 +88,22 @@ export default function ContactList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginRight: 10,
   },
   profile: {
     flexDirection: 'row',
@@ -104,9 +121,9 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   background: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   accounts: {
     alignSelf: 'left'

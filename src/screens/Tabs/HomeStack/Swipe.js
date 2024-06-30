@@ -14,6 +14,13 @@ export default function Swipe() {
   const swiperRef = useRef(null); // Reference for Swiper component
   const [username, setUsername] = useState('');
 
+  // Get the current user ID
+  const auth = getAuth();
+  const currentUser = auth.currentUser ? auth.currentUser.uid : null;
+
+  // Refs to manage initial fetch
+  const likedProfilesFetched = useRef(false);
+  const starPetsFetched = useRef(false);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -25,23 +32,40 @@ export default function Swipe() {
     }
   }, []);
 
-  // Get the current user ID
-  const auth = getAuth();
-  const currentUser = auth.currentUser ? auth.currentUser.uid : null;
-
   useEffect(() => {
     fetchPetProfiles();
+    fetchStarPets();
   }, []);
 
   const fetchPetProfiles = async () => {
     try {
-      const petProfilesRef = collection(firestore, 'petProfiles');
-      const querySnapshot = await getDocs(petProfilesRef);
-      const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setPets(petsData);
-      setLoading(false);
+      if (!likedProfilesFetched.current) {
+        const petProfilesRef = collection(firestore, 'petProfiles');
+        const querySnapshot = await getDocs(petProfilesRef);
+        const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setPets(petsData);
+        setLoading(false);
+        likedProfilesFetched.current = true; // Set flag once fetched
+      }
     } catch (error) {
       console.error('Error fetching pet profiles: ', error);
+    }
+  };
+
+  const fetchStarPets = async () => {
+    try {
+      if (!starPetsFetched.current && username) {
+        const starPetsRef = doc(firestore, 'StarPets', username);
+        const docSnap = await getDoc(starPetsRef);
+        if (docSnap.exists()) {
+          const starPetsData = docSnap.data().profiles;
+          // Set starPets state if data exists
+          // Example: setStarPets(starPetsData);
+        }
+        starPetsFetched.current = true; // Set flag once fetched
+      }
+    } catch (error) {
+      console.error('Error fetching star pets: ', error);
     }
   };
 
@@ -231,70 +255,66 @@ export default function Swipe() {
   }
 
   return (
-<ImageBackground 
+    <ImageBackground 
       source={require('../HomeStack/images/lightbrown.png')}
       style={styles.background}
-      >
-  <Image 
+    >
+      <Image 
         source={require('../HomeStack/images/header.png')}
         style={{alignSelf: 'center'}}
-        />
-        <TouchableOpacity 
-    onPress={() => navigation.goBack()}>
-    <Image
-      source={require('../HomeStack/images/backbutton.png')}
-      style={styles.backbutton}
       />
+      <TouchableOpacity 
+        onPress={() => navigation.goBack()}
+      >
+        <Image
+          source={require('../HomeStack/images/backbutton.png')}
+          style={styles.backbutton}
+        />
       </TouchableOpacity>
 
-    <View>
-      <Swiper
-        ref={swiperRef}
-        cards={pets}
-        renderCard={(pet) => (
-          <View style={styles.card}>
-            {pet && pet.imageUrl ? (
-              <Image source={{ uri: pet.imageUrl }} style={styles.profileImage} />
-            ) : null}
-            {pet && (
-              <>
-                <Text style={styles.text}>Username: {pet.username}</Text>
-                <Text style={styles.text}>Location: {pet.location}</Text>
-                <Text style={styles.text}>Animal: {pet.animal}</Text>
-                <Text style={styles.text}>Breed: {pet.breed}</Text>
-                <Text style={styles.text}>Description: {pet.description}</Text>
-              </>
-            )}
-            <View style={styles.buttons}>
-              <TouchableOpacity onPress={handleUndo}>
-                <Image source={require('../HomeStack/images/undobutton.png')} />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={handleCancel}>
-                <Image source={require('../HomeStack/images/cancelbutton.png')} />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => handleLike(pet)}>
-                <Image source={require('../HomeStack/images/likebutton.png')} />
-              </TouchableOpacity>
-
-              <TouchableOpacity onPress={() => handleStar(pet)}>
-                <Image source={require('../HomeStack/images/starbutton.png')} />
-              </TouchableOpacity>
-
+      <View>
+        <Swiper
+          ref={swiperRef}
+          cards={pets}
+          renderCard={(pet) => (
+            <View style={styles.card}>
+              {pet && pet.imageUrl ? (
+                <Image source={{ uri: pet.imageUrl }} style={styles.profileImage} />
+              ) : null}
+              {pet && (
+                <>
+                  <Text style={styles.text}>Username: {pet.username}</Text>
+                  <Text style={styles.text}>Location: {pet.location}</Text>
+                  <Text style={styles.text}>Animal: {pet.animal}</Text>
+                  <Text style={styles.text}>Breed: {pet.breed}</Text>
+                  <Text style={styles.text}>Description: {pet.description}</Text>
+                </>
+              )}
+              <View style={styles.buttons}>
+                <TouchableOpacity onPress={handleUndo}>
+                  <Image source={require('../HomeStack/images/undobutton.png')} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={handleCancel}>
+                  <Image source={require('../HomeStack/images/cancelbutton.png')} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleLike(pet)}>
+                  <Image source={require('../HomeStack/images/likebutton.png')} />
+                </TouchableOpacity>
+                <TouchableOpacity onPress={() => handleStar(pet)}>
+                  <Image source={require('../HomeStack/images/starbutton.png')} />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        )}
-        onSwipedRight={(cardIndex) => handleLikeSwiped(pets[cardIndex])}
-        onSwipedLeft={() => {handleCancel}} // No operation needed here
-        cardIndex={0}
-        backgroundColor="#f2f2f2"
-        stackSize={3}
-      />
-    </View>
+          )}
+          onSwipedRight={(cardIndex) => handleLikeSwiped(pets[cardIndex])}
+          onSwipedLeft={() => {handleCancel}} // No operation needed here          cardIndex={0}
+          backgroundColor="#f2f2f2"
+          stackSize={3}
+        />
+      </View>
     </ImageBackground> 
-)};
-
+  );
+}
 
 const styles = StyleSheet.create({
   background: {

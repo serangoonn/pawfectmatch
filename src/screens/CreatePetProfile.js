@@ -214,6 +214,22 @@ import {
                 onChangeText={setPetName}
             />
 
+            <Text style={{color: 'white', marginTop: 10}}> Breed </Text>
+            <TextInput
+                style={styles.input}
+                value={breed}
+                onChangeText={setBreed}
+            />
+
+            <Text style={{color: 'white'}}> Description of pet</Text>
+            <TextInput
+                style={styles.input}
+                value={description}
+                onChangeText={setDescription}
+                placeholder="Include the age of your pet here."
+                placeholderTextColor="white" 
+            />
+
             <Text style={{color: 'white'}}> Location</Text>
             <SelectList
            setSelected={setLocation}
@@ -238,23 +254,7 @@ import {
             dropdownItemStyles={styles.dropdownItemStyles} 
            />
 
-            <Text style={{color: 'white', marginTop: 10}}> Breed </Text>
-            <TextInput
-                style={styles.input}
-                value={breed}
-                onChangeText={setBreed}
-            />
-
-            <Text style={{color: 'white'}}> Description of pet</Text>
-            <TextInput
-                style={styles.input}
-                value={description}
-                onChangeText={setDescription}
-                placeholder="Include the age of your pet here."
-                placeholderTextColor="white" 
-            />
-
-            <Text style={{color: 'white'}}> Characteristics of the pet </Text>
+            <Text style={{color: 'white', marginTop: 10}}> Characteristics of the pet </Text>
             <MultipleSelectList 
             setSelected={(val) => setFixedCharacteristics(val)} 
             data={characteristicsOptions} 
