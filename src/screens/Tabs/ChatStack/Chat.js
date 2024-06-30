@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Image, ImageBackground, Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { Image, ImageBackground, Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
 import { getAuth } from 'firebase/auth';
 import { doc, getDoc, collection, query, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
 import { firestore } from '../../../utils/firebase';
-import { useNavigation } from'@react-navigation/core';
-
+import { useNavigation } from '@react-navigation/core';
 
 export default function ChatPage({ route }) {
   const chatPartner = route.params.profile;
@@ -19,8 +18,6 @@ export default function ChatPage({ route }) {
   const [currentUserPhoto, setCurrentUserPhoto] = useState(null);
   const [partnerPhoto, setPartnerPhoto] = useState(null);
   const [partnerUsername, setPartnerUsername] = useState(null);
-
-
 
   // get current username and profile photo
   const auth = getAuth();
@@ -53,10 +50,9 @@ export default function ChatPage({ route }) {
         const petProfilesRef = doc(firestore, 'petProfiles', chatPartner);
         const petProfilesSnap = await getDoc(petProfilesRef);
         if (petProfilesSnap.exists()) {
-            setPartnerUsername(petProfilesSnap.data().username);
-
-            setPartnerPhoto(petProfilesSnap.data().imageUrl);
-            return;
+          setPartnerUsername(petProfilesSnap.data().username);
+          setPartnerPhoto(petProfilesSnap.data().imageUrl);
+          return;
         }
 
         console.log('Profile photo not found for chat partner:', chatPartner);
@@ -67,8 +63,6 @@ export default function ChatPage({ route }) {
 
     fetchPartnerPhoto();
   }, [chatPartner]);
-
-
 
   useEffect(() => {
     const chatDocId = [username, chatPartner].sort().join('_');
@@ -88,19 +82,18 @@ export default function ChatPage({ route }) {
 
   const sendMessage = async () => {
     if (newMessage.trim() === '') return;
-  
+
     const chatDocId = [username, chatPartner].sort().join('_');
-  
+
     try {
-        const docRef = await addDoc(collection(firestore, 'messages', chatDocId, 'chat'), {
-            text: newMessage,
-            sender: username, // Ensure this is correct
-            timestamp: new Date(),
-        });
-          
-  
+      const docRef = await addDoc(collection(firestore, 'messages', chatDocId, 'chat'), {
+        text: newMessage,
+        sender: username, // Ensure this is correct
+        timestamp: new Date(),
+      });
+
       console.log('Message sent successfully with ID:', docRef.id);
-  
+
       setNewMessage(''); // Clear input field after sending message
     } catch (error) {
       console.error('Error sending message:', error);
@@ -126,59 +119,65 @@ export default function ChatPage({ route }) {
   };
 
   return (
-    <View style={styles.container}>
-        <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
-      style={styles.background}
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingContainer}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
     >
-        <Image 
-        style={{alignSelf: 'center'}}
-        source={require('../HomeStack/images/header.png')}
-        />
+      <View style={styles.container}>
+        <ImageBackground
+          source={require('../HomeStack/images/lightbrown.png')}
+          style={styles.background}
+        >
+          <Image
+            style={{ alignSelf: 'center' }}
+            source={require('../HomeStack/images/header.png')}
+          />
 
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../HomeStack/images/backbutton.png')}
+                style={styles.backbutton}
+              />
+            </TouchableOpacity>
 
-        <TouchableOpacity 
-        onPress={() => navigation.goBack()}>
-        <Image
-          source={require('../HomeStack/images/backbutton.png')}
-          style={styles.backbutton}
-        />
-      </TouchableOpacity>
+            <Image source={{ uri: partnerPhoto }} style={styles.profileImageTop} />
+            <Text style={styles.usernameTop}>{partnerUsername} </Text>
+          </View>
 
-      <Image source={{ uri: partnerPhoto }} style={styles.profileImageTop} />
-      <Text style={styles.usernameTop}>{partnerUsername} </Text>  
+          <View style={{ height: 1, backgroundColor: '#7D5F26', marginTop: 10 }} />
+
+          <FlatList
+            data={messages}
+            renderItem={renderItem}
+            keyExtractor={(item) => item.id}
+            style={styles.messagesList}
+          />
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              value={newMessage}
+              onChangeText={setNewMessage}
+              placeholder="Type a message"
+            />
+            <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
       </View>
-
-      <View style={{ height: 1, backgroundColor: '#7D5F26', marginTop: 10}} />
-
-
-      <FlatList
-        data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        style={styles.messagesList}
-        inverted  // To display messages from bottom to top (typical chat app behavior)
-      />
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          value={newMessage}
-          onChangeText={setNewMessage}
-          placeholder="Type a message"
-        />
-        <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
-      </View>
-      </ImageBackground>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  keyboardAvoidingContainer: {
+    flex: 1,
+    backgroundColor: '#EDD7B5', // Adjust the color to match your app's theme
   },
   messagesList: {
     flex: 1,
@@ -264,7 +263,7 @@ const styles = StyleSheet.create({
   backbutton: {
     alignSelf: 'left',
     marginLeft: 5,
-    marginTop: 10,           
+    marginTop: 10,
   },
   usernameTop: {
     fontSize: 30,
