@@ -63,6 +63,11 @@ const HomeStack = () => (
          headerShown: false,
          }}
          />
+         <Stack.Screen name = "ContactList" component={ContactListScreen} 
+      options ={{ 
+         headerShown: false,
+         }}
+         />
    </Stack.Navigator>
 )
 
