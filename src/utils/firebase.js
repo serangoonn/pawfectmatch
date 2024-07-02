@@ -31,10 +31,10 @@ const firebaseConfig = {
 // Initialize Firebase
 // for login/signup
 const app = initializeApp(firebaseConfig);
-//const auth = getAuth(app);
-const auth = initializeAuth(app, {
+const auth = getAuth(app);
+/*const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(ReactNativeAsyncStorage)
-});
+});*/
 
 
 // for forgot password
