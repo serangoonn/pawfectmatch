@@ -1,18 +1,37 @@
-import React, { useEffect, useState } from 'react';
-import { Image, ImageBackground, Text, View, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
-import { getAuth } from 'firebase/auth';
-import { doc, getDoc, collection, query, orderBy, onSnapshot, addDoc } from 'firebase/firestore';
-import { firestore } from '../../../utils/firebase';
-import { useNavigation } from '@react-navigation/core';
+import React, { useEffect, useState } from "react";
+import {
+  Image,
+  ImageBackground,
+  Text,
+  View,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+} from "react-native";
+import { getAuth } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  addDoc,
+} from "firebase/firestore";
+import { firestore } from "../../../utils/firebase";
+import { useNavigation } from "@react-navigation/core";
 
 export default function Chat({ route }) {
   const chatPartner = route.params.profile;
   useEffect(() => {
-    console.log('Chat partner:', chatPartner);
+    console.log("Chat partner:", chatPartner);
   }, [chatPartner]);
   const [messages, setMessages] = useState([]);
-  const [newMessage, setNewMessage] = useState('');
-  const [username, setUsername] = useState('');
+  const [newMessage, setNewMessage] = useState("");
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const navigation = useNavigation();
   const [currentUserPhoto, setCurrentUserPhoto] = useState(null);
@@ -39,7 +58,7 @@ export default function Chat({ route }) {
     const fetchPartnerPhoto = async () => {
       try {
         // Check in userProfiles collection
-        const userProfilesRef = doc(firestore, 'userProfiles', chatPartner);
+        const userProfilesRef = doc(firestore, "userProfiles", chatPartner);
         const userProfilesSnap = await getDoc(userProfilesRef);
         if (userProfilesSnap.exists()) {
           setPartnerPhoto(userProfilesSnap.data().imageUrl);
@@ -47,7 +66,7 @@ export default function Chat({ route }) {
         }
 
         // Check in petProfiles collection
-        const petProfilesRef = doc(firestore, 'petProfiles', chatPartner);
+        const petProfilesRef = doc(firestore, "petProfiles", chatPartner);
         const petProfilesSnap = await getDoc(petProfilesRef);
         if (petProfilesSnap.exists()) {
           setPartnerUsername(petProfilesSnap.data().username);
@@ -55,9 +74,9 @@ export default function Chat({ route }) {
           return;
         }
 
-        console.log('Profile photo not found for chat partner:', chatPartner);
+        console.log("Profile photo not found for chat partner:", chatPartner);
       } catch (error) {
-        console.error('Error fetching profile photo for chat partner:', error);
+        console.error("Error fetching profile photo for chat partner:", error);
       }
     };
 
@@ -65,9 +84,9 @@ export default function Chat({ route }) {
   }, [chatPartner]);
 
   useEffect(() => {
-    const chatDocId = [username, chatPartner].sort().join('_');
-    const chatRef = collection(firestore, 'messages', chatDocId, 'chat');
-    const q = query(chatRef, orderBy('timestamp'));
+    const chatDocId = [username, chatPartner].sort().join("_");
+    const chatRef = collection(firestore, "messages", chatDocId, "chat");
+    const q = query(chatRef, orderBy("timestamp"));
 
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const messagesList = [];
@@ -81,38 +100,51 @@ export default function Chat({ route }) {
   }, [chatPartner, username]);
 
   const sendMessage = async () => {
-    if (newMessage.trim() === '') return;
+    if (newMessage.trim() === "") return;
 
-    const chatDocId = [username, chatPartner].sort().join('_');
+    const chatDocId = [username, chatPartner].sort().join("_");
 
     try {
-      const docRef = await addDoc(collection(firestore, 'messages', chatDocId, 'chat'), {
-        text: newMessage,
-        sender: username, // Ensure this is correct
-        timestamp: new Date(),
-      });
+      const docRef = await addDoc(
+        collection(firestore, "messages", chatDocId, "chat"),
+        {
+          text: newMessage,
+          sender: username, // Ensure this is correct
+          timestamp: new Date(),
+        }
+      );
 
-      console.log('Message sent successfully with ID:', docRef.id);
+      console.log("Message sent successfully with ID:", docRef.id);
 
-      setNewMessage(''); // Clear input field after sending message
+      setNewMessage(""); // Clear input field after sending message
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error("Error sending message:", error);
     }
   };
 
   const renderItem = ({ item }) => {
     const isCurrentUser = item.sender === username;
     return (
-      <View style={[styles.messageContainer, isCurrentUser ? styles.currentUser : styles.otherUser]}>
+      <View
+        style={[
+          styles.messageContainer,
+          isCurrentUser ? styles.currentUser : styles.otherUser,
+        ]}
+      >
         {!isCurrentUser && partnerPhoto && (
           <Image source={{ uri: partnerPhoto }} style={styles.profileImage} />
         )}
         <View style={styles.messageContent}>
           <Text style={styles.messageText}>{item.text}</Text>
-          <Text style={styles.messageTimestamp}>{item.timestamp.toDate().toLocaleTimeString()}</Text>
+          <Text style={styles.messageTimestamp}>
+            {item.timestamp.toDate().toLocaleTimeString()}
+          </Text>
         </View>
         {isCurrentUser && currentUserPhoto && (
-          <Image source={{ uri: currentUserPhoto }} style={styles.profileImage} />
+          <Image
+            source={{ uri: currentUserPhoto }}
+            style={styles.profileImage}
+          />
         )}
       </View>
     );
@@ -121,32 +153,37 @@ export default function Chat({ route }) {
   return (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingContainer}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 50 : 0}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
     >
       <View style={styles.container}>
         <ImageBackground
-          source={require('../HomeStack/images/lightbrown.png')}
+          source={require("../HomeStack/images/lightbrown.png")}
           style={styles.background}
         >
           <Image
-            style={{ alignSelf: 'center' }}
-            source={require('../HomeStack/images/header.png')}
+            style={{ alignSelf: "center" }}
+            source={require("../HomeStack/images/header.png")}
           />
 
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
-                source={require('../HomeStack/images/backbutton.png')}
+                source={require("../HomeStack/images/backbutton.png")}
                 style={styles.backbutton}
               />
             </TouchableOpacity>
 
-            <Image source={{ uri: partnerPhoto }} style={styles.profileImageTop} />
+            <Image
+              source={{ uri: partnerPhoto }}
+              style={styles.profileImageTop}
+            />
             <Text style={styles.usernameTop}>{partnerUsername} </Text>
           </View>
 
-          <View style={{ height: 1, backgroundColor: '#7D5F26', marginTop: 10 }} />
+          <View
+            style={{ height: 1, backgroundColor: "#7D5F26", marginTop: 10 }}
+          />
 
           <FlatList
             data={messages}
@@ -177,23 +214,23 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingContainer: {
     flex: 1,
-    backgroundColor: '#EDD7B5', // Adjust the color to match your app's theme
+    backgroundColor: "#EDD7B5", // Adjust the color to match your app's theme
   },
   messagesList: {
     flex: 1,
     padding: 10,
   },
   messageContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
+    flexDirection: "row",
+    alignItems: "flex-end",
     marginVertical: 5,
     paddingHorizontal: 10,
   },
   currentUser: {
-    justifyContent: 'flex-end',
+    justifyContent: "flex-end",
   },
   otherUser: {
-    justifyContent: 'flex-start',
+    justifyContent: "flex-start",
   },
   messageText: {
     fontSize: 16,
@@ -201,20 +238,20 @@ const styles = StyleSheet.create({
   },
   messageTimestamp: {
     fontSize: 12,
-    color: '#888',
+    color: "#888",
   },
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 10,
     paddingVertical: 5,
     borderTopWidth: 1,
-    borderTopColor: '#ccc',
+    borderTopColor: "#ccc",
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -222,20 +259,20 @@ const styles = StyleSheet.create({
   },
   sendButton: {
     marginLeft: 10,
-    backgroundColor: '#007BFF',
+    backgroundColor: "#007BFF",
     borderRadius: 5,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 15,
   },
   sendButton: {
-    backgroundColor: '#007BFF',
+    backgroundColor: "#007BFF",
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
-    justifyContent: 'center',
+    justifyContent: "center",
   },
   sendButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
   profileImage: {
@@ -257,11 +294,11 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     //alignItems: 'center',
   },
   backbutton: {
-    alignSelf: 'left',
+    alignSelf: "left",
     marginLeft: 5,
     marginTop: 10,
   },
@@ -269,6 +306,5 @@ const styles = StyleSheet.create({
     fontSize: 30,
     //fontWeight: 'bold',
     marginLeft: 10,
-
-  }
+  },
 });
