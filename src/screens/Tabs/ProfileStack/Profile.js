@@ -51,7 +51,9 @@ export default function Profile() {
           setBreed(userData.breed || '');
           setLocation(userData.location || '');
           setAnimal(userData.animal || '');
-          setCharacteristics(userData.characteristics || '');
+          setCharacteristics(userData.fixedCharacteristics || '');
+          setPetname(''); // Clear pet profile fields
+          setDescription('');
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
           setImage(petData.imageUrl || '');
@@ -60,7 +62,8 @@ export default function Profile() {
           setDescription(petData.description || '');
           setLocation(petData.location || '');
           setAnimal(petData.animal || '');
-          setCharacteristics(petData.characteristics || '');
+          setCharacteristics(petData.fixedCharacteristics || '');
+          setExperiencelevel(''); // Clear user profile fields
         } else {
           console.log("No profile found!");
         }
@@ -90,17 +93,16 @@ export default function Profile() {
       <Text style={{alignSelf: 'center', marginRight: 110, fontSize: 30, marginLeft: 10}}
       >@{username}</Text>
       {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
-
       </View>
 
-
-      <Text style={styles.font}>Experience Level: {experiencelevel}</Text>
-      <Text style={styles.font}>Breed: {breed}</Text>
-      <Text style={styles.font}>Location: {location}</Text>
-      <Text style={styles.font}>Animal: {animal}</Text>
-      <Text style={styles.font}>Characteristics: {characteristics}</Text>
+      {experiencelevel ? <Text style={styles.font}>Experience Level: {experiencelevel}</Text> : null}
+      {breed ? <Text style={styles.font}>Breed: {breed}</Text> : null}
+      {location ? <Text style={styles.font}>Location: {location}</Text> : null}
+      {animal ? <Text style={styles.font}>Animal: {animal}</Text> : null}
+      {characteristics? <Text style={styles.font}>Characteristics: {characteristics}</Text> : null}
       {petname ? <Text style={styles.font}>Pet Name: {petname}</Text> : null}
       {description ? <Text style={styles.font}>Description: {description}</Text> : null}
+
       <TouchableOpacity onPress={handleSignOut} style={styles.button}>
         <Text style={styles.buttonText}>Sign Out</Text>
       </TouchableOpacity>
@@ -136,3 +138,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+
+/*  <Text style={styles.font}>Experience Level: {experiencelevel}</Text>
+    <Text style={styles.font}>Breed: {breed}</Text>
+    <Text style={styles.font}>Location: {location}</Text>
+    <Text style={styles.font}>Animal: {animal}</Text>
+    <Text style={styles.font}>Characteristics: {fixedCharacteristics}</Text>
+    {petname ? <Text style={styles.font}>Pet Name: {petname}</Text> : null}
+    {description ? <Text style={styles.font}>Description: {description}</Text> : null}  */
