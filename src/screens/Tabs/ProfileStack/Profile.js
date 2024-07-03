@@ -1,9 +1,9 @@
-import { Image, ImageBackground, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageBackground, StyleSheet, Text, View, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/core';
 import { firestore, storage, auth } from '../../../utils/firebase';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, deleteDoc } from 'firebase/firestore';
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -16,6 +16,17 @@ export default function Profile() {
   const [animal, setAnimal] = useState('');
   const [experiencelevel, setExperiencelevel] = useState('');
   const [characteristics, setCharacteristics] = useState('');
+  const [isUserProfile, setIsUserProfile] = useState(true); 
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleUpdateProfile = () => {
+    setIsEditing(true); // Set editing mode
+    if (isUserProfile) {
+      navigation.navigate('CreateUserProfile', { isEditing: true }); // Navigate to edit user profile
+    } else {
+      navigation.navigate('CreatePetProfile', { isEditing: true }); // Navigate to edit pet profile
+    }
+  };
 
   const handleSignOut = () => {
     auth
@@ -24,6 +35,23 @@ export default function Profile() {
         navigation.replace("Login");
       })
       .catch(error => alert(error.message));
+  };
+
+  const handleDeleteProfile = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const username = user.displayName;
+        if (isUserProfile) {
+          await deleteDoc(doc(firestore, 'userProfiles', username));
+        } else {
+          await deleteDoc(doc(firestore, 'petProfiles', username));
+        }
+        navigation.replace('Login'); // Redirect to login after deletion
+      }
+    } catch (error) {
+      console.error("Error deleting profile: ", error);
+    }
   };
 
   useEffect(() => {
@@ -46,6 +74,7 @@ export default function Profile() {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+          setIsUserProfile(true); // Set profile type to user
           setImage(userData.imageUrl || '');
           setExperiencelevel(userData.experiencelevel || '');
           setBreed(userData.breed || '');
@@ -56,6 +85,7 @@ export default function Profile() {
           setDescription('');
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
+          setIsUserProfile(false); // Set profile type to pet
           setImage(petData.imageUrl || '');
           setPetname(petData.petname || '');
           setBreed(petData.breed || '');
@@ -84,29 +114,85 @@ export default function Profile() {
         source={require('../HomeStack/images/header.png')}
         style={{alignSelf: 'center'}}
       />
-    <View >
-      <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}
-      >My Profile
-      </Text>
+      <View>
+        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
+          My Profile
+        </Text>
 
-      <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-      <Text style={{alignSelf: 'center', marginRight: 110, fontSize: 30, marginLeft: 10}}
-      >@{username}</Text>
-      {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
+        <View style={{flexDirection: 'row', justifyContent: 'left'}}>
+          <Text style={{alignSelf: 'center', marginRight: 110, fontSize: 30, fontWeight: 'bold', marginLeft: 10}}>
+            @{username}
+          </Text>
+          {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
+        </View>
+
+        {experiencelevel ? (
+          <Text>
+            <Text style={styles.boldFont}>Experience Level:</Text>
+            <Text style={styles.font}>{experiencelevel}</Text>          
+          </Text>
+        ) : null}
+        {breed ? (
+          <Text>
+            <Text style={styles.boldFont}>Breed:</Text>
+            <Text style={styles.font}>{breed}</Text>
+          </Text>
+        ) : null}
+        {location ? (
+          <Text>
+            <Text style={styles.boldFont}>Location:</Text>
+            <Text style={styles.font}>{location}</Text>
+          </Text>
+        ) : null}
+        {animal ? (
+          <Text>
+            <Text style={styles.boldFont}>Animal:</Text>
+            <Text style={styles.font}>{animal}</Text>
+          </Text>
+        ) : null}
+        {characteristics.length > 0 ? (
+          <View>
+            <Text style={styles.boldFont}>
+              {isUserProfile ? "Characteristics I'm looking for: " : "Characteristics I have: "}
+            </Text>
+            <View style={styles.characteristicsContainer}>
+              {characteristics.map((item, index) => (
+                <View key={index} style={styles.characteristicBox}>
+                  <Text style={styles.characteristicText}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        ) : null}
+        {petname ? (
+          <Text>
+            <Text style={styles.boldFont}>Pet Name:</Text>
+            <Text style={styles.font}>{petname}</Text>
+          </Text>
+        ) : null}
+        {description ? (
+          <Text>
+            <Text style={styles.boldFont}>Description:</Text>
+            <Text style={styles.font}>{description}</Text>
+          </Text>
+        ) : null}
+
+        <TouchableOpacity onPress={handleUpdateProfile} style={styles.button}>
+          <Text style={styles.buttonText}>Edit Profile</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={handleSignOut} style={styles.button}>
+          <Text style={styles.buttonText}>Sign Out</Text>
+        </TouchableOpacity>
+
+        <Text style={{fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 10, marginTop: 10}}>
+          Found your pet / pet has been adopted?
+        </Text>
+
+        <TouchableOpacity onPress={handleDeleteProfile} style={styles.button}>
+          <Text style={styles.buttonText}>Delete Profile</Text>
+        </TouchableOpacity>
       </View>
-
-      {experiencelevel ? <Text style={styles.font}>Experience Level: {experiencelevel}</Text> : null}
-      {breed ? <Text style={styles.font}>Breed: {breed}</Text> : null}
-      {location ? <Text style={styles.font}>Location: {location}</Text> : null}
-      {animal ? <Text style={styles.font}>Animal: {animal}</Text> : null}
-      {characteristics? <Text style={styles.font}>Characteristics: {characteristics}</Text> : null}
-      {petname ? <Text style={styles.font}>Pet Name: {petname}</Text> : null}
-      {description ? <Text style={styles.font}>Description: {description}</Text> : null}
-
-      <TouchableOpacity onPress={handleSignOut} style={styles.button}>
-        <Text style={styles.buttonText}>Sign Out</Text>
-      </TouchableOpacity>
-    </View>
     </ImageBackground>
   );
 }
@@ -115,13 +201,18 @@ const styles = StyleSheet.create({
   font: {
     fontsize: 20,
     marginLeft: 10,
-    padding: 5,
+    padding: 7,
+  },
+  boldFont: {
+    fontWeight: 'bold',
+    marginLeft: 10,
+    padding: 7,
   },
   button: {
-    backgroundColor: "lightblue",
+    backgroundColor: "#7D5F26",
     padding: 10,
     borderRadius: 20,
-    width: "60%",
+    width: "30%",
     marginLeft: 10,
   },
   buttonText: {
@@ -137,12 +228,18 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  characteristicsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginLeft: 10,
+  },
+  characteristicBox: {
+    backgroundColor: '#A78D5C',
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+  },
+  characteristicText: {
+    color: '#EDD7B5',
+  },
 });
-
-/*  <Text style={styles.font}>Experience Level: {experiencelevel}</Text>
-    <Text style={styles.font}>Breed: {breed}</Text>
-    <Text style={styles.font}>Location: {location}</Text>
-    <Text style={styles.font}>Animal: {animal}</Text>
-    <Text style={styles.font}>Characteristics: {fixedCharacteristics}</Text>
-    {petname ? <Text style={styles.font}>Pet Name: {petname}</Text> : null}
-    {description ? <Text style={styles.font}>Description: {description}</Text> : null}  */

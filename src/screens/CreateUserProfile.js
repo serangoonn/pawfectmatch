@@ -5,7 +5,7 @@ import {
   Image, SafeAreaView, TouchableOpacity
 } from 'react-native';
 import React, { useState, useEffect } from 'react';
-import { useNavigation } from '@react-navigation/core';
+import { useNavigation, useRoute } from '@react-navigation/core';
 import { firestore, storage } from '../utils/firebase';
 import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
 import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list';
@@ -15,9 +15,13 @@ import { getAuth, updateProfile, onAuthStateChanged } from 'firebase/auth';
 
 export default function CreateUserProfile() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const isEditing = route.params?.isEditing || false; 
+ 
   const [image, setImage] = useState('');
   const [username, setUsername] = useState('');
   const [location, setLocation] = useState('');
+
   const locationOptions = [
     { key: '1', value: 'North Region' },
     { key: '2', value: 'North East Region' },
@@ -52,6 +56,10 @@ export default function CreateUserProfile() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log('User is logged in:', user);
+        // Fetching existing user profile data
+        if (isEditing) {
+          fetchUserProfile(user.displayName || '');
+        }
       } else {
         console.log('User is not logged in');
         navigation.navigate('Login'); // Redirect to login page if not logged in
@@ -59,7 +67,29 @@ export default function CreateUserProfile() {
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+  }, [isEditing]);
+
+  const fetchUserProfile = async (username) => { // <-- Added function to fetch user profile
+    try {
+      const userDocRef = doc(firestore, 'userProfiles', username);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setUsername(userData.username || '');
+        setImage(userData.imageUrl || '');
+        setExperiencelevel(userData.experiencelevel || '');
+        setBreed(userData.breed || '');
+        setLocation(userData.location || '');
+        setAnimalType(userData.animal || '');
+        setFixedCharacteristics(userData.fixedCharacteristics || []);
+      } else {
+        console.log("No profile found!");
+      }
+    } catch (error) {
+      console.error("Error fetching profile: ", error);
+    }
+  };
 
   const validateFields = () => {
     if (!username || !experiencelevel || !location || !animal || !breed || !fixedCharacteristics.length || !image) {
@@ -74,7 +104,7 @@ export default function CreateUserProfile() {
     
       try {
         const isUsernameAvailable = await checkUsernameAvailability();
-        if (!isUsernameAvailable) {
+        if (!isUsernameAvailable && !isEditing) {
           alert('Username is already taken.');
           return;
         }
@@ -123,8 +153,7 @@ export default function CreateUserProfile() {
         alert('Error saving profile.');
       }
     };
-    
-
+  
     const checkUsernameAvailability = async () => {
       try {
         // Array to store promises for querying both collections
@@ -193,8 +222,6 @@ export default function CreateUserProfile() {
       return null;
     }
   };
-
-
 
   return (
     <ImageBackground

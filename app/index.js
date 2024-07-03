@@ -96,6 +96,26 @@ const HomeStack = () => (
    </Stack.Navigator>
 )
 
+const ProfileStack = () => (
+   <Stack.Navigator>
+      <Stack.Screen name = "Profile" component={ProfileScreen} 
+      options={{ 
+         headerShown: false,
+         }} 
+         />
+      <Stack.Screen name = "CreateUserProfile" component={CreateUserProfile} 
+         options={{ 
+            headerShown: false,
+         }} 
+         />
+      <Stack.Screen name = "CreatePetProfile" component={CreatePetProfile} 
+         options={{ 
+            headerShown: false,
+         }} 
+         />
+   </Stack.Navigator>
+);
+
 const HomeTabNavigator = () => (
     <Tab.Navigator 
       screenOptions={{
@@ -137,7 +157,7 @@ const HomeTabNavigator = () => (
          ),
          }}
          />
-        <Tab.Screen name = "Profile" component={ProfileScreen} 
+        <Tab.Screen name = "ProfileStack" component={ProfileStack} 
         options ={{ 
          headerShown: false,
          tabBarLabel: () => (

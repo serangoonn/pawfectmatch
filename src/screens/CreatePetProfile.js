@@ -1,11 +1,11 @@
 // custom text font not working yet
 
-import {
+  import {
     Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput,
     Image, SafeAreaView, TouchableOpacity
   } from 'react-native';
   import React, { useState, useEffect } from 'react';
-  import { useNavigation } from '@react-navigation/core';
+  import { useNavigation, useRoute } from '@react-navigation/core';
   import { firestore, storage } from '../utils/firebase';
   import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
   import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list';
@@ -15,6 +15,9 @@ import {
   
   export default function CreatePetProfile() {
     const navigation = useNavigation();
+    const route = useRoute();
+    const { isEditing } = route.params?.isEditing || false; 
+
     const [image, setImage] = useState('');
     const [username, setUsername] = useState('');
     const [petname, setPetName] = useState('');
@@ -53,6 +56,9 @@ import {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
         if (user) {
           console.log('User is logged in:', user);
+          if (isEditing) {
+            fetchUserProfile(user.displayName || '');
+          }
         } else {
           console.log('User is not logged in');
           navigation.navigate('Login'); // Redirect to login page if not logged in
@@ -60,7 +66,30 @@ import {
       });
   
       return () => unsubscribe(); // Cleanup subscription on unmount
-    }, []);
+    }, [isEditing]);
+
+    const fetchUserProfile = async (username) => {
+      try {
+        const petDocRef = doc(firestore, 'petProfiles', username);
+        const petDocSnap = await getDoc(petDocRef);
+        if (petDocSnap.exists()) {
+          const petData = petDocSnap.data();
+          setIsUserProfile(false); // Set profile type to pet
+          setImage(petData.imageUrl || '');
+          setPetname(petData.petname || '');
+          setBreed(petData.breed || '');
+          setDescription(petData.description || '');
+          setLocation(petData.location || '');
+          setAnimal(petData.animal || '');
+          setCharacteristics(petData.fixedCharacteristics || '');
+          setExperiencelevel(''); // Clear user profile fields 
+        } else {
+          console.log("No such document!");
+        }
+      } catch (error) {
+        console.error("Error fetching user profile: ", error);
+      }
+    };
   
     const validateFields = () => {
       if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
