@@ -1,34 +1,28 @@
 // custom text font not working yet
 
 import {
-  Alert,
-  ScrollView,
-  ImageBackground,
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Image,
-  SafeAreaView,
-  TouchableOpacity,
-} from "react-native";
-import React, { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/core";
-import { firestore, storage } from "../utils/firebase";
-import { collection, setDoc, getDocs, doc } from "firebase/firestore";
-import {
-  SelectList,
-  MultipleSelectList,
-} from "react-native-dropdown-select-list";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
-import * as ImagePicker from "expo-image-picker";
-import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
+  Alert, ScrollView, ImageBackground, StyleSheet, Text, View, TextInput,
+  Image, SafeAreaView, TouchableOpacity
+} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { useNavigation, useRoute } from '@react-navigation/core';
+import { firestore, storage } from '../utils/firebase';
+import { collection, setDoc, getDocs, doc } from 'firebase/firestore';
+import { SelectList, MultipleSelectList } from 'react-native-dropdown-select-list';
+import { uploadBytes, ref, getDownloadURL } from 'firebase/storage';
+import * as ImagePicker from 'expo-image-picker';
+import { getAuth, updateProfile, onAuthStateChanged } from 'firebase/auth';
 
 export default function CreateUserProfile() {
   const navigation = useNavigation();
-  const [image, setImage] = useState("");
-  const [username, setUsername] = useState("");
-  const [location, setLocation] = useState("");
+  const route = useRoute();
+  const isEditing = route.params?.isEditing || false; 
+ 
+  const [image, setImage] = useState('');
+  const [username, setUsername] = useState('');
+  const [location, setLocation] = useState('');
+
+
   const locationOptions = [
     { key: "1", value: "North Region" },
     { key: "2", value: "North East Region" },
@@ -62,7 +56,11 @@ export default function CreateUserProfile() {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        console.log("User is logged in:", user);
+        console.log('User is logged in:', user);
+        // Fetching existing user profile data
+        if (isEditing) {
+          fetchUserProfile(user.displayName || '');
+        }
       } else {
         console.log("User is not logged in");
         navigation.navigate("Login"); // Redirect to login page if not logged in
@@ -70,7 +68,29 @@ export default function CreateUserProfile() {
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+  }, [isEditing]);
+
+  const fetchUserProfile = async (username) => { // <-- Added function to fetch user profile
+    try {
+      const userDocRef = doc(firestore, 'userProfiles', username);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setUsername(userData.username || '');
+        setImage(userData.imageUrl || '');
+        setExperiencelevel(userData.experiencelevel || '');
+        setBreed(userData.breed || '');
+        setLocation(userData.location || '');
+        setAnimalType(userData.animal || '');
+        setFixedCharacteristics(userData.fixedCharacteristics || []);
+      } else {
+        console.log("No profile found!");
+      }
+    } catch (error) {
+      console.error("Error fetching profile: ", error);
+    }
+  };
 
   const validateFields = () => {
     if (
@@ -89,28 +109,83 @@ export default function CreateUserProfile() {
   };
 
   const handleSave = async () => {
-    if (!validateFields()) return;
-
-    try {
-      const isUsernameAvailable = await checkUsernameAvailability();
-      if (!isUsernameAvailable) {
-        alert("Username is already taken.");
-        return;
+      if (!validateFields()) return;
+    
+      try {
+        const isUsernameAvailable = await checkUsernameAvailability();
+        if (!isUsernameAvailable && !isEditing) {
+          alert('Username is already taken.');
+          return;
+        }
+    
+        const imageUrl = await submitData(); // Get the image URL from submitData
+        if (!imageUrl) {
+          alert('Failed to upload image.');
+          return;
+        }
+    
+        const auth = getAuth();
+        const user = auth.currentUser;
+        if (user) {
+          // Update the user profile in Firebase Authentication
+          await updateProfile(user, {
+            displayName: username,
+            photoURL: imageUrl,
+          });
+    
+          // Log user profile to verify
+          console.log('User displayName:', user.displayName);
+          console.log('User photoURL:', user.photoURL);
+    
+          // Save the user profile to Firestore with username as document ID
+          await setDoc(doc(firestore, 'userProfiles', username), {
+            uid: user.uid,
+            username,
+            experiencelevel,
+            location,
+            animal,
+            breed,
+            fixedCharacteristics,
+            imageUrl,
+          });
+    
+          alert('Profile saved successfully!');
+          navigation.reset({
+            index: 0,
+            routes: [{ name: 'PawfectMatch' }],
+          });
+        } else {
+          alert('User not logged in');
+        }
+      } catch (error) {
+        console.error("Error saving profile: ", error);
+        alert('Error saving profile.');
       }
-
-      const imageUrl = await submitData(); // Get the image URL from submitData
-      if (!imageUrl) {
-        alert("Failed to upload image.");
-        return;
-      }
-
-      const auth = getAuth();
-      const user = auth.currentUser;
-      if (user) {
-        // Update the user profile in Firebase Authentication
-        await updateProfile(user, {
-          displayName: username,
-          photoURL: imageUrl,
+    };
+  
+    const checkUsernameAvailability = async () => {
+      try {
+        // Array to store promises for querying both collections
+        const queries = [];
+    
+        // Query for 'userProfiles'
+        const userProfilesRef = collection(firestore, 'userProfiles');
+        queries.push(getDocs(userProfilesRef));
+    
+        // Query for 'petProfiles'
+        const petProfilesRef = collection(firestore, 'petProfiles');
+        queries.push(getDocs(petProfilesRef));
+    
+        // Await all queries
+        const results = await Promise.all(queries);
+    
+        // Extract usernames from query results
+        let existingUsernames = [];
+        results.forEach(querySnapshot => {
+          existingUsernames = [
+            ...existingUsernames,
+            ...querySnapshot.docs.map(doc => doc.data().username),
+          ];
         });
 
         // Log user profile to verify
