@@ -1,3 +1,4 @@
+
 import { Image, ImageBackground, StyleSheet, Text, View, TextInput } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
@@ -34,7 +35,7 @@ export default function Profile() {
       .then(() => {
         navigation.replace("Login");
       })
-      .catch(error => alert(error.message));
+      .catch((error) => alert(error.message));
   };
 
   const handleDeleteProfile = async () => {
@@ -57,8 +58,8 @@ export default function Profile() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || '');
-      fetchUserProfile(user.displayName || '');
+      setUsername(user.displayName || "");
+      fetchUserProfile(user.displayName || "");
     }
   }, []);
 
@@ -66,14 +67,15 @@ export default function Profile() {
     try {
       console.log("Fetching profile for username: ", username);
       if (username) {
-        const userDocRef = doc(firestore, 'userProfiles', username);
-        const petDocRef = doc(firestore, 'petProfiles', username);
+        const userDocRef = doc(firestore, "userProfiles", username);
+        const petDocRef = doc(firestore, "petProfiles", username);
 
         const userDocSnap = await getDoc(userDocRef);
         const petDocSnap = await getDoc(petDocRef);
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+          
           setIsUserProfile(true); // Set profile type to user
           setImage(userData.imageUrl || '');
           setExperiencelevel(userData.experiencelevel || '');
@@ -94,6 +96,7 @@ export default function Profile() {
           setAnimal(petData.animal || '');
           setCharacteristics(petData.fixedCharacteristics || '');
           setExperiencelevel(''); // Clear user profile fields
+
         } else {
           console.log("No profile found!");
         }
@@ -106,15 +109,16 @@ export default function Profile() {
   };
 
   return (
-    <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
+    <ImageBackground
+      source={require("../HomeStack/images/lightbrown.png")}
       style={styles.background}
     >
-      <Image 
-        source={require('../HomeStack/images/header.png')}
-        style={{alignSelf: 'center'}}
+      <Image
+        source={require("../HomeStack/images/header.png")}
+        style={{ alignSelf: "center" }}
       />
       <View>
+
         <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
           My Profile
         </Text>
@@ -192,6 +196,7 @@ export default function Profile() {
         <TouchableOpacity onPress={handleDeleteProfile} style={styles.button}>
           <Text style={styles.buttonText}>Delete Profile</Text>
         </TouchableOpacity>
+
       </View>
     </ImageBackground>
   );
@@ -217,7 +222,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    textAlign: "center"
+    textAlign: "center",
   },
   image: {
     width: 150,

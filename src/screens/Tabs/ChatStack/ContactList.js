@@ -1,10 +1,19 @@
-import React, { useEffect, useState } from 'react';
-import { RefreshControl, ImageBackground, View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
-import { firestore } from '../../../utils/firebase';
-import { doc, getDoc } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import MyTextInput from '@/src/components/MyTextInput';
+import React, { useEffect, useState } from "react";
+import {
+  RefreshControl,
+  ImageBackground,
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  FlatList,
+  TouchableOpacity,
+} from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { firestore } from "../../../utils/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+import MyTextInput from "@/src/components/MyTextInput";
 
 export default function ContactList() {
   const [likedProfiles, setLikedProfiles] = useState([]);
@@ -21,7 +30,7 @@ export default function ContactList() {
 
   const fetchLikedProfiles = async () => {
     try {
-      const docRef = doc(firestore, 'likedProfiles', currentUser);
+      const docRef = doc(firestore, "likedProfiles", currentUser);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setLikedProfiles(docSnap.data().profiles);
@@ -31,10 +40,10 @@ export default function ContactList() {
     } catch (error) {
       console.error("Error fetching liked profiles: ", error);
     }
-  };   
+  };
 
   const handleProfilePress = (profile) => {
-    navigation.navigate('Chat', { profile });
+    navigation.navigate("Chat", { profile });
   };
 
   const refreshData = async () => {
@@ -45,22 +54,20 @@ export default function ContactList() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground 
-        source={require('../HomeStack/images/lightbrown.png')}
+      <ImageBackground
+        source={require("../HomeStack/images/lightbrown.png")}
         style={styles.background}
       >
-        <Image 
-          source={require('../HomeStack/images/header.png')}
-        />
+        <Image source={require("../HomeStack/images/header.png")} />
 
         <View style={styles.inputContainer}>
-          <MyTextInput 
+          <MyTextInput
             style={styles.input}
             placeholder={"Search for contact"}
             // onChange={}
           />
           <TouchableOpacity onPress={refreshData}>
-            <Image source={require('../ChatStack/images/refresh.png')} />
+            <Image source={require("../ChatStack/images/refresh.png")} />
           </TouchableOpacity>
         </View>
 
@@ -71,7 +78,10 @@ export default function ContactList() {
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
               <View style={styles.profile}>
-                <Image source={{ uri: item.imageUrl }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: item.imageUrl }}
+                  style={styles.profileImage}
+                />
                 <Text style={styles.username}>{item.username}</Text>
               </View>
             </TouchableOpacity>
@@ -90,24 +100,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 10,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
     marginRight: 10,
   },
   profile: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   profileImage: {
@@ -122,10 +132,10 @@ const styles = StyleSheet.create({
   },
   background: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   accounts: {
-    alignSelf: 'left'
+    alignSelf: "left",
   },
 });
