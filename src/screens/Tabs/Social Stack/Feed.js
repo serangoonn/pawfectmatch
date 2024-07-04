@@ -20,6 +20,7 @@ export default function Feed() {
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
+  const [profilephoto, setProfilephoto] = useState("");
 
   const navigation = useNavigation();
 
@@ -29,25 +30,7 @@ export default function Feed() {
       const postsData = await Promise.all(
         querySnapshot.docs.map(async (doc) => {
           const data = doc.data();
-          let photoURL = "";
-
-          // Determine where to fetch photoURL based on data structure
-          if (data.userType === "pet") {
-            // Fetch from petprofile
-            const petProfileRef = doc(firestore, "petProfiles", data.username);
-            const petProfileSnap = await getDoc(petProfileRef);
-            if (petProfileSnap.exists()) {
-              photoURL = petProfileSnap.data().imageUrl;
-            } else {
-              console.log(`No pet profile found for username ${data.username}`);
-              // You can set a default photoURL or handle as needed
-            }
-          } else {
-            // Fetch from userprofile (assuming userprofile contains photoURL)
-            photoURL = data.photoURL; // Adjust this based on your actual data structure
-          }
-
-          return { id: doc.id, ...data, photoURL };
+          return { id: doc.id, ...data };
         })
       );
       setPosts(postsData);
@@ -70,6 +53,7 @@ export default function Feed() {
     const user = auth.currentUser;
     if (user) {
       setUsername(user.displayName || "");
+      setProfilephoto(user.imageUrl);
       setLoading(false);
     } else {
       setLoading(false);
@@ -90,7 +74,7 @@ export default function Feed() {
             <View style={styles.post}>
               <View style={styles.userInfo}>
                 <Image
-                  source={{ uri: item.photoURL }}
+                  source={{ uri: item.profilephoto }}
                   style={styles.userPhoto}
                 />
                 <Text style={styles.username}>@{item.username}</Text>

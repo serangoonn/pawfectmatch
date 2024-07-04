@@ -1,6 +1,4 @@
-// custom text font not working yet
-
-  import {
+import {
   Alert,
   ScrollView,
   ImageBackground,
@@ -13,7 +11,7 @@
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/core";
+import { useNavigation, useRoute } from "@react-navigation/core";
 import { firestore, storage } from "../utils/firebase";
 import { collection, setDoc, getDocs, doc } from "firebase/firestore";
 import {
@@ -23,89 +21,156 @@ import {
 import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
-  
-  export default function CreatePetProfile() {
-    const navigation = useNavigation();
-    const route = useRoute();
-    const { isEditing } = route.params?.isEditing || false; 
 
-    const [image, setImage] = useState('');
-    const [username, setUsername] = useState('');
-    const [petname, setPetName] = useState('');
-    const [location, setLocation] = useState('');
-    const locationOptions = [
-      { key: '1', value: 'North Region' },
-      { key: '2', value: 'North East Region' },
-      { key: '3', value: 'East Region' },
-      { key: '4', value: 'Central Region' },
-      { key: '5', value: 'West Region' },
-    ];
-    const [animal, setAnimalType] = useState('');
-    const animalOptions = [
-      { key: '1', value: 'Dog' },
-      { key: '2', value: 'Cat' },
-      { key: '3', value: 'Hamster' },
-      { key: '4', value: 'Fish' },
-      { key: '5', value: 'Bird' },
-      { key: '6', value: 'Rabbit' },
-    ];
-    const [breed, setBreed] = useState('');
-    const [description, setDescription] = useState('');
-    const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
-    const characteristicsOptions = [
-      { key: '1', value: 'small' },
-      { key: '2', value: 'big' },
-      { key: '3', value: 'active' },
-      { key: '4', value: 'playful' },
-      { key: '5', value: 'disciplined' },
-      { key: '6', value: 'quiet' },
-      { key: '7', value: 'open to rescue animals' },
-    ];
-  
-    useEffect(() => {
-      const auth = getAuth();
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (user) {
-          console.log('User is logged in:', user);
-          if (isEditing) {
-            (user.displayName || '');
-          }
-        } else {
-          console.log('User is not logged in');
-          navigation.navigate('Login'); // Redirect to login page if not logged in
-        }
-      });
-  
-      return () => unsubscribe(); // Cleanup subscription on unmount
-    }, [isEditing]);
+export default function CreatePetProfile() {
+  const navigation = useNavigation();
+  const route = useRoute();
+  const { isEditing } = route.params?.isEditing || false;
 
-    const fetchUserProfile = async (username) => {
-      try {
-        const petDocRef = doc(firestore, 'petProfiles', username);
-        const petDocSnap = await getDoc(petDocRef);
-        if (petDocSnap.exists()) {
-          const petData = petDocSnap.data();
-          setIsUserProfile(false); // Set profile type to pet
-          setImage(petData.imageUrl || '');
-          setPetname(petData.petname || '');
-          setBreed(petData.breed || '');
-          setDescription(petData.description || '');
-          setLocation(petData.location || '');
-          setAnimal(petData.animal || '');
-          setCharacteristics(petData.fixedCharacteristics || '');
-          setExperiencelevel(''); // Clear user profile fields 
-        } else {
-          console.log("No such document!");
+  const [image, setImage] = useState("");
+  const [username, setUsername] = useState("");
+  const [petname, setPetName] = useState("");
+  const [location, setLocation] = useState("");
+  const locationOptions = [
+    { key: "1", value: "North Region" },
+    { key: "2", value: "North East Region" },
+    { key: "3", value: "East Region" },
+    { key: "4", value: "Central Region" },
+    { key: "5", value: "West Region" },
+  ];
+  const [animal, setAnimalType] = useState("");
+  const animalOptions = [
+    { key: "1", value: "Dog" },
+    { key: "2", value: "Cat" },
+    { key: "3", value: "Hamster" },
+    { key: "4", value: "Fish" },
+    { key: "5", value: "Bird" },
+    { key: "6", value: "Rabbit" },
+  ];
+  const [breed, setBreed] = useState("");
+  const [description, setDescription] = useState("");
+  const [fixedCharacteristics, setFixedCharacteristics] = useState([]);
+  const characteristicsOptions = [
+    { key: "1", value: "small" },
+    { key: "2", value: "big" },
+    { key: "3", value: "active" },
+    { key: "4", value: "playful" },
+    { key: "5", value: "disciplined" },
+    { key: "6", value: "quiet" },
+    { key: "7", value: "open to rescue animals" },
+  ];
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User is logged in:", user);
+        if (isEditing) {
+          fetchUserProfile(user.displayName || "");
         }
-      } catch (error) {
-        console.error("Error fetching user profile: ", error);
+      } else {
+        console.log("User is not logged in");
+        navigation.navigate("Login"); // Redirect to login page if not logged in
       }
-    };
-  
-    const validateFields = () => {
-      if (!username || !petname || !location || !animal || !breed || !description || !fixedCharacteristics.length || !image) {
-        Alert.alert("Error", "All fields must be filled.");
-        return false;
+    });
+
+    return () => unsubscribe(); // Cleanup subscription on unmount
+  }, [isEditing]);
+
+  const fetchUserProfile = async (username) => {
+    try {
+      const petDocRef = doc(firestore, "petProfiles", username);
+      const petDocSnap = await getDoc(petDocRef);
+      if (petDocSnap.exists()) {
+        const petData = petDocSnap.data();
+        setIsUserProfile(false); // Set profile type to pet
+        setImage(petData.imageUrl || "");
+        setPetname(petData.petname || "");
+        setBreed(petData.breed || "");
+        setDescription(petData.description || "");
+        setLocation(petData.location || "");
+        setAnimal(petData.animal || "");
+        setCharacteristics(petData.fixedCharacteristics || "");
+        setExperiencelevel(""); // Clear user profile fields
+      } else {
+        console.log("No such document!");
+      }
+    } catch (error) {
+      console.error("Error fetching user profile: ", error);
+    }
+  };
+
+  const validateFields = () => {
+    if (
+      !username ||
+      !petname ||
+      !location ||
+      !animal ||
+      !breed ||
+      !description ||
+      !fixedCharacteristics.length ||
+      !image
+    ) {
+      Alert.alert("Error", "All fields must be filled.");
+      return false;
+    }
+    return true;
+  };
+  const handleSave = async () => {
+    if (!validateFields()) return;
+
+    try {
+      const isUsernameAvailable = await checkUsernameAvailability();
+      if (!isUsernameAvailable) {
+        alert("Username is already taken.");
+        return;
+      }
+
+      const imageUrl = await submitData(); // Get the image URL from submitData
+      if (!imageUrl) {
+        alert("Failed to upload image.");
+        return;
+      }
+
+      const auth = getAuth();
+      const user = auth.currentUser;
+      if (user) {
+        // Update the user profile in Firebase Authentication
+        await updateProfile(user, {
+          displayName: username,
+          photoURL: imageUrl,
+        });
+
+        // Log user profile to verify
+        console.log("User displayName:", user.displayName);
+        console.log("User photoURL:", user.photoURL);
+
+        // Save the user profile to Firestore with username as document ID
+        await setDoc(doc(firestore, "petProfiles", username), {
+          uid: user.uid,
+          username,
+          petname,
+          location,
+          animal,
+          breed,
+          description,
+          fixedCharacteristics,
+          imageUrl,
+        });
+
+        alert("Profile saved successfully!");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: "PawfectMatch" }],
+        });
+      } else {
+        alert("User not logged in");
+      }
+    } catch (error) {
+      console.error("Error saving profile: ", error);
+      alert("Error saving profile.");
+    }
+  };
 
   const checkUsernameAvailability = async () => {
     try {
@@ -174,7 +239,6 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
           </TouchableOpacity>
 
           {image && <Image source={{ uri: image }} style={styles.image} />}
-
           <Text style={{ color: "white" }}> Username</Text>
           <TextInput
             style={styles.input}

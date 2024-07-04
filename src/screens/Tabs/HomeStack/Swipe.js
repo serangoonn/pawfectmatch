@@ -17,6 +17,7 @@ import {
   getDocs,
   getDoc,
   doc,
+  updateDoc,
   arrayUnion,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -250,20 +251,18 @@ export default function Swipe() {
           "StarPets",
           username
         );
-        await setDoc(
-          currentUserLikedProfilesRef,
-          {
-            profiles: arrayUnion({
-              username: pet.username,
-              imageUrl: pet.imageUrl,
-              location: pet.location,
-              breed: pet.breed,
-              description: pet.description,
-              animal: pet.animal,
-            }),
-          },
-          { merge: true }
-        );
+        const petProfile = {
+          username: pet.username,
+          imageUrl: pet.imageUrl,
+          location: pet.location,
+          breed: pet.breed,
+          description: pet.description,
+          animal: pet.animal,
+        };
+        await updateDoc(currentUserLikedProfilesRef, {
+          [`profiles.${pet.username}`]: petProfile,
+        });
+
         if (swiperRef.current) {
           swiperRef.current.swipeLeft();
         }

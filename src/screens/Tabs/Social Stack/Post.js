@@ -17,26 +17,27 @@ import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/core";
 
 export default function Post() {
-  // Navigation
   const navigation = useNavigation();
 
-  // State variables
   const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [caption, setCaption] = useState("");
   const [loading, setLoading] = useState(true);
+  const [profilephoto, setProfilephoto] = useState("");
 
+  // authenticate user
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || "");
+      setUsername(user.displayName);
+      setProfilephoto(user.photoURL);
       setLoading(false);
     } else {
       setLoading(false);
     }
   }, []);
 
-  // Open gallery to select image
+  // open gallery to select image
   const handleImagePick = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -44,17 +45,16 @@ export default function Post() {
       aspect: [4, 3],
       quality: 1,
     });
-
     if (!result.canceled) {
       setImage(result.assets[0].uri);
     }
   };
 
-  // Uploads image onto Firebase storage
+  // uploads image onto Firebase storage
   const submitData = async () => {
     if (image && username && caption) {
       try {
-        const uniqueId = Date.now().toString(); // Generate a unique ID using the current timestamp
+        const uniqueId = Date.now().toString();
         const fileName =
           username + uniqueId + image.substring(image.lastIndexOf("."));
         const storageRef = ref(storage, `posts/${fileName}`);
@@ -69,6 +69,7 @@ export default function Post() {
           imageUrl: downloadURL,
           caption: caption,
           createdAt: new Date(),
+          profilephoto: profilephoto,
         });
 
         console.log("Document written with ID: ", docRef.id);
