@@ -1,4 +1,4 @@
-import { Image, ImageBackground, StyleSheet, Text, View, TextInput } from 'react-native';
+import { Image, ImageBackground, StyleSheet, Text, View, ScrollView, } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/core';
@@ -22,9 +22,31 @@ export default function Profile() {
   const handleUpdateProfile = () => {
     setIsEditing(true); // Set editing mode
     if (isUserProfile) {
-      navigation.navigate('CreateUserProfile', { isEditing: true }); // Navigate to edit user profile
+      // Pass user profile data when navigating
+      navigation.navigate('CreateUserProfile', {
+        profile: {
+          username,
+          image,
+          location,
+          breed,
+          animal,
+          experiencelevel,
+          characteristics
+        }
+      });
     } else {
-      navigation.navigate('CreatePetProfile', { isEditing: true }); // Navigate to edit pet profile
+      // Pass pet profile data when navigating
+      navigation.navigate('CreatePetProfile', {
+        profile: {
+          petname,
+          image,
+          location,
+          breed,
+          description,
+          animal,
+          characteristics
+        }
+      });
     }
   };
 
@@ -52,6 +74,10 @@ export default function Profile() {
     } catch (error) {
       console.error("Error deleting profile: ", error);
     }
+  };
+
+  const handleGiveReview = () => {
+    navigation.navigate('FeedbackRating');
   };
 
   useEffect(() => {
@@ -114,45 +140,51 @@ export default function Profile() {
         source={require('../HomeStack/images/header.png')}
         style={{alignSelf: 'center'}}
       />
-      <View>
-        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
+      <ScrollView>
+        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 5}}>
           My Profile
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-          <Text style={{alignSelf: 'center', marginRight: 110, fontSize: 30, fontWeight: 'bold', marginLeft: 10}}>
+          <Text style={{alignSelf: 'center', marginRight: 110, fontFamily: 'Inknut Antiqua Regular', fontSize: 30, fontWeight: 'bold', marginLeft: 15}}>
             @{username}
           </Text>
           {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
         </View>
 
-        {experiencelevel ? (
-          <Text>
-            <Text style={styles.boldFont}>Experience Level:</Text>
-            <Text style={styles.font}>{experiencelevel}</Text>          
-          </Text>
-        ) : null}
-        {breed ? (
-          <Text>
-            <Text style={styles.boldFont}>Breed:</Text>
-            <Text style={styles.font}>{breed}</Text>
-          </Text>
-        ) : null}
-        {location ? (
-          <Text>
-            <Text style={styles.boldFont}>Location:</Text>
-            <Text style={styles.font}>{location}</Text>
-          </Text>
-        ) : null}
-        {animal ? (
-          <Text>
-            <Text style={styles.boldFont}>Animal:</Text>
-            <Text style={styles.font}>{animal}</Text>
-          </Text>
-        ) : null}
+        <View style={styles.textContainer}>
+          {animal && (
+            <Text>
+              <Text style={styles.customBoldFont}>
+                {isUserProfile ? "Type of Animal Preference: " : "Type of Animal: "}
+              </Text>
+              <Text style={styles.customFont}>{animal}</Text>
+            </Text>
+          )}
+          {breed && (
+            <Text>
+              <Text style={styles.customBoldFont}>
+                {isUserProfile ? "Breed Preference: " : "Breed: "}
+              </Text>
+              <Text style={styles.customFont}>{breed}</Text>
+            </Text>
+          )}
+          {location && (
+            <Text>
+              <Text style={styles.customBoldFont}>Location: </Text>
+              <Text style={styles.customFont}>{location}</Text>
+            </Text>
+          )}
+          {experiencelevel && (
+            <Text>
+              <Text style={styles.customBoldFont}>Experience Level: </Text>
+              <Text style={styles.customFont}>{experiencelevel}</Text>
+            </Text>
+          )}
+        </View> 
         {characteristics.length > 0 ? (
           <View>
-            <Text style={styles.boldFont}>
+            <Text style={styles.customBoldFont}>
               {isUserProfile ? "Characteristics I'm looking for: " : "Characteristics I have: "}
             </Text>
             <View style={styles.characteristicsContainer}>
@@ -164,35 +196,51 @@ export default function Profile() {
             </View>
           </View>
         ) : null}
-        {petname ? (
-          <Text>
-            <Text style={styles.boldFont}>Pet Name:</Text>
-            <Text style={styles.font}>{petname}</Text>
-          </Text>
-        ) : null}
-        {description ? (
-          <Text>
-            <Text style={styles.boldFont}>Description:</Text>
-            <Text style={styles.font}>{description}</Text>
-          </Text>
-        ) : null}
+        <View style={styles.textContainer}>
+          {petname ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Pet Name: </Text>
+              <Text style={styles.customFont}>{petname}</Text>
+            </Text>
+          ) : null}
+          {description ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Description: </Text>
+              <Text style={styles.customFont}>{description}</Text>
+            </Text>
+          ) : null}
+        </View>
 
-        <TouchableOpacity onPress={handleUpdateProfile} style={styles.button}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleUpdateProfile} style={styles.buttons}>
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleSignOut} style={styles.button}>
-          <Text style={styles.buttonText}>Sign Out</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleSignOut} style={styles.buttons}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
 
-        <Text style={{fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 10, marginTop: 10}}>
+        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
           Found your pet / pet has been adopted?
         </Text>
 
-        <TouchableOpacity onPress={handleDeleteProfile} style={styles.button}>
+        <TouchableOpacity onPress={handleDeleteProfile} style={styles.deleteButton}>
           <Text style={styles.buttonText}>Delete Profile</Text>
         </TouchableOpacity>
-      </View>
+
+        {isUserProfile && (
+          <>
+            <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
+              Want to leave a review?
+            </Text>
+
+            <TouchableOpacity onPress={handleGiveReview} style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Give Review</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -208,16 +256,56 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 7,
   },
-  button: {
-    backgroundColor: "#7D5F26",
-    padding: 10,
-    borderRadius: 20,
-    width: "30%",
+  customFont: {
+    color: 'black',
+    fontSize: 16,
+    fontFamily: 'Inknut Antiqua Regular',
     marginLeft: 10,
+    textAlign: 'justify',
+    lineHeight: 30,
+    padding: 7,
+  },
+  customBoldFont: {
+    color: 'black',
+    fontSize: 18,
+    fontFamily: 'Inknut Antiqua Regular',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    textAlign: 'justify',
+    lineHeight: 30,
+    padding: 7,
+  },
+  deleteButton: {
+    backgroundColor: "#7D5F26",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    width: "40%",
+    marginLeft: 20,
+    marginHorizonatal: 50, 
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttons: {
+    backgroundColor: "#7D5F26",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    width: "90%",
+    marginLeft: 20,
+    marginHorizonatal: 50, 
+    justifyContent: 'center',
+    alignItems: 'center',  
   },
   buttonText: {
     color: "white",
-    textAlign: "center"
+    textAlign: 'center',
+    fontFamily: 'Inknut Antiqua Regular',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 10,
   },
   image: {
     width: 150,
@@ -232,6 +320,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     marginLeft: 10,
+    marginBottom: -5,
   },
   characteristicBox: {
     backgroundColor: '#A78D5C',
@@ -241,5 +330,11 @@ const styles = StyleSheet.create({
   },
   characteristicText: {
     color: '#EDD7B5',
+    fontFamily: 'Inknut Antiqua Regular',
+  },
+  textContainer:  {
+    padding: 10,
+    marginLeft: 8,
+    marginBottom: -17,
   },
 });

@@ -325,7 +325,6 @@ export default function CreateUserProfile() {
   );
 };
 
-
 const styles = StyleSheet.create({
   input: {
       height: 40,

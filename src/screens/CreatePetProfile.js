@@ -155,7 +155,6 @@
         }
       };
       
-  
     const checkUsernameAvailability = async () => {
       try {
         const userProfilesRef = collection(firestore, 'petProfiles');
@@ -204,8 +203,6 @@
       }
     };
   
-  
-
     return (
       <ImageBackground
       source={require('../images/createprofilesbackground.png')}
