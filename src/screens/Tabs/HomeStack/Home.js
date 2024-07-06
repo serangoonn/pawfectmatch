@@ -1,14 +1,24 @@
-import React, { useEffect, useState } from 'react';
-import { RefreshControl, FlatList, Image, ImageBackground, StyleSheet, Text, View, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { doc, getDoc } from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/core';
-import { firestore } from '../../../utils/firebase';
-import { getAuth } from 'firebase/auth';
+import React, { useEffect, useState } from "react";
+import {
+  RefreshControl,
+  FlatList,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  ActivityIndicator,
+} from "react-native";
+import { doc, getDoc } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/core";
+import { firestore } from "../../../utils/firebase";
+import { getAuth } from "firebase/auth";
 
 const Home = () => {
   const navigation = useNavigation();
   const [starredPets, setStarredPets] = useState([]);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -17,7 +27,7 @@ const Home = () => {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || '');
+      setUsername(user.displayName || "");
       setLoading(false);
     } else {
       setLoading(false);
@@ -29,7 +39,7 @@ const Home = () => {
       fetchStarredPets();
     }
   }, [username]);
-  
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchStarredPets();
@@ -40,11 +50,16 @@ const Home = () => {
     try {
       console.log("Fetching pets for username: ", username); // Debugging line
       if (username) {
-        const docRef = doc(firestore, 'StarPets', username);
+        const docRef = doc(firestore, "StarPets", username);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
           const profiles = docSnap.data().profiles || [];
-          setStarredPets(profiles.map((profile, index) => ({ ...profile, id: index.toString() })));
+          setStarredPets(
+            profiles.map((profile, index) => ({
+              ...profile,
+              id: index.toString(),
+            }))
+          );
         } else {
           console.log("No liked profiles found!");
         }
@@ -65,28 +80,28 @@ const Home = () => {
   }
 
   return (
-    <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
+    <ImageBackground
+      source={require("../HomeStack/images/lightbrown.png")}
       style={styles.background}
     >
-      <Image 
-        source={require('../HomeStack/images/header.png')}
-      />
+      <Image source={require("../HomeStack/images/header.png")} />
 
-      <Text style={{ marginTop: 10, alignSelf: 'flex-start', marginLeft: 10 }}>
+      <Text style={{ marginTop: 10, alignSelf: "flex-start", marginLeft: 10 }}>
         Welcome back!
       </Text>
 
-      <TouchableOpacity onPress={() => navigation.push('Swipe')}>
+      <TouchableOpacity onPress={() => navigation.push("Swipe")}>
         <Image
-          source={require('../HomeStack/images/adoptnowbutton.png')}
+          source={require("../HomeStack/images/adoptnowbutton.png")}
           style={styles.imageButtonAdoptNow}
         />
       </TouchableOpacity>
 
-      <View style={{ flex: 1, height: 1, backgroundColor: 'brown', marginTop: 20 }} />
+      <View
+        style={{ flex: 1, height: 1, backgroundColor: "brown", marginTop: 20 }}
+      />
 
-      <Text style={{ alignSelf: 'flex-start', marginLeft: 10 }}>
+      <Text style={{ alignSelf: "flex-start", marginLeft: 10 }}>
         Liked pets
       </Text>
 
@@ -96,19 +111,24 @@ const Home = () => {
         renderItem={({ item }) => (
           <TouchableOpacity>
             <View style={styles.profile}>
-              <Image source={{ uri: item.imageUrl }} style={styles.profileImage} />
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={styles.profileImage}
+              />
               <View style={styles.information}>
                 <Text style={styles.username}>username: {item.username}</Text>
                 <Text style={styles.username}>location: {item.location}</Text>
                 <Text style={styles.username}>animal type: {item.animal}</Text>
                 <Text style={styles.username}>breed: {item.breed}</Text>
-                <Text style={styles.username}>description: {item.description}</Text>
+                <Text style={styles.username}>
+                  description: {item.description}
+                </Text>
               </View>
             </View>
           </TouchableOpacity>
         )}
         ListEmptyComponent={() => (
-          <Text style={{ alignSelf: 'center', marginTop: 20 }}>
+          <Text style={{ alignSelf: "center", marginTop: 20 }}>
             No liked pets found.
           </Text>
         )}
@@ -127,12 +147,12 @@ export default Home;
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   imageButtonAdoptNow: {
     width: 330,
@@ -142,7 +162,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   petContainer: {
-    backgroundColor: '#EDD7B5',
+    backgroundColor: "#EDD7B5",
     padding: 10,
     marginVertical: 5,
     borderRadius: 10,
@@ -151,20 +171,20 @@ const styles = StyleSheet.create({
     width: 160,
     height: 150,
     borderRadius: 30,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 10,
   },
   accounts: {
-    alignSelf: 'flex-start'
+    alignSelf: "flex-start",
   },
   profile: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   information: {
-    flexDirection: 'column',
-    alignItems: 'flex-start',
+    flexDirection: "column",
+    alignItems: "flex-start",
   },
   profileImage: {
     width: 70,
@@ -175,6 +195,6 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 10,
-    alignSelf: 'flex-start',
+    alignSelf: "flex-start",
   },
 });
