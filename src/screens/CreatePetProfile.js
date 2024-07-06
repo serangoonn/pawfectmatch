@@ -132,10 +132,66 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
       if (!result.canceled) {
         setImage(result.assets[0].uri);
       }
-    } catch (error) {
-      console.error("Error picking image:", error);
-    }
-  };
+
+      return true;
+    };
+  
+    const handleSave = async () => {
+        if (!validateFields()) return;
+      
+        try {
+          const isUsernameAvailable = await checkUsernameAvailability();
+          if (!isUsernameAvailable) {
+            alert('Username is already taken.');
+            return;
+          }
+      
+          const imageUrl = await submitData(); // Get the image URL from submitData
+          if (!imageUrl) {
+            alert('Failed to upload image.');
+            return;
+          }
+      
+          const auth = getAuth();
+          const user = auth.currentUser;
+          if (user) {
+            // Update the user profile in Firebase Authentication
+            await updateProfile(user, {
+              displayName: username,
+              photoURL: imageUrl,
+            });
+      
+            // Log user profile to verify
+            console.log('User displayName:', user.displayName);
+            console.log('User photoURL:', user.photoURL);
+      
+            // Save the user profile to Firestore with username as document ID
+            await setDoc(doc(firestore, 'petProfiles', username), {
+              uid: user.uid,
+              username,
+              petname,
+              location,
+              animal,
+              breed,
+              description,
+              fixedCharacteristics,
+              imageUrl,
+            });
+      
+            alert('Profile saved successfully!');
+            navigation.reset({
+              index: 0,
+              routes: [{ name: 'PawfectMatch' }],
+            });
+          } else {
+            alert('User not logged in');
+          }
+        } catch (error) {
+          console.error("Error saving profile: ", error);
+          alert('Error saving profile.');
+        }
+      };
+ 
 
   const submitData = async () => {
     if (image && username) {
@@ -152,10 +208,8 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
         console.error("Error uploading image:", error);
         return null;
       }
-    } else {
-      return null;
+
     }
-  };
 
   return (
     <ImageBackground

@@ -18,7 +18,8 @@ import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
 import FeedScreen from '../src/screens/Tabs/Social Stack/Feed';
 import PostScreen from '../src/screens/Tabs/Social Stack/Post';
 import ForgotPasswordScreen from '../src/screens/ForgotPassword';
-import ChatScreen from '../src/screens/Tabs/ChatStack/Chat'
+import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
+import FeedbackRating from '../src/screens/Tabs/ProfileStack/FeedbackRating';
 
 //icons
 import homeicon from '../app/icons/homeicon.png'
@@ -112,6 +113,11 @@ const ProfileStack = () => (
          options={{ 
             headerShown: false,
          }} 
+         />
+      <Stack.Screen name = "FeedbackRating" component={FeedbackRating}
+         options={{
+            headerShown: false,
+         }}
          />
    </Stack.Navigator>
 );
