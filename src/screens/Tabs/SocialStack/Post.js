@@ -70,6 +70,8 @@ export default function Post() {
           caption: caption,
           createdAt: new Date(),
           profilephoto: profilephoto,
+          likes: [],
+          comments: [],
         });
 
         console.log("Document written with ID: ", docRef.id);

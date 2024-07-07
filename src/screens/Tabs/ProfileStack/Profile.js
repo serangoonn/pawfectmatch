@@ -1,31 +1,37 @@
-
-import { Image, ImageBackground, StyleSheet, Text, View, TextInput } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useNavigation } from '@react-navigation/core';
-import { firestore, storage, auth } from '../../../utils/firebase';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import {
+  Image,
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+} from "react-native";
+import React, { useEffect, useState } from "react";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { useNavigation } from "@react-navigation/core";
+import { firestore, storage, auth } from "../../../utils/firebase";
+import { doc, getDoc, deleteDoc } from "firebase/firestore";
 
 export default function Profile() {
   const navigation = useNavigation();
-  const [username, setUsername] = useState('');
-  const [image, setImage] = useState('');
-  const [location, setLocation] = useState('');
-  const [petname, setPetname] = useState('');
-  const [breed, setBreed] = useState('');
-  const [description, setDescription] = useState('');
-  const [animal, setAnimal] = useState('');
-  const [experiencelevel, setExperiencelevel] = useState('');
-  const [characteristics, setCharacteristics] = useState('');
-  const [isUserProfile, setIsUserProfile] = useState(true); 
+  const [username, setUsername] = useState("");
+  const [image, setImage] = useState("");
+  const [location, setLocation] = useState("");
+  const [petname, setPetname] = useState("");
+  const [breed, setBreed] = useState("");
+  const [description, setDescription] = useState("");
+  const [animal, setAnimal] = useState("");
+  const [experiencelevel, setExperiencelevel] = useState("");
+  const [characteristics, setCharacteristics] = useState("");
+  const [isUserProfile, setIsUserProfile] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
   const handleUpdateProfile = () => {
     setIsEditing(true); // Set editing mode
     if (isUserProfile) {
-      navigation.navigate('CreateUserProfile', { isEditing: true }); // Navigate to edit user profile
+      navigation.navigate("CreateUserProfile", { isEditing: true }); // Navigate to edit user profile
     } else {
-      navigation.navigate('CreatePetProfile', { isEditing: true }); // Navigate to edit pet profile
+      navigation.navigate("CreatePetProfile", { isEditing: true }); // Navigate to edit pet profile
     }
   };
 
@@ -44,11 +50,11 @@ export default function Profile() {
       if (user) {
         const username = user.displayName;
         if (isUserProfile) {
-          await deleteDoc(doc(firestore, 'userProfiles', username));
+          await deleteDoc(doc(firestore, "userProfiles", username));
         } else {
-          await deleteDoc(doc(firestore, 'petProfiles', username));
+          await deleteDoc(doc(firestore, "petProfiles", username));
         }
-        navigation.replace('Login'); // Redirect to login after deletion
+        navigation.replace("Login"); // Redirect to login after deletion
       }
     } catch (error) {
       console.error("Error deleting profile: ", error);
@@ -75,28 +81,27 @@ export default function Profile() {
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
-          
+
           setIsUserProfile(true); // Set profile type to user
-          setImage(userData.imageUrl || '');
-          setExperiencelevel(userData.experiencelevel || '');
-          setBreed(userData.breed || '');
-          setLocation(userData.location || '');
-          setAnimal(userData.animal || '');
-          setCharacteristics(userData.fixedCharacteristics || '');
-          setPetname(''); // Clear pet profile fields
-          setDescription('');
+          setImage(userData.imageUrl || "");
+          setExperiencelevel(userData.experiencelevel || "");
+          setBreed(userData.breed || "");
+          setLocation(userData.location || "");
+          setAnimal(userData.animal || "");
+          setCharacteristics(userData.fixedCharacteristics || "");
+          setPetname(""); // Clear pet profile fields
+          setDescription("");
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
           setIsUserProfile(false); // Set profile type to pet
-          setImage(petData.imageUrl || '');
-          setPetname(petData.petname || '');
-          setBreed(petData.breed || '');
-          setDescription(petData.description || '');
-          setLocation(petData.location || '');
-          setAnimal(petData.animal || '');
-          setCharacteristics(petData.fixedCharacteristics || '');
-          setExperiencelevel(''); // Clear user profile fields
-
+          setImage(petData.imageUrl || "");
+          setPetname(petData.petname || "");
+          setBreed(petData.breed || "");
+          setDescription(petData.description || "");
+          setLocation(petData.location || "");
+          setAnimal(petData.animal || "");
+          setCharacteristics(petData.fixedCharacteristics || "");
+          setExperiencelevel(""); // Clear user profile fields
         } else {
           console.log("No profile found!");
         }
@@ -118,22 +123,39 @@ export default function Profile() {
         style={{ alignSelf: "center" }}
       />
       <View>
-
-        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
+        <Text
+          style={{
+            fontSize: 25,
+            fontWeight: "bold",
+            color: "#7D5F26",
+            marginLeft: 5,
+            marginTop: 5,
+          }}
+        >
           My Profile
         </Text>
 
-        <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-          <Text style={{alignSelf: 'center', marginRight: 110, fontSize: 30, fontWeight: 'bold', marginLeft: 10}}>
+        <View style={{ flexDirection: "row", justifyContent: "left" }}>
+          <Text
+            style={{
+              alignSelf: "center",
+              marginRight: 110,
+              fontSize: 30,
+              fontWeight: "bold",
+              marginLeft: 10,
+            }}
+          >
             @{username}
           </Text>
-          {image ? <Image source={{ uri: image }} style={styles.image} /> : null}
+          {image ? (
+            <Image source={{ uri: image }} style={styles.image} />
+          ) : null}
         </View>
 
         {experiencelevel ? (
           <Text>
             <Text style={styles.boldFont}>Experience Level:</Text>
-            <Text style={styles.font}>{experiencelevel}</Text>          
+            <Text style={styles.font}>{experiencelevel}</Text>
           </Text>
         ) : null}
         {breed ? (
@@ -157,7 +179,9 @@ export default function Profile() {
         {characteristics.length > 0 ? (
           <View>
             <Text style={styles.boldFont}>
-              {isUserProfile ? "Characteristics I'm looking for: " : "Characteristics I have: "}
+              {isUserProfile
+                ? "Characteristics I'm looking for: "
+                : "Characteristics I have: "}
             </Text>
             <View style={styles.characteristicsContainer}>
               {characteristics.map((item, index) => (
@@ -189,14 +213,21 @@ export default function Profile() {
           <Text style={styles.buttonText}>Sign Out</Text>
         </TouchableOpacity>
 
-        <Text style={{fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 10, marginTop: 10}}>
+        <Text
+          style={{
+            fontSize: 18,
+            fontWeight: "bold",
+            color: "#7D5F26",
+            marginLeft: 10,
+            marginTop: 10,
+          }}
+        >
           Found your pet / pet has been adopted?
         </Text>
 
         <TouchableOpacity onPress={handleDeleteProfile} style={styles.button}>
           <Text style={styles.buttonText}>Delete Profile</Text>
         </TouchableOpacity>
-
       </View>
     </ImageBackground>
   );
@@ -209,7 +240,7 @@ const styles = StyleSheet.create({
     padding: 7,
   },
   boldFont: {
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
     padding: 7,
   },
@@ -234,17 +265,17 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   characteristicsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     marginLeft: 10,
   },
   characteristicBox: {
-    backgroundColor: '#A78D5C',
+    backgroundColor: "#A78D5C",
     borderRadius: 20,
     padding: 10,
     margin: 5,
   },
   characteristicText: {
-    color: '#EDD7B5',
+    color: "#EDD7B5",
   },
 });
