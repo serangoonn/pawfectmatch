@@ -411,9 +411,14 @@ export default function Feed() {
                     <Text style={styles.modalText}>
                       Animal: {animal || "Not provided"}
                     </Text>
-                    <Text style={styles.modalText}>
-                      Characteristics: {characteristics || "Not provided"}
-                    </Text>
+                    <Text style={styles.modalText}>Characteristics:</Text>
+                    <FlatList
+                      data={characteristics}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => (
+                        <Text style={styles.modalText}>- {item}</Text>
+                      )}
+                    />
                   </>
                 ) : (
                   <>
@@ -430,9 +435,14 @@ export default function Feed() {
                     <Text style={styles.modalText}>
                       Animal: {animal || "Not provided"}
                     </Text>
-                    <Text style={styles.modalText}>
-                      Characteristics: {characteristics || "Not provided"}
-                    </Text>
+                    <Text style={styles.modalText}>Characteristics:</Text>
+                    <FlatList
+                      data={characteristics}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => (
+                        <Text style={styles.modalText}>- {item}</Text>
+                      )}
+                    />
                     <Text style={styles.modalText}>
                       Description: {description || "Not provided"}
                     </Text>
