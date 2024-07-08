@@ -19,21 +19,38 @@ export default function ContactList() {
   const [likedProfiles, setLikedProfiles] = useState([]);
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
+  const [username, setUsername] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  // Get the current user ID
   const auth = getAuth();
-  const currentUser = auth.currentUser ? auth.currentUser.uid : null;
+  useEffect(() => {
+    const user = auth.currentUser;
+    if (user) {
+      setUsername(user.displayName);
+      setLoading(false);
+    } else {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     fetchLikedProfiles();
-  }, []);
+  }, [username]);
 
   const fetchLikedProfiles = async () => {
+    if (!username) return;
+
     try {
-      const docRef = doc(firestore, "likedProfiles", currentUser);
+      const docRef = doc(firestore, "likedProfiles", username);
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
-        setLikedProfiles(docSnap.data().profiles);
+        const profiles = docSnap.data().profiles;
+        // Ensure each profile has a unique key
+        const uniqueProfiles = profiles.map((profile, index) => ({
+          ...profile,
+          key: profile.id || index.toString(),
+        }));
+        setLikedProfiles(uniqueProfiles);
       } else {
         console.log("No liked profiles found!");
       }
@@ -74,7 +91,7 @@ export default function ContactList() {
         <FlatList
           style={styles.accounts}
           data={likedProfiles}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
               <View style={styles.profile}>
@@ -123,7 +140,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 70,
     height: 70,
-    borderRadius: 90,
+    borderRadius: 35,
     marginRight: 10,
     marginLeft: 30,
   },
