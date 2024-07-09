@@ -8,15 +8,26 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { firestore } from "../../../utils/firebase";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  collection,
+  query,
+  orderBy,
+  limit,
+  getDocs,
+} from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import MyTextInput from "@/src/components/MyTextInput";
 
 export default function ContactList() {
   const [likedProfiles, setLikedProfiles] = useState([]);
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const navigation = useNavigation();
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("");
@@ -37,6 +48,17 @@ export default function ContactList() {
     fetchLikedProfiles();
   }, [username]);
 
+  useEffect(() => {
+    if (searchQuery === "") {
+      setFilteredProfiles(likedProfiles);
+    } else {
+      const filtered = likedProfiles.filter((profile) =>
+        profile.username.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+      setFilteredProfiles(filtered);
+    }
+  }, [searchQuery, likedProfiles]);
+
   const fetchLikedProfiles = async () => {
     if (!username) return;
 
@@ -45,18 +67,39 @@ export default function ContactList() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const profiles = docSnap.data().profiles;
+        // Fetch latest message for each profile
+        const profilesWithLatestMessages = await Promise.all(
+          profiles.map(async (profile) => {
+            const latestMessage = await fetchLatestMessage(profile.username);
+            return { ...profile, latestMessage };
+          })
+        );
         // Ensure each profile has a unique key
-        const uniqueProfiles = profiles.map((profile, index) => ({
-          ...profile,
-          key: profile.id || index.toString(),
-        }));
+        const uniqueProfiles = profilesWithLatestMessages.map(
+          (profile, index) => ({
+            ...profile,
+            key: profile.id || index.toString(),
+          })
+        );
         setLikedProfiles(uniqueProfiles);
+        setFilteredProfiles(uniqueProfiles);
       } else {
         console.log("No liked profiles found!");
       }
     } catch (error) {
       console.error("Error fetching liked profiles: ", error);
     }
+  };
+
+  const fetchLatestMessage = async (chatPartner) => {
+    const chatDocId = [username, chatPartner].sort().join("_");
+    const chatRef = collection(firestore, "messages", chatDocId, "chat");
+    const q = query(chatRef, orderBy("timestamp", "desc"), limit(1));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return querySnapshot.docs[0].data().text;
+    }
+    return null;
   };
 
   const handleProfilePress = (profile) => {
@@ -78,10 +121,12 @@ export default function ContactList() {
         <Image source={require("../HomeStack/images/header.png")} />
 
         <View style={styles.inputContainer}>
-          <MyTextInput
+          <TextInput
             style={styles.input}
             placeholder={"Search for contact"}
-            // onChange={}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholderTextColor={"#7D5F26"}
           />
           <TouchableOpacity onPress={refreshData}>
             <Image source={require("../ChatStack/images/refresh.png")} />
@@ -90,7 +135,7 @@ export default function ContactList() {
 
         <FlatList
           style={styles.accounts}
-          data={likedProfiles}
+          data={filteredProfiles}
           keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
             <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
@@ -99,7 +144,14 @@ export default function ContactList() {
                   source={{ uri: item.imageUrl }}
                   style={styles.profileImage}
                 />
-                <Text style={styles.username}>{item.username}</Text>
+                <View>
+                  <Text style={styles.username}>{item.username} </Text>
+                  {item.latestMessage && (
+                    <Text style={styles.latestMessage}>
+                      {item.latestMessage}
+                    </Text>
+                  )}
+                </View>
               </View>
             </TouchableOpacity>
           )}
@@ -122,11 +174,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 10,
+    marginTop: 10,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "#ccc",
+    borderColor: "#7D5F26",
     borderRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -146,6 +199,10 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 18,
+  },
+  latestMessage: {
+    fontSize: 14,
+    color: "#888",
   },
   background: {
     flex: 1,
