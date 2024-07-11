@@ -11,9 +11,9 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useNavigation } from "@react-navigation/core";
-import { firestore, storage } from "../utils/firebase";
-import { collection, setDoc, getDocs, doc } from "firebase/firestore";
+import { useNavigation, useRoute } from "@react-navigation/core";
+import { firestore, storage } from "../../../utils/firebase";
+import { collection, setDoc, getDoc, doc } from "firebase/firestore";
 import {
   SelectList,
   MultipleSelectList,
@@ -22,11 +22,12 @@ import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
-export default function CreateUserProfile() {
+export default function EditUserProfile() {
   const navigation = useNavigation();
+  const route = useRoute();
+  const username = route.params?.username || "";
 
   const [image, setImage] = useState("");
-  const [username, setUsername] = useState("");
   const [location, setLocation] = useState("");
 
   const locationOptions = [
@@ -63,6 +64,7 @@ export default function CreateUserProfile() {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User is logged in:", user);
+        fetchUserProfile(user.displayName || "");
       } else {
         console.log("User is not logged in");
         navigation.navigate("Login"); // Redirect to login page if not logged in
@@ -72,9 +74,29 @@ export default function CreateUserProfile() {
     return () => unsubscribe(); // Cleanup subscription on unmount
   }, []);
 
+  const fetchUserProfile = async (username) => {
+    try {
+      const userDocRef = doc(firestore, "userProfiles", username);
+      const userDocSnap = await getDoc(userDocRef);
+
+      if (userDocSnap.exists()) {
+        const userData = userDocSnap.data();
+        setImage(userData.imageUrl || "");
+        setExperiencelevel(userData.experiencelevel || "");
+        setBreed(userData.breed || "");
+        setLocation(userData.location || "");
+        setAnimalType(userData.animal || "");
+        setFixedCharacteristics(userData.fixedCharacteristics || []);
+      } else {
+        console.log("No profile found!");
+      }
+    } catch (error) {
+      console.error("Error fetching profile: ", error);
+    }
+  };
+
   const validateFields = () => {
     if (
-      !username ||
       !experiencelevel ||
       !location ||
       !animal ||
@@ -92,12 +114,6 @@ export default function CreateUserProfile() {
     if (!validateFields()) return;
 
     try {
-      const isUsernameAvailable = await checkUsernameAvailability();
-      if (!isUsernameAvailable && !isEditing) {
-        alert("Username is already taken.");
-        return;
-      }
-
       const imageUrl = await submitData(); // Get the image URL from submitData
       if (!imageUrl) {
         alert("Failed to upload image.");
@@ -108,7 +124,6 @@ export default function CreateUserProfile() {
       if (user) {
         // Update the user profile in Firebase Authentication
         await updateProfile(user, {
-          displayName: username,
           photoURL: imageUrl,
         });
 
@@ -139,39 +154,6 @@ export default function CreateUserProfile() {
     } catch (error) {
       console.error("Error saving profile: ", error);
       alert("Error saving profile.");
-    }
-  };
-
-  const checkUsernameAvailability = async () => {
-    try {
-      // Array to store promises for querying both collections
-      const queries = [];
-
-      // Query for 'userProfiles'
-      const userProfilesRef = collection(firestore, "userProfiles");
-      queries.push(getDocs(userProfilesRef));
-
-      // Query for 'petProfiles'
-      const petProfilesRef = collection(firestore, "petProfiles");
-      queries.push(getDocs(petProfilesRef));
-
-      // Await all queries
-      const results = await Promise.all(queries);
-
-      // Extract usernames from query results
-      let existingUsernames = [];
-      results.forEach((querySnapshot) => {
-        existingUsernames = [
-          ...existingUsernames,
-          ...querySnapshot.docs.map((doc) => doc.data().username),
-        ];
-      });
-
-      // Check if username exists in either collection
-      return !existingUsernames.includes(username);
-    } catch (error) {
-      console.error("Error checking username availability:", error);
-      return false;
     }
   };
 
@@ -213,7 +195,7 @@ export default function CreateUserProfile() {
 
   return (
     <ImageBackground
-      source={require("../images/createprofilesbackground.png")}
+      source={require("../ProfileStack/images/createprofilesbackground.png")}
       style={styles.background}
     >
       <View style={styles.container}>
@@ -222,7 +204,7 @@ export default function CreateUserProfile() {
 
           <TouchableOpacity onPress={handleImagePick}>
             <Image
-              source={require("../images/pickuserprofilephoto.png")}
+              source={require("../ProfileStack/images/pickuserprofilephoto.png")}
               style={styles.imagebutton}
             />
           </TouchableOpacity>
@@ -233,7 +215,7 @@ export default function CreateUserProfile() {
           <TextInput
             style={styles.input}
             value={username}
-            onChangeText={setUsername}
+            editable={false} // Disable editing username
           />
           <Text style={{ color: "white" }}> Your experience level</Text>
           <TextInput
@@ -242,10 +224,7 @@ export default function CreateUserProfile() {
             onChangeText={setExperiencelevel}
           />
 
-          <Text style={{ color: "white", marginTop: 10 }}>
-            {" "}
-            Breed Preference
-          </Text>
+          <Text style={{ color: "white", marginTop: 10 }}> Breed Preference </Text>
           <TextInput
             style={styles.input}
             value={breed}
@@ -262,12 +241,10 @@ export default function CreateUserProfile() {
             inputStyles={styles.inputStyles}
             dropdownStyles={styles.dropdownStyles}
             dropdownItemStyles={styles.dropdownItemStyles}
+            defaultOption={{ key: location, value: location }}
           />
 
-          <Text style={{ color: "white", marginTop: 15 }}>
-            {" "}
-            Animal Type Preference
-          </Text>
+          <Text style={{ color: "white", marginTop: 15 }}> Animal Type Preference </Text>
           <SelectList
             setSelected={setAnimalType}
             data={animalOptions}
@@ -277,12 +254,10 @@ export default function CreateUserProfile() {
             inputStyles={styles.inputStyles}
             dropdownStyles={styles.dropdownStyles}
             dropdownItemStyles={styles.dropdownItemStyles}
+            defaultOption={{ key: animal, value: animal }}
           />
 
-          <Text style={{ color: "white", marginTop: 10 }}>
-            {" "}
-            Characteristics you are looking for{" "}
-          </Text>
+          <Text style={{ color: "white", marginTop: 10 }}> Characteristics you are looking for </Text>
           <MultipleSelectList
             setSelected={(val) => setFixedCharacteristics(val)}
             data={characteristicsOptions}
@@ -293,11 +268,15 @@ export default function CreateUserProfile() {
             dropdownStyles={styles.dropdownStyles}
             dropdownItemStyles={styles.dropdownItemStyles}
             placeholderTextColor="white"
+            defaultOptions={fixedCharacteristics.map((char) => ({
+              key: char,
+              value: char,
+            }))}
           />
           <SafeAreaView style={styles.buttonContainer}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
-                source={require("../images/gobackbutton.png")}
+                source={require("../ProfileStack/images/gobackbutton.png")}
                 style={{
                   width: 100,
                   height: 30,
@@ -308,7 +287,7 @@ export default function CreateUserProfile() {
             </TouchableOpacity>
             <TouchableOpacity onPress={handleSave}>
               <Image
-                source={require("../images/saveprofilebutton.png")}
+                source={require("../ProfileStack/images/saveprofilebutton.png")}
                 style={{
                   width: 100,
                   height: 30,

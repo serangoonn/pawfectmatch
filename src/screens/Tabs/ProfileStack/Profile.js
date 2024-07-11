@@ -1,9 +1,10 @@
-import { Image, ImageBackground, StyleSheet, Text, View, ScrollView, } from 'react-native';
+import { Image, ImageBackground, StyleSheet, Text, View, ScrollView, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useNavigation } from '@react-navigation/core';
 import { firestore, storage, auth } from '../../../utils/firebase';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc, getDocs, deleteDoc, collection, query, where } from 'firebase/firestore';
+import { deleteUser, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -16,37 +17,14 @@ export default function Profile() {
   const [animal, setAnimal] = useState('');
   const [experiencelevel, setExperiencelevel] = useState('');
   const [characteristics, setCharacteristics] = useState('');
+  const [organization, setOrganization] = useState('')
   const [isUserProfile, setIsUserProfile] = useState(true); 
-  const [isEditing, setIsEditing] = useState(false);
 
-  const handleUpdateProfile = () => {
-    setIsEditing(true); // Set editing mode
+  const handleEditProfile = () => {
     if (isUserProfile) {
-      // Pass user profile data when navigating
-      navigation.navigate('CreateUserProfile', {
-        profile: {
-          username,
-          image,
-          location,
-          breed,
-          animal,
-          experiencelevel,
-          characteristics
-        }
-      });
+      navigation.navigate('EditUserProfile', { username });
     } else {
-      // Pass pet profile data when navigating
-      navigation.navigate('CreatePetProfile', {
-        profile: {
-          petname,
-          image,
-          location,
-          breed,
-          description,
-          animal,
-          characteristics
-        }
-      });
+      navigation.navigate('EditPetProfile', { username });
     }
   };
 
@@ -56,7 +34,28 @@ export default function Profile() {
       .then(() => {
         navigation.replace("Login");
       })
-      .catch(error => alert(error.message));
+      .catch((error) => alert(error.message));
+  };
+
+  const promptForPassword = async () => {
+    return new Promise((resolve, reject) => {
+      Alert.prompt(
+        "Reauthenticate",
+        "Please enter your current password to proceed.",
+        [
+          {
+            text: "Cancel",
+            onPress: () => reject("User canceled"),
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: (password) => resolve(password)
+          }
+        ],
+        "secure-text"
+      );
+    });
   };
 
   const handleDeleteProfile = async () => {
@@ -64,15 +63,47 @@ export default function Profile() {
       const user = auth.currentUser;
       if (user) {
         const username = user.displayName;
+        const userId = user.uid; // Fetch user's UID from Firebase Authentication
+
+        // Collect the current password from the user
+        const currentPassword = await promptForPassword();
+
+        if (!currentPassword) {
+          throw new Error('Password is required');
+        }
+
+        // Reauthenticate user before deleting the account
+        const credential =  EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+
+        // Delete user or pet profiles from Firestore
         if (isUserProfile) {
           await deleteDoc(doc(firestore, 'userProfiles', username));
         } else {
           await deleteDoc(doc(firestore, 'petProfiles', username));
-        }
-        navigation.replace('Login'); // Redirect to login after deletion
+        } 
+
+        // Delete user's posts from Firestore
+        const postsQuery = query(collection(firestore, 'posts', userId));
+        const querySnapshot = await getDocs(postsQuery);
+  
+        // Iterate over the documents and delete each one
+        querySnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+
+        /*const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);*/
+
+        // Delete the user's account from Firebase Authentication
+        await deleteUser(user) ;
+
+        // Redirect to login after deletion
+        navigation.replace('Login'); 
       }
     } catch (error) {
       console.error("Error deleting profile: ", error);
+      Alert.alert("Error", `Error deleting profile: ${error.message}`);
     }
   };
 
@@ -83,8 +114,8 @@ export default function Profile() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || '');
-      fetchUserProfile(user.displayName || '');
+      setUsername(user.displayName || "");
+      fetchUserProfile(user.displayName || "");
     }
   }, []);
 
@@ -92,14 +123,15 @@ export default function Profile() {
     try {
       console.log("Fetching profile for username: ", username);
       if (username) {
-        const userDocRef = doc(firestore, 'userProfiles', username);
-        const petDocRef = doc(firestore, 'petProfiles', username);
+        const userDocRef = doc(firestore, "userProfiles", username);
+        const petDocRef = doc(firestore, "petProfiles", username);
 
         const userDocSnap = await getDoc(userDocRef);
         const petDocSnap = await getDoc(petDocRef);
 
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
+          
           setIsUserProfile(true); // Set profile type to user
           setImage(userData.imageUrl || '');
           setExperiencelevel(userData.experiencelevel || '');
@@ -119,7 +151,9 @@ export default function Profile() {
           setLocation(petData.location || '');
           setAnimal(petData.animal || '');
           setCharacteristics(petData.fixedCharacteristics || '');
+          setOrganization(petData.organization || '');
           setExperiencelevel(''); // Clear user profile fields
+
         } else {
           console.log("No profile found!");
         }
@@ -132,16 +166,17 @@ export default function Profile() {
   };
 
   return (
-    <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
+    <ImageBackground
+      source={require("../HomeStack/images/lightbrown.png")}
       style={styles.background}
     >
-      <Image 
-        source={require('../HomeStack/images/header.png')}
-        style={{alignSelf: 'center'}}
+      <Image
+        source={require("../HomeStack/images/header.png")}
+        style={{ alignSelf: "center" }}
       />
       <ScrollView>
-        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 5}}>
+
+        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
           My Profile
         </Text>
 
@@ -209,10 +244,16 @@ export default function Profile() {
               <Text style={styles.customFont}>{description}</Text>
             </Text>
           ) : null}
+          {organization ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Organisation: </Text>
+              <Text style={styles.customFont}>{organization}</Text>
+            </Text>
+          ) : null}
         </View>
 
         <View style={styles.buttonContainer}>
-          <TouchableOpacity onPress={handleUpdateProfile} style={styles.buttons}>
+          <TouchableOpacity onPress={handleEditProfile} style={styles.buttons}>
             <Text style={styles.buttonText}>Edit Profile</Text>
           </TouchableOpacity>
 
@@ -299,13 +340,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    textAlign: 'center',
-    fontFamily: 'Inknut Antiqua Regular',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    marginTop: 10,
+    textAlign: "center",
   },
   image: {
     width: 150,

@@ -1,10 +1,26 @@
-import React, { useEffect, useState, useRef } from 'react';
-import { ImageBackground, StyleSheet, Text, View, Image, Alert, TouchableOpacity } from 'react-native';
-import Swiper from 'react-native-deck-swiper';
-import { useNavigation } from '@react-navigation/core';
-import { firestore } from '../../../utils/firebase';
-import { collection, setDoc, getDocs, getDoc, doc, arrayUnion } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
+import React, { useEffect, useState, useRef } from "react";
+import {
+  ImageBackground,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Alert,
+  TouchableOpacity,
+} from "react-native";
+import Swiper from "react-native-deck-swiper";
+import { useNavigation } from "@react-navigation/core";
+import { firestore } from "../../../utils/firebase";
+import {
+  collection,
+  setDoc,
+  getDocs,
+  getDoc,
+  doc,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 
 export default function Swipe() {
   const navigation = useNavigation();
@@ -12,7 +28,8 @@ export default function Swipe() {
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
+  const [feedback, setFeedback] = useState({});
 
   // Get the current user ID
   const auth = getAuth();
@@ -25,7 +42,7 @@ export default function Swipe() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || '');
+      setUsername(user.displayName || "");
       setLoading(false);
     } else {
       setLoading(false);
@@ -35,27 +52,52 @@ export default function Swipe() {
   useEffect(() => {
     fetchPetProfiles();
     fetchStarPets();
+    fetchFeedback();
   }, []);
 
   const fetchPetProfiles = async () => {
     try {
       if (!likedProfilesFetched.current) {
-        const petProfilesRef = collection(firestore, 'petProfiles');
+        const petProfilesRef = collection(firestore, "petProfiles");
         const querySnapshot = await getDocs(petProfilesRef);
-        const petsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const petsData = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
         setPets(petsData);
         setLoading(false);
         likedProfilesFetched.current = true; // Set flag once fetched
       }
     } catch (error) {
-      console.error('Error fetching pet profiles: ', error);
+      console.error("Error fetching pet profiles: ", error);
+    }
+  };
+
+  const fetchFeedback = async () => {
+    try {
+      const feedbackRef = collection(firestore, "feedback");
+      const querySnapshot = await getDocs(feedbackRef);
+      const feedbackData = {};
+      querySnapshot.forEach((doc) => {
+        const { organization } = doc.data();
+        if (!feedbackData[organization]) {
+          feedbackData[organization] = [];
+        }
+        feedbackData[organization].push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      setFeedback(feedbackData);
+    } catch (error) {
+      console.error("Error fetching feedback: ", error);
     }
   };
 
   const fetchStarPets = async () => {
     try {
       if (!starPetsFetched.current && username) {
-        const starPetsRef = doc(firestore, 'StarPets', username);
+        const starPetsRef = doc(firestore, "StarPets", username);
         const docSnap = await getDoc(starPetsRef);
         if (docSnap.exists()) {
           const starPetsData = docSnap.data().profiles;
@@ -65,7 +107,7 @@ export default function Swipe() {
         starPetsFetched.current = true; // Set flag once fetched
       }
     } catch (error) {
-      console.error('Error fetching star pets: ', error);
+      console.error("Error fetching star pets: ", error);
     }
   };
 
@@ -73,13 +115,13 @@ export default function Swipe() {
     try {
       const user = auth.currentUser;
       if (user) {
-        return user.displayName || '';
+        return user.displayName || "";
       } else {
-        return '';
+        return "";
       }
     } catch (error) {
-      console.error('Error fetching current username:', error);
-      return '';
+      console.error("Error fetching current username:", error);
+      return "";
     }
   };
 
@@ -90,7 +132,11 @@ export default function Swipe() {
         const username = await getCurrentUsername();
 
         // Update current user's liked profiles
-        const currentUserLikedProfilesRef = doc(firestore, 'likedProfiles', currentUser);
+        const currentUserLikedProfilesRef = doc(
+          firestore,
+          "likedProfiles",
+          currentUser
+        );
         await setDoc(
           currentUserLikedProfilesRef,
           {
@@ -104,14 +150,14 @@ export default function Swipe() {
         );
 
         // Update pet's contact list
-        const petProfileRef = doc(firestore, 'likedProfiles', pet.uid);
+        const petProfileRef = doc(firestore, "likedProfiles", pet.uid);
         await setDoc(
           petProfileRef,
           {
             profiles: arrayUnion({
               id: currentUser,
               username: username,
-              imageUrl: pet.imageUrl || '',
+              imageUrl: pet.imageUrl || "",
             }),
           },
           { merge: true }
@@ -124,7 +170,7 @@ export default function Swipe() {
             {
               text: "Message",
               onPress: () => {
-                navigation.navigate('ContactList');
+                navigation.navigate("ContactList");
                 moveToNextCard();
               },
             },
@@ -148,7 +194,11 @@ export default function Swipe() {
         const username = await getCurrentUsername();
 
         // Update current user's liked profiles
-        const currentUserLikedProfilesRef = doc(firestore, 'likedProfiles', currentUser);
+        const currentUserLikedProfilesRef = doc(
+          firestore,
+          "likedProfiles",
+          currentUser
+        );
         await setDoc(
           currentUserLikedProfilesRef,
           {
@@ -162,14 +212,14 @@ export default function Swipe() {
         );
 
         // Update pet's contact list
-        const petProfileRef = doc(firestore, 'likedProfiles', pet.uid);
+        const petProfileRef = doc(firestore, "likedProfiles", pet.uid);
         await setDoc(
           petProfileRef,
           {
             profiles: arrayUnion({
               id: currentUser,
               username: username,
-              imageUrl: pet.imageUrl || '',
+              imageUrl: pet.imageUrl || "",
             }),
           },
           { merge: true }
@@ -182,7 +232,7 @@ export default function Swipe() {
             {
               text: "Message",
               onPress: () => {
-                navigation.navigate('ContactList');
+                navigation.navigate("ContactList");
               },
             },
             {
@@ -200,7 +250,7 @@ export default function Swipe() {
   const handleCancel = () => {
     if (swiperRef.current) {
       const currentPet = swiperRef.current.state.cardIndex;
-      setPreviousPets(prevPets => [...prevPets, pets[currentPet]]);
+      setPreviousPets((prevPets) => [...prevPets, pets[currentPet]]);
       moveToNextCard();
     }
   };
@@ -208,32 +258,34 @@ export default function Swipe() {
   const handleUndo = () => {
     if (previousPets.length > 0) {
       const lastPet = previousPets[previousPets.length - 1];
-      setPreviousPets(prevState => prevState.slice(0, -1));
-      setPets(prevState => [lastPet, ...prevState]);
+      setPreviousPets((prevState) => prevState.slice(0, -1));
+      setPets((prevState) => [lastPet, ...prevState]);
     }
   };
 
   const handleStar = async (pet) => {
-    Alert.alert('User Saved', 'This pet profile has been saved!');
+    Alert.alert("User Saved", "This pet profile has been saved!");
     if (pet && username) {
       try {
         // Get current user's username
         // Update current user's liked profiles
-        const currentUserLikedProfilesRef = doc(firestore, 'StarPets', username);
-        await setDoc(
-          currentUserLikedProfilesRef,
-          {
-            profiles: arrayUnion({
-              username: pet.username,
-              imageUrl: pet.imageUrl,
-              location: pet.location,
-              breed: pet.breed,
-              description: pet.description,
-              animal: pet.animal,
-            }),
-          },
-          { merge: true }
+        const currentUserLikedProfilesRef = doc(
+          firestore,
+          "StarPets",
+          username
         );
+        const petProfile = {
+          username: pet.username,
+          imageUrl: pet.imageUrl,
+          location: pet.location,
+          breed: pet.breed,
+          description: pet.description,
+          animal: pet.animal,
+        };
+        await updateDoc(currentUserLikedProfilesRef, {
+          [`profiles.${pet.username}`]: petProfile,
+        });
+
         if (swiperRef.current) {
           swiperRef.current.swipeLeft();
         }
@@ -258,19 +310,17 @@ export default function Swipe() {
   }
 
   return (
-    <ImageBackground 
-      source={require('../HomeStack/images/lightbrown.png')}
+    <ImageBackground
+      source={require("../HomeStack/images/lightbrown.png")}
       style={styles.background}
     >
-      <Image 
-        source={require('../HomeStack/images/header.png')}
-        style={{alignSelf: 'center'}}
+      <Image
+        source={require("../HomeStack/images/header.png")}
+        style={{ alignSelf: "center" }}
       />
-      <TouchableOpacity 
-        onPress={() => navigation.goBack()}
-      >
+      <TouchableOpacity onPress={() => navigation.goBack()}>
         <Image
-          source={require('../HomeStack/images/backbutton.png')}
+          source={require("../HomeStack/images/backbutton.png")}
           style={styles.backbutton}
         />
       </TouchableOpacity>
@@ -282,7 +332,10 @@ export default function Swipe() {
           renderCard={(pet) => (
             <View style={styles.card}>
               {pet && pet.imageUrl ? (
-                <Image source={{ uri: pet.imageUrl }} style={styles.profileImage} />
+                <Image
+                  source={{ uri: pet.imageUrl }}
+                  style={styles.profileImage}
+                />
               ) : null}
               {pet && (
                 <>
@@ -290,32 +343,57 @@ export default function Swipe() {
                   <Text style={styles.text}>Location: {pet.location}</Text>
                   <Text style={styles.text}>Animal: {pet.animal}</Text>
                   <Text style={styles.text}>Breed: {pet.breed}</Text>
-                  <Text style={styles.text}>Description: {pet.description}</Text>
+                  <Text style={styles.text}>
+                    Description: {pet.description}
+                  </Text>
+                  {feedback[pet.organization] && (
+                    <View>
+                      <Text>Feedback:</Text>
+                      {feedback[pet.organization].map((fb, index) => (
+                        <View key={index}>
+                          <Text>Username: {fb.username}</Text>
+                          <Text>Rating: {fb.rating}</Text>
+                          <Text>Review: {fb.review}</Text>
+                          <Text>Created at: {fb.createdAt}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </>
               )}
               <View style={styles.buttons}>
                 <TouchableOpacity onPress={handleUndo}>
-                  <Image source={require('../HomeStack/images/undobutton.png')} />
+                  <Image
+                    source={require("../HomeStack/images/undobutton.png")}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={handleCancel}>
-                  <Image source={require('../HomeStack/images/cancelbutton.png')} />
+                  <Image
+                    source={require("../HomeStack/images/cancelbutton.png")}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleLike(pet)}>
-                  <Image source={require('../HomeStack/images/likebutton.png')} />
+                  <Image
+                    source={require("../HomeStack/images/likebutton.png")}
+                  />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => handleStar(pet)}>
-                  <Image source={require('../HomeStack/images/starbutton.png')} />
+                  <Image
+                    source={require("../HomeStack/images/starbutton.png")}
+                  />
                 </TouchableOpacity>
               </View>
             </View>
           )}
           onSwipedRight={(cardIndex) => handleLikeSwiped(pets[cardIndex])}
-          onSwipedLeft={() => {handleCancel}} // No operation needed here          cardIndex={0}
+          onSwipedLeft={() => {
+            handleCancel;
+          }} // No operation needed here cardIndex={0}
           backgroundColor="#f2f2f2"
           stackSize={3}
         />
       </View>
-    </ImageBackground> 
+    </ImageBackground>
   );
 }
 
@@ -325,36 +403,36 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EDD7B5',
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#EDD7B5",
   },
   buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   card: {
-    alignSelf: 'center',  
+    alignSelf: "center",
     width: 300,
     height: 400,
     borderRadius: 10,
-    backgroundColor: '#5b4636',
+    backgroundColor: "#5b4636",
     padding: 20,
   },
   text: {
-    color: 'white',
+    color: "white",
     marginBottom: 10,
   },
   profileImage: {
     width: 160,
     height: 150,
     borderRadius: 30,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginBottom: 20,
   },
   loadingContainer: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

@@ -20,6 +20,8 @@ import PostScreen from '../src/screens/Tabs/Social Stack/Post';
 import ForgotPasswordScreen from '../src/screens/ForgotPassword';
 import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
 import FeedbackRating from '../src/screens/Tabs/ProfileStack/FeedbackRating';
+import EditUserProfile from '../src/screens/Tabs/ProfileStack/EditUserProfile';
+import EditPetProfile from '../src/screens/Tabs/ProfileStack/EditPetProfile';
 
 //icons
 import homeicon from '../app/icons/homeicon.png'
@@ -104,12 +106,12 @@ const ProfileStack = () => (
          headerShown: false,
          }} 
          />
-      <Stack.Screen name = "CreateUserProfile" component={CreateUserProfile} 
+      <Stack.Screen name = "EditUserProfile" component={EditUserProfile} 
          options={{ 
             headerShown: false,
          }} 
          />
-      <Stack.Screen name = "CreatePetProfile" component={CreatePetProfile} 
+      <Stack.Screen name = "EditPetProfile" component={EditPetProfile} 
          options={{ 
             headerShown: false,
          }} 

@@ -1,50 +1,43 @@
-import React, { useEffect, useState } from 'react';
-import { ImageBackground, View, Text, Image, FlatList, StyleSheet, Button, RefreshControl } from 'react-native';
-import { firestore, storage, auth } from '../../../utils/firebase';
-import { collection, getDocs } from 'firebase/firestore';
-import { useNavigation } from '@react-navigation/core';
-import { getDownloadURL, ref } from 'firebase/storage';
-import { TouchableOpacity } from 'react-native-gesture-handler';
+import React, { useEffect, useState } from "react";
+import {
+  ImageBackground,
+  View,
+  Text,
+  Image,
+  FlatList,
+  StyleSheet,
+  Button,
+  RefreshControl,
+} from "react-native";
+import { firestore, storage, auth } from "../../../utils/firebase";
+import { collection, getDocs } from "firebase/firestore";
+import { useNavigation } from "@react-navigation/core";
+import { getDownloadURL, ref } from "firebase/storage";
+import { TouchableOpacity } from "react-native-gesture-handler";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [username, setUsername] = useState('');
+  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
+  const [profilephoto, setProfilephoto] = useState("");
 
   const navigation = useNavigation();
 
   const fetchPosts = async () => {
     try {
-      const querySnapshot = await getDocs(collection(firestore, 'posts'));
-      const postsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
-        const data = doc.data();
-        let photoURL = '';
-  
-        // Determine where to fetch photoURL based on data structure
-        if (data.userType === 'pet') {
-          // Fetch from petprofile
-          const petProfileRef = doc(firestore, 'petProfiles', data.username);
-          const petProfileSnap = await getDoc(petProfileRef);
-          if (petProfileSnap.exists()) {
-            photoURL = petProfileSnap.data().imageUrl;
-          } else {
-            console.log(`No pet profile found for username ${data.username}`);
-            // You can set a default photoURL or handle as needed
-          }
-        } else {
-          // Fetch from userprofile (assuming userprofile contains photoURL)
-          photoURL = data.photoURL; // Adjust this based on your actual data structure
-        }
-  
-        return { id: doc.id, ...data, photoURL };
-      }));
+      const querySnapshot = await getDocs(collection(firestore, "posts"));
+      const postsData = await Promise.all(
+        querySnapshot.docs.map(async (doc) => {
+          const data = doc.data();
+          return { id: doc.id, ...data };
+        })
+      );
       setPosts(postsData);
     } catch (error) {
-      console.error('Error fetching posts:', error);
+      console.error("Error fetching posts:", error);
     }
   };
-  
 
   useEffect(() => {
     fetchPosts();
@@ -59,7 +52,8 @@ export default function Feed() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || '');
+      setUsername(user.displayName || "");
+      setProfilephoto(user.imageUrl);
       setLoading(false);
     } else {
       setLoading(false);
@@ -68,12 +62,10 @@ export default function Feed() {
 
   return (
     <ImageBackground
-      source={require('../HomeStack/images/lightbrown.png')}
+      source={require("../HomeStack/images/lightbrown.png")}
       style={styles.background}
     >
-      <Image
-        source={require('../HomeStack/images/header.png')}
-      />
+      <Image source={require("../HomeStack/images/header.png")} />
       <View style={styles.container}>
         <FlatList
           data={posts}
@@ -81,7 +73,10 @@ export default function Feed() {
           renderItem={({ item }) => (
             <View style={styles.post}>
               <View style={styles.userInfo}>
-                <Image source={{ uri: item.photoURL }} style={styles.userPhoto} />
+                <Image
+                  source={{ uri: item.profilephoto }}
+                  style={styles.userPhoto}
+                />
                 <Text style={styles.username}>@{item.username}</Text>
               </View>
               <Image source={{ uri: item.imageUrl }} style={styles.image} />
@@ -92,12 +87,11 @@ export default function Feed() {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
         />
-        <TouchableOpacity 
-         onPress={() => navigation.push('Post')} >
-         <Image
-              source={require('../Social Stack/images/uploadbutton.png')}
-              style={styles.imagebutton}
-              />
+        <TouchableOpacity onPress={() => navigation.push("Post")}>
+          <Image
+            source={require("../Social Stack/images/uploadbutton.png")}
+            style={styles.imagebutton}
+          />
         </TouchableOpacity>
       </View>
     </ImageBackground>
@@ -114,18 +108,18 @@ const styles = StyleSheet.create({
     width: 300,
   },
   image: {
-    width: '100%',
+    width: "100%",
     height: 200,
     borderRadius: 20,
   },
   background: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
   },
   userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 10,
   },
   userPhoto: {
@@ -145,7 +139,7 @@ const styles = StyleSheet.create({
   imagebutton: {
     height: 50,
     width: 50,
-    alignSelf: 'center',
+    alignSelf: "center",
     marginTop: 5,
   },
 });
