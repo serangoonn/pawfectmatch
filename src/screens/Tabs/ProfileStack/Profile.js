@@ -3,8 +3,8 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
+  ScrollView,
   View,
-  TextInput,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -23,15 +23,14 @@ export default function Profile() {
   const [animal, setAnimal] = useState("");
   const [experiencelevel, setExperiencelevel] = useState("");
   const [characteristics, setCharacteristics] = useState("");
+  const [organization, setOrganization] = useState("");
   const [isUserProfile, setIsUserProfile] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
 
-  const handleUpdateProfile = () => {
-    setIsEditing(true); // Set editing mode
+  const handleEditProfile = () => {
     if (isUserProfile) {
-      navigation.navigate("CreateUserProfile", { isEditing: true }); // Navigate to edit user profile
+      navigation.navigate('EditUserProfile', { username });
     } else {
-      navigation.navigate("CreatePetProfile", { isEditing: true }); // Navigate to edit pet profile
+      navigation.navigate('EditPetProfile', { username });
     }
   };
 
@@ -44,21 +43,78 @@ export default function Profile() {
       .catch((error) => alert(error.message));
   };
 
+  const promptForPassword = async () => {
+    return new Promise((resolve, reject) => {
+      Alert.prompt(
+        "Reauthenticate",
+        "Please enter your current password to proceed.",
+        [
+          {
+            text: "Cancel",
+            onPress: () => reject("User canceled"),
+            style: "cancel"
+          },
+          {
+            text: "OK",
+            onPress: (password) => resolve(password)
+          }
+        ],
+        "secure-text"
+      );
+    });
+  };
+
   const handleDeleteProfile = async () => {
     try {
       const user = auth.currentUser;
       if (user) {
         const username = user.displayName;
+        const userId = user.uid; // Fetch user's UID from Firebase Authentication
+
+        // Collect the current password from the user
+        const currentPassword = await promptForPassword();
+
+        if (!currentPassword) {
+          throw new Error('Password is required');
+        }
+
+        // Reauthenticate user before deleting the account
+        const credential =  EmailAuthProvider.credential(user.email, currentPassword);
+        await reauthenticateWithCredential(user, credential);
+
+        // Delete user or pet profiles from Firestore
         if (isUserProfile) {
           await deleteDoc(doc(firestore, "userProfiles", username));
         } else {
-          await deleteDoc(doc(firestore, "petProfiles", username));
-        }
-        navigation.replace("Login"); // Redirect to login after deletion
+          await deleteDoc(doc(firestore, 'petProfiles', username));
+        } 
+
+        // Delete user's posts from Firestore
+        const postsQuery = query(collection(firestore, 'posts', userId));
+        const querySnapshot = await getDocs(postsQuery);
+  
+        // Iterate over the documents and delete each one
+        querySnapshot.forEach(async (doc) => {
+          await deleteDoc(doc.ref);
+        });
+
+        /*const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
+        await Promise.all(deletePromises);*/
+
+        // Delete the user's account from Firebase Authentication
+        await deleteUser(user) ;
+
+        // Redirect to login after deletion
+        navigation.replace('Login'); 
       }
     } catch (error) {
       console.error("Error deleting profile: ", error);
+      Alert.alert("Error", `Error deleting profile: ${error.message}`);
     }
+  };
+
+  const handleGiveReview = () => {
+    navigation.navigate('FeedbackRating');
   };
 
   useEffect(() => {
@@ -94,14 +150,16 @@ export default function Profile() {
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
           setIsUserProfile(false); // Set profile type to pet
-          setImage(petData.imageUrl || "");
-          setPetname(petData.petname || "");
-          setBreed(petData.breed || "");
-          setDescription(petData.description || "");
-          setLocation(petData.location || "");
-          setAnimal(petData.animal || "");
-          setCharacteristics(petData.fixedCharacteristics || "");
-          setExperiencelevel(""); // Clear user profile fields
+          setImage(petData.imageUrl || '');
+          setPetname(petData.petname || '');
+          setBreed(petData.breed || '');
+          setDescription(petData.description || '');
+          setLocation(petData.location || '');
+          setAnimal(petData.animal || '');
+          setCharacteristics(petData.fixedCharacteristics || '');
+          setOrganization(petData.organization || '');
+          setExperiencelevel(''); // Clear user profile fields
+
         } else {
           console.log("No profile found!");
         }
@@ -122,29 +180,13 @@ export default function Profile() {
         source={require("../HomeStack/images/header.png")}
         style={{ alignSelf: "center" }}
       />
-      <View>
-        <Text
-          style={{
-            fontSize: 25,
-            fontWeight: "bold",
-            color: "#7D5F26",
-            marginLeft: 5,
-            marginTop: 5,
-          }}
-        >
+      <ScrollView>
+        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 5}}>
           My Profile
         </Text>
 
-        <View style={{ flexDirection: "row", justifyContent: "left" }}>
-          <Text
-            style={{
-              alignSelf: "center",
-              marginRight: 110,
-              fontSize: 30,
-              fontWeight: "bold",
-              marginLeft: 10,
-            }}
-          >
+        <View style={{flexDirection: 'row', justifyContent: 'left'}}>
+          <Text style={{alignSelf: 'center', fontFamily: 'Inknut Antiqua Regular', fontSize: 30, fontWeight: 'bold', marginLeft: 15}}>
             @{username}
           </Text>
           {image ? (
@@ -152,36 +194,40 @@ export default function Profile() {
           ) : null}
         </View>
 
-        {experiencelevel ? (
-          <Text>
-            <Text style={styles.boldFont}>Experience Level:</Text>
-            <Text style={styles.font}>{experiencelevel}</Text>
-          </Text>
-        ) : null}
-        {breed ? (
-          <Text>
-            <Text style={styles.boldFont}>Breed:</Text>
-            <Text style={styles.font}>{breed}</Text>
-          </Text>
-        ) : null}
-        {location ? (
-          <Text>
-            <Text style={styles.boldFont}>Location:</Text>
-            <Text style={styles.font}>{location}</Text>
-          </Text>
-        ) : null}
-        {animal ? (
-          <Text>
-            <Text style={styles.boldFont}>Animal:</Text>
-            <Text style={styles.font}>{animal}</Text>
-          </Text>
-        ) : null}
+        <View style={styles.textContainer}>
+          {animal && (
+            <Text>
+              <Text style={styles.customBoldFont}>
+                {isUserProfile ? "Type of Animal Preference: " : "Type of Animal: "}
+              </Text>
+              <Text style={styles.customFont}>{animal}</Text>
+            </Text>
+          )}
+          {breed && (
+            <Text>
+              <Text style={styles.customBoldFont}>
+                {isUserProfile ? "Breed Preference: " : "Breed: "}
+              </Text>
+              <Text style={styles.customFont}>{breed}</Text>
+            </Text>
+          )}
+          {location && (
+            <Text>
+              <Text style={styles.customBoldFont}>Location: </Text>
+              <Text style={styles.customFont}>{location}</Text>
+            </Text>
+          )}
+          {experiencelevel && (
+            <Text>
+              <Text style={styles.customBoldFont}>Experience Level: </Text>
+              <Text style={styles.customFont}>{experiencelevel}</Text>
+            </Text>
+          )}
+        </View> 
         {characteristics.length > 0 ? (
           <View>
-            <Text style={styles.boldFont}>
-              {isUserProfile
-                ? "Characteristics I'm looking for: "
-                : "Characteristics I have: "}
+            <Text style={styles.customBoldFont}>
+              {isUserProfile ? "Characteristics I'm looking for: " : "Characteristics I have: "}
             </Text>
             <View style={styles.characteristicsContainer}>
               {characteristics.map((item, index) => (
@@ -192,43 +238,57 @@ export default function Profile() {
             </View>
           </View>
         ) : null}
-        {petname ? (
-          <Text>
-            <Text style={styles.boldFont}>Pet Name:</Text>
-            <Text style={styles.font}>{petname}</Text>
-          </Text>
-        ) : null}
-        {description ? (
-          <Text>
-            <Text style={styles.boldFont}>Description:</Text>
-            <Text style={styles.font}>{description}</Text>
-          </Text>
-        ) : null}
+        <View style={styles.textContainer}>
+          {petname ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Pet Name: </Text>
+              <Text style={styles.customFont}>{petname}</Text>
+            </Text>
+          ) : null}
+          {description ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Description: </Text>
+              <Text style={styles.customFont}>{description}</Text>
+            </Text>
+          ) : null}
+          {organization ? (
+            <Text>
+              <Text style={styles.customBoldFont}>Organisation: </Text>
+              <Text style={styles.customFont}>{organization}</Text>
+            </Text>
+          ) : null}
+        </View>
 
-        <TouchableOpacity onPress={handleUpdateProfile} style={styles.button}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity onPress={handleEditProfile} style={styles.buttons}>
+            <Text style={styles.buttonText}>Edit Profile</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={handleSignOut} style={styles.button}>
-          <Text style={styles.buttonText}>Sign Out</Text>
-        </TouchableOpacity>
+          <TouchableOpacity onPress={handleSignOut} style={styles.buttons}>
+            <Text style={styles.buttonText}>Sign Out</Text>
+          </TouchableOpacity>
+        </View>
 
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "bold",
-            color: "#7D5F26",
-            marginLeft: 10,
-            marginTop: 10,
-          }}
-        >
+        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
           Found your pet / pet has been adopted?
         </Text>
 
-        <TouchableOpacity onPress={handleDeleteProfile} style={styles.button}>
+        <TouchableOpacity onPress={handleDeleteProfile} style={styles.deleteButton}>
           <Text style={styles.buttonText}>Delete Profile</Text>
         </TouchableOpacity>
-      </View>
+
+        {isUserProfile && (
+          <>
+            <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
+              Want to leave a review?
+            </Text>
+
+            <TouchableOpacity onPress={handleGiveReview} style={styles.deleteButton}>
+              <Text style={styles.buttonText}>Give Review</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </ScrollView>
     </ImageBackground>
   );
 }
@@ -244,22 +304,63 @@ const styles = StyleSheet.create({
     marginLeft: 10,
     padding: 7,
   },
-  button: {
-    backgroundColor: "#7D5F26",
-    padding: 10,
-    borderRadius: 20,
-    width: "30%",
+  customFont: {
+    color: 'black',
+    fontSize: 16,
+    fontFamily: 'Inknut Antiqua Regular',
     marginLeft: 10,
+    textAlign: 'justify',
+    lineHeight: 30,
+    padding: 7,
+  },
+  customBoldFont: {
+    color: 'black',
+    fontSize: 18,
+    fontFamily: 'Inknut Antiqua Regular',
+    fontWeight: 'bold',
+    marginLeft: 10,
+    textAlign: 'justify',
+    lineHeight: 30,
+    padding: 7,
+  },
+  deleteButton: {
+    backgroundColor: "#7D5F26",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    width: "40%",
+    marginLeft: 20,
+    marginHorizonatal: 50, 
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttons: {
+    backgroundColor: "#7D5F26",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    width: "90%",
+    marginLeft: 20,
+    marginHorizonatal: 50, 
+    justifyContent: 'center',
+    alignItems: 'center',  
   },
   buttonText: {
     color: "white",
-    textAlign: "center",
+    textAlign: 'center',
+    fontFamily: 'Inknut Antiqua Regular',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 10,
   },
   image: {
     width: 150,
     height: 150,
     borderRadius: 90,
     marginVertical: 10,
+    marginLeft: 80,
   },
   background: {
     flex: 1,
@@ -268,6 +369,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     marginLeft: 10,
+    marginBottom: -5,
   },
   characteristicBox: {
     backgroundColor: "#A78D5C",
@@ -276,6 +378,12 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   characteristicText: {
-    color: "#EDD7B5",
+    color: '#EDD7B5',
+    fontFamily: 'Inknut Antiqua Regular',
+  },
+  textContainer:  {
+    padding: 10,
+    marginLeft: 8,
+    marginBottom: -17,
   },
 });

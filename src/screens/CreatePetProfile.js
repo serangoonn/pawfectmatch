@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import React, { useState, useEffect } from "react";
-import { useNavigation, useRoute } from "@react-navigation/core";
+import { useNavigation } from "@react-navigation/core";
 import { firestore, storage } from "../utils/firebase";
 import { collection, setDoc, getDocs, doc } from "firebase/firestore";
 import {
@@ -24,8 +24,6 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
 export default function CreatePetProfile() {
   const navigation = useNavigation();
-  const route = useRoute();
-  const { isEditing } = route.params?.isEditing || false;
 
   const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
@@ -59,15 +57,20 @@ export default function CreatePetProfile() {
     { key: "6", value: "quiet" },
     { key: "7", value: "open to rescue animals" },
   ];
+  const [organization, setOrganization] = useState("");
+  const organizationOptions = [
+    { key: "1", value: "SPCA" },
+    { key: "2", value: "The Animal Lodge" },
+    { key: "3", value: "SOSD" },
+    { key: "4", value: "Mercylight" },
+    { key: "5", value: "NIL" },
+  ];
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         console.log("User is logged in:", user);
-        if (isEditing) {
-          fetchUserProfile(user.displayName || "");
-        }
       } else {
         console.log("User is not logged in");
         navigation.navigate("Login"); // Redirect to login page if not logged in
@@ -75,30 +78,7 @@ export default function CreatePetProfile() {
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
-  }, [isEditing]);
-
-  const fetchUserProfile = async (username) => {
-    try {
-      const petDocRef = doc(firestore, "petProfiles", username);
-      const petDocSnap = await getDoc(petDocRef);
-      if (petDocSnap.exists()) {
-        const petData = petDocSnap.data();
-        setIsUserProfile(false); // Set profile type to pet
-        setImage(petData.imageUrl || "");
-        setPetname(petData.petname || "");
-        setBreed(petData.breed || "");
-        setDescription(petData.description || "");
-        setLocation(petData.location || "");
-        setAnimal(petData.animal || "");
-        setCharacteristics(petData.fixedCharacteristics || "");
-        setExperiencelevel(""); // Clear user profile fields
-      } else {
-        console.log("No such document!");
-      }
-    } catch (error) {
-      console.error("Error fetching user profile: ", error);
-    }
-  };
+  }, []);
 
   const validateFields = () => {
     if (
@@ -109,7 +89,8 @@ export default function CreatePetProfile() {
       !breed ||
       !description ||
       !fixedCharacteristics.length ||
-      !image
+      !organization ||
+      !image 
     ) {
       Alert.alert("Error", "All fields must be filled.");
       return false;
@@ -118,14 +99,13 @@ export default function CreatePetProfile() {
   };
   const handleSave = async () => {
     if (!validateFields()) return;
-
     try {
       const isUsernameAvailable = await checkUsernameAvailability();
       if (!isUsernameAvailable) {
         alert("Username is already taken.");
         return;
       }
-
+    
       const imageUrl = await submitData(); // Get the image URL from submitData
       if (!imageUrl) {
         alert("Failed to upload image.");
@@ -146,17 +126,23 @@ export default function CreatePetProfile() {
         console.log("User photoURL:", user.photoURL);
 
         // Save the user profile to Firestore with username as document ID
-        await setDoc(doc(firestore, "petProfiles", username), {
-          uid: user.uid,
-          username,
-          petname,
-          location,
-          animal,
-          breed,
-          description,
-          fixedCharacteristics,
-          imageUrl,
-        });
+        try {
+          await setDoc(doc(firestore, "petProfiles", username), {
+            uid: user.uid,
+            username,
+            petname,
+            location,
+            animal,
+            breed,
+            description,
+            fixedCharacteristics,
+            organization,
+            imageUrl,
+          });
+          console.log("Document successfully written!");
+        } catch (error) {
+          console.error("Error writing document: ", error);
+        }
 
         alert("Profile saved successfully!");
         navigation.reset({
@@ -197,8 +183,11 @@ export default function CreatePetProfile() {
       if (!result.canceled) {
         setImage(result.assets[0].uri);
       }
+
+      return true;
     } catch (error) {
       console.error("Error picking image:", error);
+      return false;
     }
   };
 
@@ -213,6 +202,7 @@ export default function CreatePetProfile() {
         await uploadBytes(storageRef, blob);
         const downloadURL = await getDownloadURL(storageRef);
         return downloadURL;
+
       } catch (error) {
         console.error("Error uploading image:", error);
         return null;
@@ -253,7 +243,19 @@ export default function CreatePetProfile() {
             onChangeText={setPetName}
           />
 
-          <Text style={{ color: "white", marginTop: 10 }}> Breed </Text>
+          <Text style={{ color: "white" }}> Animal Type</Text>
+          <SelectList
+            setSelected={setAnimalType}
+            data={animalOptions}
+            save="value"
+            placeholder="Select an Animal Type"
+            boxStyles={styles.selectList}
+            inputStyles={styles.inputStyles}
+            dropdownStyles={styles.dropdownStyles}
+            dropdownItemStyles={styles.dropdownItemStyles}
+          />
+
+          <Text style={{ color: "white", marginTop: 15 }}> Breed </Text>
           <TextInput
             style={styles.input}
             value={breed}
@@ -271,7 +273,7 @@ export default function CreatePetProfile() {
 
           <Text style={{ color: "white" }}> Location</Text>
           <SelectList
-            setSelected={setLocation}
+            setSelected={(val) => setLocation(val)}
             data={locationOptions}
             save="value"
             placeholder="Select a location"
@@ -281,19 +283,7 @@ export default function CreatePetProfile() {
             dropdownItemStyles={styles.dropdownItemStyles}
           />
 
-          <Text style={{ color: "white", marginTop: 15 }}> Animal Type</Text>
-          <SelectList
-            setSelected={setAnimalType}
-            data={animalOptions}
-            save="value"
-            placeholder="Select an Animal Type"
-            boxStyles={styles.selectList}
-            inputStyles={styles.inputStyles}
-            dropdownStyles={styles.dropdownStyles}
-            dropdownItemStyles={styles.dropdownItemStyles}
-          />
-
-          <Text style={{ color: "white", marginTop: 10 }}>
+          <Text style={{ color: "white", marginTop: 15 }}>
             {" "}
             Characteristics of the pet{" "}
           </Text>
@@ -308,6 +298,19 @@ export default function CreatePetProfile() {
             dropdownItemStyles={styles.dropdownItemStyles}
             placeholderTextColor="white"
           />
+
+          <Text style={{ color: "white" }}> Organisation</Text>
+          <SelectList
+            setSelected={(val) => setOrganization(val)}
+            data={organizationOptions}
+            save="value"
+            placeholder="Select an organization"
+            boxStyles={styles.selectList}
+            inputStyles={styles.inputStyles}
+            dropdownStyles={styles.dropdownStyles}
+            dropdownItemStyles={styles.dropdownItemStyles}
+          />
+
           <SafeAreaView style={styles.buttonContainer}>
             <TouchableOpacity onPress={() => navigation.goBack()}>
               <Image
@@ -393,6 +396,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     width: "80%",
+    marginTop: 10,
   },
   image: {
     width: 200,

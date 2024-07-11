@@ -29,6 +29,7 @@ export default function Swipe() {
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
   const [username, setUsername] = useState("");
+  const [feedback, setFeedback] = useState({});
 
   // Get the current user ID
   const auth = getAuth();
@@ -51,6 +52,7 @@ export default function Swipe() {
   useEffect(() => {
     fetchPetProfiles();
     fetchStarPets();
+    fetchFeedback();
   }, []);
 
   const fetchPetProfiles = async () => {
@@ -68,6 +70,27 @@ export default function Swipe() {
       }
     } catch (error) {
       console.error("Error fetching pet profiles: ", error);
+    }
+  };
+
+  const fetchFeedback = async () => {
+    try {
+      const feedbackRef = collection(firestore, "feedback");
+      const querySnapshot = await getDocs(feedbackRef);
+      const feedbackData = {};
+      querySnapshot.forEach((doc) => {
+        const { organization } = doc.data();
+        if (!feedbackData[organization]) {
+          feedbackData[organization] = [];
+        }
+        feedbackData[organization].push({
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+      setFeedback(feedbackData);
+    } catch (error) {
+      console.error("Error fetching feedback: ", error);
     }
   };
 
@@ -319,6 +342,19 @@ export default function Swipe() {
                   <Text style={styles.text}>
                     Description: {pet.description}
                   </Text>
+                  {feedback[pet.organization] && (
+                    <View>
+                      <Text>Feedback:</Text>
+                      {feedback[pet.organization].map((fb, index) => (
+                        <View key={index}>
+                          <Text>Username: {fb.username}</Text>
+                          <Text>Rating: {fb.rating}</Text>
+                          <Text>Review: {fb.review}</Text>
+                          <Text>Created at: {fb.createdAt}</Text>
+                        </View>
+                      ))}
+                    </View>
+                  )}
                 </>
               )}
               <View style={styles.buttons}>
@@ -348,7 +384,7 @@ export default function Swipe() {
           onSwipedRight={(cardIndex) => handleLikeSwiped(pets[cardIndex])}
           onSwipedLeft={() => {
             handleCancel;
-          }} // No operation needed here          cardIndex={0}
+          }} // No operation needed here cardIndex={0}
           backgroundColor="#f2f2f2"
           stackSize={3}
         />
