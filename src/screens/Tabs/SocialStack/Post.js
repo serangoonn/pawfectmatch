@@ -2,13 +2,14 @@ import React, { useState, useEffect } from "react";
 import {
   TouchableOpacity,
   ImageBackground,
-  ScrollView,
   StyleSheet,
   Text,
   View,
   TextInput,
   Image,
   Button,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { firestore, storage, auth } from "../../../utils/firebase";
@@ -90,44 +91,44 @@ export default function Post() {
 
   if (loading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <Text>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <ImageBackground
-      source={require("../HomeStack/images/lightbrown.png")}
-      style={styles.background}
+    <KeyboardAvoidingView
+      style={{ flex: 1, backgroundColor: "#EDD7B5" }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <Image source={require("../HomeStack/images/header.png")} />
-      <View style={styles.backbuttontext}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Image
-            source={require("../HomeStack/images/backbutton.png")}
-            style={styles.backbutton}
-          />
-        </TouchableOpacity>
+      <ImageBackground
+        source={require("../HomeStack/images/lightbrown.png")}
+        style={styles.background}
+      >
+        <Image source={require("../HomeStack/images/header.png")} />
+        <View style={styles.backbuttontext}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require("../HomeStack/images/backbutton.png")}
+              style={styles.backbutton}
+            />
+          </TouchableOpacity>
+          <Text style={styles.text}>Make a new post</Text>
+        </View>
 
-        <Text style={styles.text}> Make a new post </Text>
-      </View>
+        <View style={styles.contentContainer}>
+          <View style={styles.imageContainer}>
+            <Button
+              color="#866629"
+              onPress={handleImagePick}
+              title="Select a picture from your gallery:"
+            />
+            {image && <Image source={{ uri: image }} style={styles.image} />}
+          </View>
 
-      <View style={styles.container}>
-        <ScrollView>
-          <Button
-            color="#866629"
-            onPress={handleImagePick}
-            title="Select a picture from your gallery:"
-          />
-          {image && <Image source={{ uri: image }} style={styles.image} />}
-          <View style={{}}>
-            <Text
-              style={{ fontSize: 20, color: "#7D5F26", fontWeight: "bold" }}
-            >
-              {" "}
-              Caption:{" "}
-            </Text>
+          <View style={styles.captionContainer}>
+            <Text style={styles.captionText}>Caption:</Text>
             <TextInput
               placeholder="Type here..."
               style={styles.input}
@@ -138,24 +139,53 @@ export default function Post() {
               <Text style={styles.posttext}>Post!</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </View>
-    </ImageBackground>
+        </View>
+      </ImageBackground>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    //padding: 20,
+  },
+  background: {
+    flex: 1,
+    alignItems: "center",
+  },
+  backbutton: {
+    marginRight: 10,
+  },
+  backbuttontext: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    width: "100%",
+    paddingHorizontal: 20,
+    marginTop: 20,
+  },
+  text: {
+    fontSize: 25,
+    color: "#7D5F26",
+    fontWeight: "bold",
+  },
+  contentContainer: {
+    flex: 1,
+    width: "100%",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    justifyContent: "center",
+  },
+  imageContainer: {
+    alignItems: "center",
+    width: "100%",
   },
   image: {
     width: "100%",
     height: 200,
     marginBottom: 20,
-    alignSelf: "center",
     borderRadius: 30,
   },
   input: {
@@ -167,36 +197,27 @@ const styles = StyleSheet.create({
     borderRadius: 30,
     backgroundColor: "#A78446",
   },
-  background: {
-    flex: 1,
-    justifyContent: "center",
-    alignSelf: "center",
-  },
-  backbutton: {
-    alignSelf: "left",
-    marginLeft: 25,
-    marginTop: 10,
-  },
-  backbuttontext: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  text: {
-    fontSize: 25,
-    color: "#7D5F26",
-    fontWeight: "bold",
-  },
   postbutton: {
     backgroundColor: "#7D5F26",
     borderRadius: 30,
     width: 80,
     height: 30,
     justifyContent: "center",
-    alignSelf: "center",
+    alignItems: "center",
   },
   posttext: {
-    alignSelf: "center",
     color: "white",
     fontWeight: "bold",
+  },
+  captionContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  captionText: {
+    fontSize: 20,
+    color: "#7D5F26",
+    fontWeight: "bold",
+    marginBottom: 10,
+    alignSelf: "left",
   },
 });

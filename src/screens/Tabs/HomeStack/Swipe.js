@@ -135,13 +135,12 @@ export default function Swipe() {
         const currentUserLikedProfilesRef = doc(
           firestore,
           "likedProfiles",
-          currentUser
+          username
         );
         await setDoc(
           currentUserLikedProfilesRef,
           {
             profiles: arrayUnion({
-              id: pet.id,
               username: pet.username,
               imageUrl: pet.imageUrl,
             }),
@@ -150,12 +149,11 @@ export default function Swipe() {
         );
 
         // Update pet's contact list
-        const petProfileRef = doc(firestore, "likedProfiles", pet.uid);
+        const petProfileRef = doc(firestore, "likedProfiles", pet.username);
         await setDoc(
           petProfileRef,
           {
             profiles: arrayUnion({
-              id: currentUser,
               username: username,
               imageUrl: pet.imageUrl || "",
             }),
@@ -197,13 +195,12 @@ export default function Swipe() {
         const currentUserLikedProfilesRef = doc(
           firestore,
           "likedProfiles",
-          currentUser
+          username
         );
         await setDoc(
           currentUserLikedProfilesRef,
           {
             profiles: arrayUnion({
-              id: pet.id,
               username: pet.username,
               imageUrl: pet.imageUrl,
             }),
@@ -212,12 +209,11 @@ export default function Swipe() {
         );
 
         // Update pet's contact list
-        const petProfileRef = doc(firestore, "likedProfiles", pet.uid);
+        const petProfileRef = doc(firestore, "likedProfiles", pet.username);
         await setDoc(
           petProfileRef,
           {
             profiles: arrayUnion({
-              id: currentUser,
               username: username,
               imageUrl: pet.imageUrl || "",
             }),

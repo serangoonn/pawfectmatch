@@ -61,6 +61,7 @@ export default function Chat({ route }) {
         const userProfilesRef = doc(firestore, "userProfiles", chatPartner);
         const userProfilesSnap = await getDoc(userProfilesRef);
         if (userProfilesSnap.exists()) {
+          setPartnerUsername(userProfilesSnap.data().username);
           setPartnerPhoto(userProfilesSnap.data().imageUrl);
           return;
         }
