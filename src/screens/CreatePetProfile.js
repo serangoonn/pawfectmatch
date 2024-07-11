@@ -183,8 +183,11 @@ export default function CreatePetProfile() {
       if (!result.canceled) {
         setImage(result.assets[0].uri);
       }
+
+      return true;
     } catch (error) {
       console.error("Error picking image:", error);
+      return false;
     }
   };
 

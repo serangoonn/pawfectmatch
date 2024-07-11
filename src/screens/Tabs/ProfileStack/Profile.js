@@ -179,8 +179,7 @@ export default function Profile() {
         style={{ alignSelf: "center" }}
       />
       <ScrollView>
-
-        <Text style={{fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 5, marginTop: 5}}>
+        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 5}}>
           My Profile
         </Text>
 
@@ -346,7 +345,13 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
-    textAlign: "center",
+    textAlign: 'center',
+    fontFamily: 'Inknut Antiqua Regular',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    marginTop: 10,
   },
   image: {
     width: 150,
