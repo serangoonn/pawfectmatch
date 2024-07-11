@@ -3,6 +3,7 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
+  ScrollView,
   View,
   Image,
   Alert,
@@ -28,8 +29,10 @@ export default function Swipe() {
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
+  const feedbackScrollViewRef = useRef(null); // to stop moving card
   const [username, setUsername] = useState("");
   const [feedback, setFeedback] = useState({});
+  const [scrollingFeedback, setScrollingFeedback] = useState(false); // to stop moving card
 
   // Get the current user ID
   const auth = getAuth();
@@ -87,6 +90,11 @@ export default function Swipe() {
           id: doc.id,
           ...doc.data(),
         });
+      });
+
+      // Sort feedback by createdAt if needed
+      Object.keys(feedbackData).forEach((org) => {
+        feedbackData[org].sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis());
       });
       setFeedback(feedbackData);
     } catch (error) {
@@ -245,8 +253,8 @@ export default function Swipe() {
 
   const handleCancel = () => {
     if (swiperRef.current) {
-      const currentPet = swiperRef.current.state.cardIndex;
-      setPreviousPets((prevPets) => [...prevPets, pets[currentPet]]);
+      const currentPetIndex = swiperRef.current.state.cardIndex;
+      setPreviousPets((prevPets) => [...prevPets, pets[currentPetIndex]]);
       moveToNextCard();
     }
   };
@@ -277,6 +285,8 @@ export default function Swipe() {
           breed: pet.breed,
           description: pet.description,
           animal: pet.animal,
+          characteristics: pet.fixedCharacteristics,
+          organisation: pet.organization,
         };
         await updateDoc(currentUserLikedProfilesRef, {
           [`profiles.${pet.username}`]: petProfile,
@@ -290,13 +300,23 @@ export default function Swipe() {
       }
     }
   };
-
+  
+  // to stop moving card
+  const handleScrollBegin = () => {
+    setScrollingFeedback(true);
+  };
+  
+  // to stop moving card
+  const handleScrollEnd = () => {
+    setScrollingFeedback(false);
+  };
+    
   const moveToNextCard = () => {
-    if (swiperRef.current) {
+    if (swiperRef.current && !scrollingFeedback) { // to stop moving card
       swiperRef.current.swipeLeft();
     }
   };
-
+  
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -304,7 +324,7 @@ export default function Swipe() {
       </View>
     );
   }
-
+  
   return (
     <ImageBackground
       source={require("../HomeStack/images/lightbrown.png")}
@@ -334,28 +354,34 @@ export default function Swipe() {
                 />
               ) : null}
               {pet && (
-                <>
+                <View style={styles.petInfoContainer}>
                   <Text style={styles.text}>Username: {pet.username}</Text>
                   <Text style={styles.text}>Location: {pet.location}</Text>
                   <Text style={styles.text}>Animal: {pet.animal}</Text>
                   <Text style={styles.text}>Breed: {pet.breed}</Text>
-                  <Text style={styles.text}>
-                    Description: {pet.description}
-                  </Text>
-                  {feedback[pet.organization] && (
-                    <View>
-                      <Text>Feedback:</Text>
-                      {feedback[pet.organization].map((fb, index) => (
-                        <View key={index}>
-                          <Text>Username: {fb.username}</Text>
-                          <Text>Rating: {fb.rating}</Text>
-                          <Text>Review: {fb.review}</Text>
-                          <Text>Created at: {fb.createdAt}</Text>
+                  <Text style={styles.text}>Description: {pet.description}</Text>
+                  <Text style={styles.text}>Characteristics: {Array.isArray(pet.fixedCharacteristics) ? pet.fixedCharacteristics.join(", ") : "-"} </Text>
+                  <Text style={styles.text}>Organisation: {pet.organization}</Text>
+                  <Text style={styles.text}>Feedback: </Text>
+                  {feedback[pet.organization] && feedback[pet.organization].length > 0 && (
+                    <ScrollView 
+                      ref={feedbackScrollViewRef} // to stop moving card
+                      style={styles.feedbackContainer}
+                      onScrollBeginDrag={handleScrollBegin} // to stop moving card
+                      onScrollEndDrag={handleScrollEnd} // to stop moving card
+                      showsVerticalScrollIndicator={true} // scroll bar supposed to appear but never
+                    >
+                      {feedback[pet.organization].map((feedbackItem, index) => (
+                        <View key={index} style={styles.feedback}>
+                          <Text style={styles.feedbackText}>Username: {feedbackItem.username}</Text>
+                          <Text style={styles.feedbackText}>Rating: {feedbackItem.rating}</Text>
+                          <Text style={styles.feedbackText}>Review: {feedbackItem.review}</Text>
+                          <Text style={styles.feedbackText}>Created at: {feedbackItem.createdAt?.toDate().toLocaleString()}</Text>
                         </View>
                       ))}
-                    </View>
+                    </ScrollView>        
                   )}
-                </>
+                </View>
               )}
               <View style={styles.buttons}>
                 <TouchableOpacity onPress={handleUndo}>
@@ -408,27 +434,44 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   card: {
-    alignSelf: "center",
-    width: 300,
-    height: 400,
+    marginTop: -50,
+    width: 350,
+    height: 520,
     borderRadius: 10,
     backgroundColor: "#5b4636",
     padding: 20,
   },
   text: {
     color: "white",
-    marginBottom: 10,
   },
   profileImage: {
     width: 160,
     height: 150,
     borderRadius: 30,
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+  feedbackContainer: {
+    maxHeight: 400, // Adjust the maximum height as needed
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 8,
+    padding: 10,
+  },
+  feedback: {
+    marginBottom: 10,
+  },
+  feedbackText: {
+    color: "black",
+    fontSize: 10,
+  },
+  petInfoContainer: {
+    flex: 1, // Take up remaining space in the card
+    marginBottom: 10, 
+    marginTop: -10,
+  }
 });

@@ -131,9 +131,9 @@ const Home = () => {
               <Text style={styles.username}>location: {item.location}</Text>
               <Text style={styles.username}>animal type: {item.animal}</Text>
               <Text style={styles.username}>breed: {item.breed}</Text>
-              <Text style={styles.username}>
-                description: {item.description}
-              </Text>
+              <Text style={styles.username}>description: {item.description}</Text>
+              <Text style={styles.username}>characteristics: {Array.isArray(item.fixedCharacteristics) ? item.fixedCharacteristics.join(", ") : "-"}</Text>
+              <Text style={styles.username}>organisation: {Array.isArray(item.organization) ? item.organization : "NIL"}</Text>
             </View>
             <View style={styles.deleteButtonContainer}>
               <TouchableOpacity
@@ -204,14 +204,14 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     flexWrap: "wrap",
     maxWidth: "55%", // Adjust as needed
-    marginRight: 50,
+    marginRight: 70,
   },
   profileImage: {
     width: 70,
     height: 70,
     borderRadius: 90,
-    marginRight: 10,
-    marginLeft: 30,
+    marginRight: 20,
+    marginLeft: 10,
   },
   username: {
     fontSize: 10,
