@@ -3,6 +3,7 @@ import {
   ImageBackground,
   StyleSheet,
   Text,
+  ScrollView,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
@@ -22,6 +23,7 @@ export default function Profile() {
   const [animal, setAnimal] = useState("");
   const [experiencelevel, setExperiencelevel] = useState("");
   const [characteristics, setCharacteristics] = useState("");
+  const [organization, setOrganization] = useState("");
   const [isUserProfile, setIsUserProfile] = useState(true);
 
   const handleEditProfile = () => {
@@ -184,7 +186,7 @@ export default function Profile() {
         </Text>
 
         <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-          <Text style={{alignSelf: 'center', marginRight: 110, fontFamily: 'Inknut Antiqua Regular', fontSize: 30, fontWeight: 'bold', marginLeft: 15}}>
+          <Text style={{alignSelf: 'center', fontFamily: 'Inknut Antiqua Regular', fontSize: 30, fontWeight: 'bold', marginLeft: 15}}>
             @{username}
           </Text>
           {image ? (
@@ -358,6 +360,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 90,
     marginVertical: 10,
+    marginLeft: 80,
   },
   background: {
     flex: 1,
