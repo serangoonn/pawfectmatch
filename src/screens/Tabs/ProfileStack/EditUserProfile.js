@@ -18,7 +18,7 @@ import {
   SelectList,
   MultipleSelectList,
 } from "react-native-dropdown-select-list";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
@@ -181,7 +181,7 @@ export default function EditUserProfile() {
         const response = await fetch(image);
         const blob = await response.blob();
 
-        await uploadBytes(storageRef, blob);
+        await uploadBytesResumable(storageRef, blob);
         const downloadURL = await getDownloadURL(storageRef);
         return downloadURL;
       } catch (error) {
@@ -224,7 +224,10 @@ export default function EditUserProfile() {
             onChangeText={setExperiencelevel}
           />
 
-          <Text style={{ color: "white", marginTop: 10 }}> Breed Preference </Text>
+          <Text style={{ color: "white", marginTop: 10 }}>
+            {" "}
+            Breed Preference{" "}
+          </Text>
           <TextInput
             style={styles.input}
             value={breed}
@@ -244,7 +247,10 @@ export default function EditUserProfile() {
             defaultOption={{ key: location, value: location }}
           />
 
-          <Text style={{ color: "white", marginTop: 15 }}> Animal Type Preference </Text>
+          <Text style={{ color: "white", marginTop: 15 }}>
+            {" "}
+            Animal Type Preference{" "}
+          </Text>
           <SelectList
             setSelected={setAnimalType}
             data={animalOptions}
@@ -257,7 +263,10 @@ export default function EditUserProfile() {
             defaultOption={{ key: animal, value: animal }}
           />
 
-          <Text style={{ color: "white", marginTop: 10 }}> Characteristics you are looking for </Text>
+          <Text style={{ color: "white", marginTop: 10 }}>
+            {" "}
+            Characteristics you are looking for{" "}
+          </Text>
           <MultipleSelectList
             setSelected={(val) => setFixedCharacteristics(val)}
             data={characteristicsOptions}

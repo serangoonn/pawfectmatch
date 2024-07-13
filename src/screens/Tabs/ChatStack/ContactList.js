@@ -211,5 +211,6 @@ const styles = StyleSheet.create({
   },
   accounts: {
     alignSelf: "left",
+    width: "100%",
   },
 });

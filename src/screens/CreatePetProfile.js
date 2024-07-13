@@ -18,7 +18,7 @@ import {
   SelectList,
   MultipleSelectList,
 } from "react-native-dropdown-select-list";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
@@ -90,7 +90,7 @@ export default function CreatePetProfile() {
       !description ||
       !fixedCharacteristics.length ||
       !organization ||
-      !image 
+      !image
     ) {
       Alert.alert("Error", "All fields must be filled.");
       return false;
@@ -105,7 +105,7 @@ export default function CreatePetProfile() {
         alert("Username is already taken.");
         return;
       }
-    
+
       const imageUrl = await submitData(); // Get the image URL from submitData
       if (!imageUrl) {
         alert("Failed to upload image.");
@@ -199,10 +199,9 @@ export default function CreatePetProfile() {
         const response = await fetch(image);
         const blob = await response.blob();
 
-        await uploadBytes(storageRef, blob);
+        await uploadBytesResumable(storageRef, blob);
         const downloadURL = await getDownloadURL(storageRef);
         return downloadURL;
-
       } catch (error) {
         console.error("Error uploading image:", error);
         return null;

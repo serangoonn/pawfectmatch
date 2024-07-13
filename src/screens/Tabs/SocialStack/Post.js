@@ -14,7 +14,7 @@ import {
 import * as ImagePicker from "expo-image-picker";
 import { firestore, storage, auth } from "../../../utils/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/core";
 
 export default function Post() {
@@ -61,7 +61,7 @@ export default function Post() {
         const storageRef = ref(storage, `posts/${fileName}`);
         const response = await fetch(image);
         const blob = await response.blob();
-        await uploadBytes(storageRef, blob);
+        await uploadBytesResumable(storageRef, blob);
 
         const downloadURL = await getDownloadURL(storageRef);
 

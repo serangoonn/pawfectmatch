@@ -4,7 +4,10 @@ import {
   StyleSheet,
   Text,
   View,
+  Button,
+  Modal,
   Image,
+  ScrollView,
   Alert,
   TouchableOpacity,
 } from "react-native";
@@ -28,8 +31,12 @@ export default function Swipe() {
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
+  const feedbackScrollViewRef = useRef(null); // to stop moving card
   const [username, setUsername] = useState("");
   const [feedback, setFeedback] = useState({});
+  const [scrollingFeedback, setScrollingFeedback] = useState(false); // to stop moving card
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState([]);
 
   // Get the current user ID
   const auth = getAuth();
@@ -87,6 +94,13 @@ export default function Swipe() {
           id: doc.id,
           ...doc.data(),
         });
+      });
+
+      // Sort feedback by createdAt if needed
+      Object.keys(feedbackData).forEach((org) => {
+        feedbackData[org].sort(
+          (a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()
+        );
       });
       setFeedback(feedbackData);
     } catch (error) {
@@ -245,8 +259,8 @@ export default function Swipe() {
 
   const handleCancel = () => {
     if (swiperRef.current) {
-      const currentPet = swiperRef.current.state.cardIndex;
-      setPreviousPets((prevPets) => [...prevPets, pets[currentPet]]);
+      const currentPetIndex = swiperRef.current.state.cardIndex;
+      setPreviousPets((prevPets) => [...prevPets, pets[currentPetIndex]]);
       moveToNextCard();
     }
   };
@@ -263,13 +277,24 @@ export default function Swipe() {
     Alert.alert("User Saved", "This pet profile has been saved!");
     if (pet && username) {
       try {
-        // Get current user's username
-        // Update current user's liked profiles
+        // // Update exclusion list
+        // const exclusionProfileRef = doc(firestore, "exclusion", username);
+        // await setDoc(
+        //   exclusionProfileRef,
+        //   {
+        //     [`${pet.username}`]: true,
+        //   },
+        //   { merge: true }
+        // );
+
+        // Get reference to current user's liked profiles document
         const currentUserLikedProfilesRef = doc(
           firestore,
           "StarPets",
           username
         );
+
+        // Create a pet profile object
         const petProfile = {
           username: pet.username,
           imageUrl: pet.imageUrl,
@@ -278,21 +303,74 @@ export default function Swipe() {
           description: pet.description,
           animal: pet.animal,
         };
+
+        // Update the user's liked profiles document
         await updateDoc(currentUserLikedProfilesRef, {
           [`profiles.${pet.username}`]: petProfile,
         });
 
+        // Swipe left after saving the pet profile
         if (swiperRef.current) {
           swiperRef.current.swipeLeft();
         }
       } catch (error) {
-        console.error("Error star-ing profile: ", error);
+        if (error.code === "not-found") {
+          // Document doesn't exist, create a new one
+          await setDoc(currentUserLikedProfilesRef, {
+            profiles: {
+              [pet.username]: petProfile,
+            },
+          });
+
+          if (swiperRef.current) {
+            swiperRef.current.swipeLeft();
+          }
+        } else {
+          console.error("Error star-ing profile: ", error);
+        }
       }
     }
   };
 
+  const FeedbackModal = ({ visible, feedback, onClose }) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => {
+        setModalVisible(!modalVisible);
+      }}
+    >
+      <View style={styles.modalContainer}>
+        <View style={styles.modalContent}>
+          <ScrollView>
+            {feedback.map((feedbackItem, index) => (
+              <View key={index} style={styles.feedback}>
+                <Text style={styles.feedbackText}>
+                  Username: {feedbackItem.username}
+                </Text>
+                <Text style={styles.feedbackText}>
+                  Rating: {feedbackItem.rating}
+                </Text>
+                <Text style={styles.feedbackText}>
+                  Review: {feedbackItem.review}
+                </Text>
+                <Text style={styles.feedbackText}>
+                  Created at:{" "}
+                  {feedbackItem.createdAt?.toDate().toLocaleString()}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+          <Button title="Close" onPress={onClose} />
+        </View>
+      </View>
+    </Modal>
+  );
+
   const moveToNextCard = () => {
-    if (swiperRef.current) {
+    if (swiperRef.current && !scrollingFeedback) {
+      // to stop moving card
       swiperRef.current.swipeLeft();
     }
   };
@@ -327,6 +405,19 @@ export default function Swipe() {
           cards={pets}
           renderCard={(pet) => (
             <View style={styles.card}>
+              {pet && (
+                <Text
+                  style={{
+                    fontSize: 20,
+                    fontWeight: "bold",
+                    alignSelf: "center",
+                    marginBottom: 5,
+                    color: "white",
+                  }}
+                >
+                  @{pet.username}
+                </Text>
+              )}
               {pet && pet.imageUrl ? (
                 <Image
                   source={{ uri: pet.imageUrl }}
@@ -334,28 +425,73 @@ export default function Swipe() {
                 />
               ) : null}
               {pet && (
-                <>
-                  <Text style={styles.text}>Username: {pet.username}</Text>
-                  <Text style={styles.text}>Location: {pet.location}</Text>
-                  <Text style={styles.text}>Animal: {pet.animal}</Text>
-                  <Text style={styles.text}>Breed: {pet.breed}</Text>
-                  <Text style={styles.text}>
-                    Description: {pet.description}
+                <View style={styles.petInfoContainer}>
+                  <View style={{ flexDirection: "row", marginBottom: 5 }}>
+                    <Image
+                      source={require("../HomeStack/images/locationmarker.png")}
+                      style={{ height: 20, width: 13, marginRight: 5 }}
+                    />
+                    <Text style={styles.text}>{pet.location}</Text>
+                    <Image
+                      source={require("../HomeStack/images/paw.png")}
+                      style={{
+                        height: 20,
+                        width: 15,
+                        marginLeft: 10,
+                        marginRight: 5,
+                      }}
+                    />
+                    <Text style={styles.text}>
+                      {pet.animal}, {pet.breed}
+                    </Text>
+                  </View>
+                  <Text style={{ color: "white", fontWeight: "bold" }}>
+                    Learn more about me!
                   </Text>
-                  {feedback[pet.organization] && (
-                    <View>
-                      <Text>Feedback:</Text>
-                      {feedback[pet.organization].map((fb, index) => (
-                        <View key={index}>
-                          <Text>Username: {fb.username}</Text>
-                          <Text>Rating: {fb.rating}</Text>
-                          <Text>Review: {fb.review}</Text>
-                          <Text>Created at: {fb.createdAt}</Text>
-                        </View>
-                      ))}
-                    </View>
+                  <Text style={styles.text}>{pet.description}</Text>
+                  <View style={styles.characteristicsContainer}>
+                    <Text style={styles.text}>
+                      {Array.isArray(pet.fixedCharacteristics) &&
+                      pet.fixedCharacteristics.length > 0 ? (
+                        pet.fixedCharacteristics.map(
+                          (characteristic, index) => (
+                            <View key={index} style={styles.characteristicBox}>
+                              <Text style={styles.characteristicText}>
+                                {characteristic}
+                              </Text>
+                            </View>
+                          )
+                        )
+                      ) : (
+                        <Text style={styles.characteristicText}>-</Text>
+                      )}
+                    </Text>
+                  </View>
+                  {pet.organization && (
+                    <Text style={styles.text}>
+                      Organisation: {pet.organization}
+                    </Text>
                   )}
-                </>
+                  {feedback[pet.organization] &&
+                    feedback[pet.organization].length > 0 && (
+                      <TouchableOpacity
+                        style={styles.feedbackButton}
+                        onPress={() => {
+                          setSelectedFeedback(feedback[pet.organization]);
+                          setModalVisible(true);
+                        }}
+                      >
+                        <Text style={styles.feedbackButtonText}>
+                          View Feedback
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                  <FeedbackModal
+                    visible={modalVisible}
+                    feedback={selectedFeedback}
+                    onClose={() => setModalVisible(false)}
+                  />
+                </View>
               )}
               <View style={styles.buttons}>
                 <TouchableOpacity onPress={handleUndo}>
@@ -387,6 +523,7 @@ export default function Swipe() {
           }} // No operation needed here cardIndex={0}
           backgroundColor="#f2f2f2"
           stackSize={3}
+          verticalSwipe={false} // Disable vertical swiping
         />
       </View>
     </ImageBackground>
@@ -408,27 +545,81 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   card: {
-    alignSelf: "center",
-    width: 300,
-    height: 400,
+    marginTop: -50,
+    width: 350,
+    height: 460,
     borderRadius: 10,
     backgroundColor: "#5b4636",
     padding: 20,
   },
   text: {
     color: "white",
-    marginBottom: 10,
   },
   profileImage: {
     width: 160,
     height: 150,
     borderRadius: 30,
     alignSelf: "center",
-    marginBottom: 20,
+    marginBottom: 30,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
+    alignItems: "center",
+  },
+  feedbackContainer: {
+    maxHeight: 400, // Adjust the maximum height as needed
+    backgroundColor: "rgba(255, 255, 255, 0.8)",
+    borderRadius: 8,
+    padding: 10,
+  },
+  feedback: {
+    marginBottom: 10,
+  },
+  feedbackText: {
+    color: "black",
+    fontSize: 10,
+  },
+  petInfoContainer: {
+    flex: 1, // Take up remaining space in the card
+    marginBottom: 10,
+    marginTop: -10,
+  },
+  characteristicsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 10,
+  },
+  characteristicBox: {
+    backgroundColor: "#A78D5C",
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+  },
+  characteristicText: {
+    color: "white", // Adjust the text color as needed
+  },
+  feedbackButton: {
+    backgroundColor: "#A78D5C",
+    padding: 10,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 10,
+  },
+  feedbackButtonText: {
+    color: "white",
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    width: "80%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 20,
     alignItems: "center",
   },
 });
