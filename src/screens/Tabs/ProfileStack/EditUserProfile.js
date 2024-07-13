@@ -18,7 +18,7 @@ import {
   SelectList,
   MultipleSelectList,
 } from "react-native-dropdown-select-list";
-import { uploadBytes, ref, getDownloadURL } from "firebase/storage";
+import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import * as ImagePicker from "expo-image-picker";
 import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
@@ -181,7 +181,7 @@ export default function EditUserProfile() {
         const response = await fetch(image);
         const blob = await response.blob();
 
-        await uploadBytes(storageRef, blob);
+        await uploadBytesResumable(storageRef, blob);
         const downloadURL = await getDownloadURL(storageRef);
         return downloadURL;
       } catch (error) {
