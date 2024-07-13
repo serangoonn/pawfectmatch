@@ -31,10 +31,8 @@ export default function Swipe() {
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
-  const feedbackScrollViewRef = useRef(null); // to stop moving card
   const [username, setUsername] = useState("");
   const [feedback, setFeedback] = useState({});
-  const [scrollingFeedback, setScrollingFeedback] = useState(false); // to stop moving card
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState([]);
 
