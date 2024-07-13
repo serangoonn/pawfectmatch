@@ -131,14 +131,14 @@ export default function Feed() {
 
         const newCommentData = {
           username: user.displayName,
-          text: newComments[postId],
+          text: newComment,
           createdAt: new Date(),
         };
 
         comments.push(newCommentData);
 
         await updateDoc(postRef, { comments });
-        setNewComments({ ...newComments, [postId]: "" }); // Clear the comment input field for the specific post
+        setNewComment(""); // Clear the comment input field
         fetchPosts(); // Refresh posts to reflect changes
       }
     } catch (error) {

@@ -294,20 +294,34 @@ export default function Swipe() {
           username
         );
 
-        // Create a pet profile object
-        const petProfile = {
-          username: pet.username,
-          imageUrl: pet.imageUrl,
-          location: pet.location,
-          breed: pet.breed,
-          description: pet.description,
-          animal: pet.animal,
-        };
+        // // Create a pet profile object
+        // const petProfile = {
+        //   username: pet.username,
+        //   imageUrl: pet.imageUrl,
+        //   location: pet.location,
+        //   breed: pet.breed,
+        //   description: pet.description,
+        //   animal: pet.animal,
+        // };
 
         // Update the user's liked profiles document
-        await updateDoc(currentUserLikedProfilesRef, {
-          [`profiles.${pet.username}`]: petProfile,
-        });
+
+        await setDoc(
+          currentUserLikedProfilesRef,
+          {
+            profiles: arrayUnion({
+              username: pet.username,
+              imageUrl: pet.imageUrl,
+              location: pet.location,
+              breed: pet.breed,
+              description: pet.description,
+              animal: pet.animal,
+              fixedcharacteristics: pet.fixedCharacteristics,
+              organization: pet.organization,
+            }),
+          },
+          { merge: true }
+        );
 
         // Swipe left after saving the pet profile
         if (swiperRef.current) {

@@ -28,9 +28,9 @@ export default function Profile() {
 
   const handleEditProfile = () => {
     if (isUserProfile) {
-      navigation.navigate('EditUserProfile', { username });
+      navigation.navigate("EditUserProfile", { username });
     } else {
-      navigation.navigate('EditPetProfile', { username });
+      navigation.navigate("EditPetProfile", { username });
     }
   };
 
@@ -52,12 +52,12 @@ export default function Profile() {
           {
             text: "Cancel",
             onPress: () => reject("User canceled"),
-            style: "cancel"
+            style: "cancel",
           },
           {
             text: "OK",
-            onPress: (password) => resolve(password)
-          }
+            onPress: (password) => resolve(password),
+          },
         ],
         "secure-text"
       );
@@ -75,24 +75,27 @@ export default function Profile() {
         const currentPassword = await promptForPassword();
 
         if (!currentPassword) {
-          throw new Error('Password is required');
+          throw new Error("Password is required");
         }
 
         // Reauthenticate user before deleting the account
-        const credential =  EmailAuthProvider.credential(user.email, currentPassword);
+        const credential = EmailAuthProvider.credential(
+          user.email,
+          currentPassword
+        );
         await reauthenticateWithCredential(user, credential);
 
         // Delete user or pet profiles from Firestore
         if (isUserProfile) {
           await deleteDoc(doc(firestore, "userProfiles", username));
         } else {
-          await deleteDoc(doc(firestore, 'petProfiles', username));
-        } 
+          await deleteDoc(doc(firestore, "petProfiles", username));
+        }
 
         // Delete user's posts from Firestore
-        const postsQuery = query(collection(firestore, 'posts', userId));
+        const postsQuery = query(collection(firestore, "posts", userId));
         const querySnapshot = await getDocs(postsQuery);
-  
+
         // Iterate over the documents and delete each one
         querySnapshot.forEach(async (doc) => {
           await deleteDoc(doc.ref);
@@ -102,10 +105,10 @@ export default function Profile() {
         await Promise.all(deletePromises);*/
 
         // Delete the user's account from Firebase Authentication
-        await deleteUser(user) ;
+        await deleteUser(user);
 
         // Redirect to login after deletion
-        navigation.replace('Login'); 
+        navigation.replace("Login");
       }
     } catch (error) {
       console.error("Error deleting profile: ", error);
@@ -114,7 +117,7 @@ export default function Profile() {
   };
 
   const handleGiveReview = () => {
-    navigation.navigate('FeedbackRating');
+    navigation.navigate("FeedbackRating");
   };
 
   useEffect(() => {
@@ -150,16 +153,15 @@ export default function Profile() {
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
           setIsUserProfile(false); // Set profile type to pet
-          setImage(petData.imageUrl || '');
-          setPetname(petData.petname || '');
-          setBreed(petData.breed || '');
-          setDescription(petData.description || '');
-          setLocation(petData.location || '');
-          setAnimal(petData.animal || '');
-          setCharacteristics(petData.fixedCharacteristics || '');
-          setOrganization(petData.organization || '');
-          setExperiencelevel(''); // Clear user profile fields
-
+          setImage(petData.imageUrl || "");
+          setPetname(petData.petname || "");
+          setBreed(petData.breed || "");
+          setDescription(petData.description || "");
+          setLocation(petData.location || "");
+          setAnimal(petData.animal || "");
+          setCharacteristics(petData.fixedCharacteristics || "");
+          setOrganization(petData.organization || "");
+          setExperiencelevel(""); // Clear user profile fields
         } else {
           console.log("No profile found!");
         }
@@ -181,12 +183,29 @@ export default function Profile() {
         style={{ alignSelf: "center" }}
       />
       <ScrollView>
-        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 25, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 5}}>
+        <Text
+          style={{
+            fontFamily: "Inknut Antiqua Regular",
+            fontSize: 25,
+            fontWeight: "bold",
+            color: "#7D5F26",
+            marginLeft: 15,
+            marginTop: 10,
+          }}
+        >
           My Profile
         </Text>
 
-        <View style={{flexDirection: 'row', justifyContent: 'left'}}>
-          <Text style={{alignSelf: 'center', fontFamily: 'Inknut Antiqua Regular', fontSize: 30, fontWeight: 'bold', marginLeft: 15}}>
+        <View style={{ flexDirection: "row", justifyContent: "left" }}>
+          <Text
+            style={{
+              alignSelf: "center",
+              fontFamily: "Inknut Antiqua Regular",
+              fontSize: 30,
+              fontWeight: "bold",
+              marginLeft: 15,
+            }}
+          >
             @{username}
           </Text>
           {image ? (
@@ -198,7 +217,9 @@ export default function Profile() {
           {animal && (
             <Text>
               <Text style={styles.customBoldFont}>
-                {isUserProfile ? "Type of Animal Preference: " : "Type of Animal: "}
+                {isUserProfile
+                  ? "Type of Animal Preference: "
+                  : "Type of Animal: "}
               </Text>
               <Text style={styles.customFont}>{animal}</Text>
             </Text>
@@ -223,11 +244,13 @@ export default function Profile() {
               <Text style={styles.customFont}>{experiencelevel}</Text>
             </Text>
           )}
-        </View> 
+        </View>
         {characteristics.length > 0 ? (
           <View>
             <Text style={styles.customBoldFont}>
-              {isUserProfile ? "Characteristics I'm looking for: " : "Characteristics I have: "}
+              {isUserProfile
+                ? "Characteristics I'm looking for: "
+                : "Characteristics I have: "}
             </Text>
             <View style={styles.characteristicsContainer}>
               {characteristics.map((item, index) => (
@@ -269,21 +292,48 @@ export default function Profile() {
           </TouchableOpacity>
         </View>
 
-        <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
+        <Text
+          style={{
+            fontFamily: "Inknut Antiqua Regular",
+            fontSize: 18,
+            fontWeight: "bold",
+            color: "#7D5F26",
+            marginLeft: 15,
+            marginTop: 10,
+            lineHeight: 30,
+            marginBottom: 10,
+          }}
+        >
           Found your pet / pet has been adopted?
         </Text>
 
-        <TouchableOpacity onPress={handleDeleteProfile} style={styles.deleteButton}>
+        <TouchableOpacity
+          onPress={handleDeleteProfile}
+          style={styles.deleteButton}
+        >
           <Text style={styles.buttonText}>Delete Profile</Text>
         </TouchableOpacity>
 
         {isUserProfile && (
           <>
-            <Text style={{fontFamily: 'Inknut Antiqua Regular', fontSize: 18, fontWeight: 'bold', color: '#7D5F26', marginLeft: 15, marginTop: 10, lineHeight: 30}}>
+            <Text
+              style={{
+                fontFamily: "Inknut Antiqua Regular",
+                fontSize: 18,
+                fontWeight: "bold",
+                color: "#7D5F26",
+                marginLeft: 15,
+                marginTop: 10,
+                lineHeight: 30,
+              }}
+            >
               Want to leave a review?
             </Text>
 
-            <TouchableOpacity onPress={handleGiveReview} style={styles.deleteButton}>
+            <TouchableOpacity
+              onPress={handleGiveReview}
+              style={styles.deleteButton}
+            >
               <Text style={styles.buttonText}>Give Review</Text>
             </TouchableOpacity>
           </>
@@ -305,21 +355,21 @@ const styles = StyleSheet.create({
     padding: 7,
   },
   customFont: {
-    color: 'black',
+    color: "black",
     fontSize: 16,
-    fontFamily: 'Inknut Antiqua Regular',
+    fontFamily: "Inknut Antiqua Regular",
     marginLeft: 10,
-    textAlign: 'justify',
+    textAlign: "justify",
     lineHeight: 30,
     padding: 7,
   },
   customBoldFont: {
-    color: 'black',
+    color: "black",
     fontSize: 18,
-    fontFamily: 'Inknut Antiqua Regular',
-    fontWeight: 'bold',
+    fontFamily: "Inknut Antiqua Regular",
+    fontWeight: "bold",
     marginLeft: 10,
-    textAlign: 'justify',
+    textAlign: "justify",
     lineHeight: 30,
     padding: 7,
   },
@@ -330,9 +380,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: "40%",
     marginLeft: 20,
-    marginHorizonatal: 50, 
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginHorizonatal: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttons: {
     backgroundColor: "#7D5F26",
@@ -341,18 +391,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     width: "90%",
     marginLeft: 20,
-    marginHorizonatal: 50, 
-    justifyContent: 'center',
-    alignItems: 'center',  
+    marginHorizonatal: 50,
+    justifyContent: "center",
+    alignItems: "center",
   },
   buttonText: {
     color: "white",
-    textAlign: 'center',
-    fontFamily: 'Inknut Antiqua Regular',
+    textAlign: "center",
+    fontFamily: "Inknut Antiqua Regular",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    justifyContent: "flex-start",
     marginTop: 10,
   },
   image: {
@@ -360,7 +410,7 @@ const styles = StyleSheet.create({
     height: 150,
     borderRadius: 90,
     marginVertical: 10,
-    marginLeft: 80,
+    marginLeft: 50,
   },
   background: {
     flex: 1,
@@ -378,12 +428,12 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   characteristicText: {
-    color: '#EDD7B5',
-    fontFamily: 'Inknut Antiqua Regular',
+    color: "#EDD7B5",
+    fontFamily: "Inknut Antiqua Regular",
   },
-  textContainer:  {
+  textContainer: {
     padding: 10,
     marginLeft: 8,
-    marginBottom: -17,
+    //marginBottom: -17,
   },
 });
