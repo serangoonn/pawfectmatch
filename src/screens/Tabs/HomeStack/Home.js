@@ -164,6 +164,8 @@ const Home = () => {
         },
         { merge: true }
       );
+
+      handleDelete(pet);
     } catch (error) {
       console.error("Error liking profile: ", error);
     }
@@ -389,11 +391,12 @@ const styles = StyleSheet.create({
     fontSize: 10,
   },
   searchBar: {
+    flex: 1,
     borderWidth: 1,
     borderColor: "#7D5F26",
     borderRadius: 20,
-    paddingHorizontal: 80,
-    paddingVertical: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
     marginRight: 10,
   },
   inputContainer: {

@@ -215,6 +215,7 @@ export default function Feed() {
     } catch (error) {
       console.error("Error liking profile: ", error);
     }
+    setModalVisible(!modalVisible);
   };
 
   const fetchUserProfile = async (username) => {
@@ -422,45 +423,95 @@ export default function Feed() {
                   </>
                 ) : (
                   <>
-                    <Text style={styles.profileText}>Pet Profile</Text>
-                    <Text style={styles.modalText}>
-                      Pet name: {petname || "Not provided"}
+                    <Text style={styles.profileText}>
+                      @{profileusername} ({petname})
                     </Text>
-                    <Text style={styles.modalText}>
-                      Breed: {breed || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Location: {location || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Animal: {animal || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>Characteristics:</Text>
-                    <FlatList
-                      data={characteristics}
-                      keyExtractor={(item, index) => index.toString()}
-                      renderItem={({ item }) => (
-                        <Text style={styles.modalText}>- {item}</Text>
-                      )}
+                    <Image
+                      source={{ uri: selectedUser.profilephoto }}
+                      style={styles.profilephoto}
                     />
-                    <Text style={styles.modalText}>
-                      Description: {description || "Not provided"}
+
+                    <View style={{ flexDirection: "row", marginBottom: 5 }}>
+                      <Image
+                        source={require("../HomeStack/images/locationmarker.png")}
+                        style={{ height: 20, width: 13, marginRight: 5 }}
+                      />
+                      <Text style={styles.text}>{location}</Text>
+                      <Image
+                        source={require("../HomeStack/images/paw.png")}
+                        style={{
+                          height: 20,
+                          width: 15,
+                          marginLeft: 10,
+                          marginRight: 5,
+                        }}
+                      />
+                      <Text style={styles.text}>
+                        {animal}, {breed}
+                      </Text>
+                    </View>
+                    <Text
+                      style={{
+                        alignSelf: "left",
+                        color: "white",
+                        marginTop: 5,
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Characteristics:
+                    </Text>
+                    <View style={styles.characteristicsContainer}>
+                      <Text style={styles.text}>
+                        {Array.isArray(characteristics) &&
+                        characteristics.length > 0 ? (
+                          characteristics.map((characteristic, index) => (
+                            <View key={index} style={styles.characteristicBox}>
+                              <Text style={styles.characteristicText}>
+                                {characteristic}
+                              </Text>
+                            </View>
+                          ))
+                        ) : (
+                          <Text style={styles.characteristicText}>-</Text>
+                        )}
+                      </Text>
+                    </View>
+
+                    <Text
+                      style={{
+                        color: "white",
+                        alignSelf: "left",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      Description:
+                    </Text>
+
+                    <Text
+                      style={{
+                        color: "white",
+                        alignSelf: "left",
+                        marginTop: 3,
+                      }}
+                    >
+                      {description}
                     </Text>
                   </>
                 )}
-
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Text style={styles.closeButtonText}>Close</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={() => handleConnect(profileusername)}
-                >
-                  <Text style={styles.closeButtonText}>Connect</Text>
-                </TouchableOpacity>
+                <View style={{ flexDirection: "row" }}>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  >
+                    <Text style={styles.closeButtonText}>Close</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={() => handleConnect(profileusername)}
+                  >
+                    <Text style={styles.closeButtonText}>Connect</Text>
+                  </TouchableOpacity>
+                </View>
               </>
             )}
           </View>
@@ -574,7 +625,7 @@ const styles = StyleSheet.create({
   },
   modalView: {
     width: 300,
-    backgroundColor: "#7D5F26",
+    backgroundColor: "#5E471C",
     borderRadius: 10,
     padding: 20,
     alignItems: "center",
@@ -589,6 +640,8 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
     marginTop: 10,
+    marginRight: 20,
+    marginLeft: 20,
   },
   closeButtonText: {
     color: "#7D5F26",
@@ -599,5 +652,29 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginBottom: 10,
     color: "white",
+  },
+  profilephoto: {
+    width: 150,
+    height: 150,
+    borderRadius: 90,
+    marginBottom: 10,
+  },
+  text: {
+    color: "white",
+  },
+  characteristicsContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 10,
+    alignSelf: "left",
+  },
+  characteristicBox: {
+    backgroundColor: "#A78D5C",
+    borderRadius: 20,
+    padding: 10,
+    margin: 5,
+  },
+  characteristicText: {
+    color: "white", // Adjust the text color as needed
   },
 });

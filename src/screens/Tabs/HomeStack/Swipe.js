@@ -35,6 +35,8 @@ export default function Swipe() {
   const [feedback, setFeedback] = useState({});
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [filteredCards, setFilteredCards] = useState([]);
 
   // Get the current user ID
   const auth = getAuth();
@@ -56,9 +58,23 @@ export default function Swipe() {
 
   useEffect(() => {
     fetchPetProfiles();
-    fetchStarPets();
+    // fetchStarPets();
     fetchFeedback();
   }, []);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     const petProfiles = await fetchPetProfiles();
+  //     const { starPets, likedProfiles } = await fetchStarredAndLikedProfiles(
+  //       username
+  //     );
+  //     const filtered = filterPetProfiles(petProfiles, starPets, likedProfiles);
+  //     setCards(filtered);
+  //     setFilteredCards(filtered);
+  //   };
+
+  //   fetchData();
+  // }, [username]);
 
   const fetchPetProfiles = async () => {
     try {
@@ -77,6 +93,56 @@ export default function Swipe() {
       console.error("Error fetching pet profiles: ", error);
     }
   };
+
+  // const fetchStarredAndLikedProfiles = async (currentUserUsername) => {
+  //   // Fetch Starred Pets
+  //   const starPetsDocRef = doc(firestore, "StarPets", currentUserUsername);
+  //   const starPetsSnapshot = await getDoc(starPetsDocRef);
+
+  //   // Fetch Liked Profiles
+  //   const likedProfilesDocRef = doc(
+  //     firestore,
+  //     "likedProfiles",
+  //     currentUserUsername
+  //   );
+  //   const likedProfilesSnapshot = await getDoc(likedProfilesDocRef);
+
+  //   // Extract data from snapshots
+  //   const starPets = starPetsSnapshot.exists()
+  //     ? starPetsSnapshot.data().profiles || []
+  //     : [];
+  //   const likedProfiles = likedProfilesSnapshot.exists()
+  //     ? likedProfilesSnapshot.data().profiles || []
+  //     : [];
+
+  //   return { starPets, likedProfiles };
+  // };
+
+  // const filterPetProfiles = (petProfiles, starPets, likedProfiles) => {
+  //   return petProfiles.filter(
+  //     (profile) =>
+  //       !starPets.includes(profile.username) &&
+  //       !likedProfiles.includes(profile.username)
+  //   );
+  // };
+
+  // const fetchPetProfiles = async () => {
+  //   try {
+  //     if (!likedProfilesFetched.current) {
+  //       const petProfilesRef = collection(firestore, "petProfiles");
+  //       const querySnapshot = await getDocs(petProfilesRef);
+  //       const petsData = querySnapshot.docs.map((doc) => ({
+  //         id: doc.id,
+  //         ...doc.data(),
+  //       }));
+  //       setPets(petsData);
+  //       setLoading(false);
+  //       likedProfilesFetched.current = true; // Set flag once fetched
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching pet profiles: ", error);
+  //   }
+  // };
 
   const fetchFeedback = async () => {
     try {
@@ -106,22 +172,22 @@ export default function Swipe() {
     }
   };
 
-  const fetchStarPets = async () => {
-    try {
-      if (!starPetsFetched.current && username) {
-        const starPetsRef = doc(firestore, "StarPets", username);
-        const docSnap = await getDoc(starPetsRef);
-        if (docSnap.exists()) {
-          const starPetsData = docSnap.data().profiles;
-          // Set starPets state if data exists
-          // Example: setStarPets(starPetsData);
-        }
-        starPetsFetched.current = true; // Set flag once fetched
-      }
-    } catch (error) {
-      console.error("Error fetching star pets: ", error);
-    }
-  };
+  // const fetchStarPets = async () => {
+  //   try {
+  //     if (!starPetsFetched.current && username) {
+  //       const starPetsRef = doc(firestore, "StarPets", username);
+  //       const docSnap = await getDoc(starPetsRef);
+  //       if (docSnap.exists()) {
+  //         const starPetsData = docSnap.data().profiles;
+  //         // Set starPets state if data exists
+  //         // Example: setStarPets(starPetsData);
+  //       }
+  //       starPetsFetched.current = true; // Set flag once fetched
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching star pets: ", error);
+  //   }
+  // };
 
   const getCurrentUsername = async () => {
     try {
@@ -275,16 +341,6 @@ export default function Swipe() {
     Alert.alert("User Saved", "This pet profile has been saved!");
     if (pet && username) {
       try {
-        // // Update exclusion list
-        // const exclusionProfileRef = doc(firestore, "exclusion", username);
-        // await setDoc(
-        //   exclusionProfileRef,
-        //   {
-        //     [`${pet.username}`]: true,
-        //   },
-        //   { merge: true }
-        // );
-
         // Get reference to current user's liked profiles document
         const currentUserLikedProfilesRef = doc(
           firestore,
@@ -292,31 +348,25 @@ export default function Swipe() {
           username
         );
 
-        // // Create a pet profile object
-        // const petProfile = {
-        //   username: pet.username,
-        //   imageUrl: pet.imageUrl,
-        //   location: pet.location,
-        //   breed: pet.breed,
-        //   description: pet.description,
-        //   animal: pet.animal,
-        // };
+        // Create the profile data
+        const petProfile = {
+          username: pet.username,
+          imageUrl: pet.imageUrl,
+          location: pet.location,
+          breed: pet.breed,
+          description: pet.description,
+          animal: pet.animal,
+          fixedCharacteristics: pet.fixedCharacteristics,
+          organization: pet.organization,
+        };
 
-        // Update the user's liked profiles document
-
+        // Update the document with the new profile using pet.username as the key
         await setDoc(
           currentUserLikedProfilesRef,
           {
-            profiles: arrayUnion({
-              username: pet.username,
-              imageUrl: pet.imageUrl,
-              location: pet.location,
-              breed: pet.breed,
-              description: pet.description,
-              animal: pet.animal,
-              fixedcharacteristics: pet.fixedCharacteristics,
-              organization: pet.organization,
-            }),
+            profiles: {
+              [pet.username]: petProfile,
+            },
           },
           { merge: true }
         );
