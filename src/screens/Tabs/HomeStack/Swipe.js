@@ -431,7 +431,7 @@ export default function Swipe() {
   );
 
   const moveToNextCard = () => {
-    if (swiperRef.current && !scrollingFeedback) {
+    if (swiperRef.current) {
       // to stop moving card
       swiperRef.current.swipeLeft();
     }

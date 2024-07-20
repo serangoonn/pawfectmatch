@@ -20,9 +20,11 @@ import {
   orderBy,
   limit,
   getDocs,
+  updateDoc,
+  arrayRemove,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import MyTextInput from "@/src/components/MyTextInput";
+import { Swipeable } from "react-native-gesture-handler";
 
 export default function ContactList() {
   const [likedProfiles, setLikedProfiles] = useState([]);
@@ -32,12 +34,14 @@ export default function ContactList() {
   const [refreshing, setRefreshing] = useState(false);
   const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(true);
+  const [currentUserPhoto, setCurrentUserPhoto] = useState(null);
 
   const auth = getAuth();
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
       setUsername(user.displayName);
+      setCurrentUserPhoto(user.photoURL);
       setLoading(false);
     } else {
       setLoading(false);
@@ -97,7 +101,12 @@ export default function ContactList() {
     const q = query(chatRef, orderBy("timestamp", "desc"), limit(1));
     const querySnapshot = await getDocs(q);
     if (!querySnapshot.empty) {
-      return querySnapshot.docs[0].data().text;
+      const latestMessage = querySnapshot.docs[0].data();
+      if (latestMessage.text) {
+        return latestMessage.text;
+      } else if (latestMessage.imageUrl) {
+        return "image sent";
+      }
     }
     return null;
   };
@@ -111,6 +120,44 @@ export default function ContactList() {
     await fetchLikedProfiles();
     setRefreshing(false);
   };
+
+  async function handleDelete(pet) {
+    // Reference to current user's liked profiles
+    const currentUserLikedProfilesRef = doc(
+      firestore,
+      "likedProfiles",
+      username
+    );
+
+    // Remove the pet from the current user's liked profiles
+    await updateDoc(currentUserLikedProfilesRef, {
+      profiles: arrayRemove({
+        username: pet.username,
+        imageUrl: pet.imageUrl,
+      }),
+    });
+
+    // Reference to pet's liked profiles
+    const petProfileRef = doc(firestore, "likedProfiles", pet.username);
+
+    // Remove the current user from the pet's liked profiles
+    await updateDoc(petProfileRef, {
+      profiles: arrayRemove({
+        username: username,
+        imageUrl: currentUserPhoto || "",
+      }),
+    });
+    refreshData();
+  }
+
+  const renderRightActions = (profile) => (
+    <TouchableOpacity
+      style={styles.deleteButton}
+      onPress={() => handleDelete(profile)}
+    >
+      <Text style={styles.deleteButtonText}>Unmatch</Text>
+    </TouchableOpacity>
+  );
 
   return (
     <View style={styles.container}>
@@ -138,22 +185,26 @@ export default function ContactList() {
           data={filteredProfiles}
           keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
-            <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
-              <View style={styles.profile}>
-                <Image
-                  source={{ uri: item.imageUrl }}
-                  style={styles.profileImage}
-                />
-                <View>
-                  <Text style={styles.username}>{item.username} </Text>
-                  {item.latestMessage && (
-                    <Text style={styles.latestMessage}>
-                      {item.latestMessage}
-                    </Text>
-                  )}
+            <Swipeable renderRightActions={() => renderRightActions(item)}>
+              <TouchableOpacity
+                onPress={() => handleProfilePress(item.username)}
+              >
+                <View style={styles.profile}>
+                  <Image
+                    source={{ uri: item.imageUrl }}
+                    style={styles.profileImage}
+                  />
+                  <View>
+                    <Text style={styles.username}>{item.username} </Text>
+                    {item.latestMessage && (
+                      <Text style={styles.latestMessage}>
+                        {item.latestMessage}
+                      </Text>
+                    )}
+                  </View>
                 </View>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </Swipeable>
           )}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={refreshData} />
@@ -212,5 +263,15 @@ const styles = StyleSheet.create({
   accounts: {
     alignSelf: "left",
     width: "100%",
+  },
+  deleteButton: {
+    padding: 5,
+    backgroundColor: "#7D5F26",
+    borderRadius: 5,
+    alignSelf: "center",
+    marginRight: 5,
+  },
+  deleteButtonText: {
+    color: "#fff",
   },
 });
