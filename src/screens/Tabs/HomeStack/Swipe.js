@@ -4,10 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
-  Modal,
   Image,
-  ScrollView,
   Alert,
   TouchableOpacity,
 } from "react-native";
@@ -18,9 +15,7 @@ import {
   collection,
   setDoc,
   getDocs,
-  getDoc,
   doc,
-  updateDoc,
   arrayUnion,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
@@ -32,11 +27,6 @@ export default function Swipe() {
   const [loading, setLoading] = useState(true);
   const swiperRef = useRef(null); // Reference for Swiper component
   const [username, setUsername] = useState("");
-  const [feedback, setFeedback] = useState({});
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedFeedback, setSelectedFeedback] = useState([]);
-  const [cards, setCards] = useState([]);
-  const [filteredCards, setFilteredCards] = useState([]);
 
   // Get the current user ID
   const auth = getAuth();
@@ -44,7 +34,6 @@ export default function Swipe() {
 
   // Refs to manage initial fetch
   const likedProfilesFetched = useRef(false);
-  const starPetsFetched = useRef(false);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -58,23 +47,7 @@ export default function Swipe() {
 
   useEffect(() => {
     fetchPetProfiles();
-    // fetchStarPets();
-    fetchFeedback();
   }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     const petProfiles = await fetchPetProfiles();
-  //     const { starPets, likedProfiles } = await fetchStarredAndLikedProfiles(
-  //       username
-  //     );
-  //     const filtered = filterPetProfiles(petProfiles, starPets, likedProfiles);
-  //     setCards(filtered);
-  //     setFilteredCards(filtered);
-  //   };
-
-  //   fetchData();
-  // }, [username]);
 
   const fetchPetProfiles = async () => {
     try {
@@ -93,101 +66,6 @@ export default function Swipe() {
       console.error("Error fetching pet profiles: ", error);
     }
   };
-
-  // const fetchStarredAndLikedProfiles = async (currentUserUsername) => {
-  //   // Fetch Starred Pets
-  //   const starPetsDocRef = doc(firestore, "StarPets", currentUserUsername);
-  //   const starPetsSnapshot = await getDoc(starPetsDocRef);
-
-  //   // Fetch Liked Profiles
-  //   const likedProfilesDocRef = doc(
-  //     firestore,
-  //     "likedProfiles",
-  //     currentUserUsername
-  //   );
-  //   const likedProfilesSnapshot = await getDoc(likedProfilesDocRef);
-
-  //   // Extract data from snapshots
-  //   const starPets = starPetsSnapshot.exists()
-  //     ? starPetsSnapshot.data().profiles || []
-  //     : [];
-  //   const likedProfiles = likedProfilesSnapshot.exists()
-  //     ? likedProfilesSnapshot.data().profiles || []
-  //     : [];
-
-  //   return { starPets, likedProfiles };
-  // };
-
-  // const filterPetProfiles = (petProfiles, starPets, likedProfiles) => {
-  //   return petProfiles.filter(
-  //     (profile) =>
-  //       !starPets.includes(profile.username) &&
-  //       !likedProfiles.includes(profile.username)
-  //   );
-  // };
-
-  // const fetchPetProfiles = async () => {
-  //   try {
-  //     if (!likedProfilesFetched.current) {
-  //       const petProfilesRef = collection(firestore, "petProfiles");
-  //       const querySnapshot = await getDocs(petProfilesRef);
-  //       const petsData = querySnapshot.docs.map((doc) => ({
-  //         id: doc.id,
-  //         ...doc.data(),
-  //       }));
-  //       setPets(petsData);
-  //       setLoading(false);
-  //       likedProfilesFetched.current = true; // Set flag once fetched
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching pet profiles: ", error);
-  //   }
-  // };
-
-  const fetchFeedback = async () => {
-    try {
-      const feedbackRef = collection(firestore, "feedback");
-      const querySnapshot = await getDocs(feedbackRef);
-      const feedbackData = {};
-      querySnapshot.forEach((doc) => {
-        const { organization } = doc.data();
-        if (!feedbackData[organization]) {
-          feedbackData[organization] = [];
-        }
-        feedbackData[organization].push({
-          id: doc.id,
-          ...doc.data(),
-        });
-      });
-
-      // Sort feedback by createdAt if needed
-      Object.keys(feedbackData).forEach((org) => {
-        feedbackData[org].sort(
-          (a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()
-        );
-      });
-      setFeedback(feedbackData);
-    } catch (error) {
-      console.error("Error fetching feedback: ", error);
-    }
-  };
-
-  // const fetchStarPets = async () => {
-  //   try {
-  //     if (!starPetsFetched.current && username) {
-  //       const starPetsRef = doc(firestore, "StarPets", username);
-  //       const docSnap = await getDoc(starPetsRef);
-  //       if (docSnap.exists()) {
-  //         const starPetsData = docSnap.data().profiles;
-  //         // Set starPets state if data exists
-  //         // Example: setStarPets(starPetsData);
-  //       }
-  //       starPetsFetched.current = true; // Set flag once fetched
-  //     }
-  //   } catch (error) {
-  //     console.error("Error fetching star pets: ", error);
-  //   }
-  // };
 
   const getCurrentUsername = async () => {
     try {
@@ -394,42 +272,6 @@ export default function Swipe() {
     }
   };
 
-  const FeedbackModal = ({ visible, feedback, onClose }) => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={() => {
-        setModalVisible(!modalVisible);
-      }}
-    >
-      <View style={styles.modalContainer}>
-        <View style={styles.modalContent}>
-          <ScrollView>
-            {feedback.map((feedbackItem, index) => (
-              <View key={index} style={styles.feedback}>
-                <Text style={styles.feedbackText}>
-                  Username: {feedbackItem.username}
-                </Text>
-                <Text style={styles.feedbackText}>
-                  Rating: {feedbackItem.rating}
-                </Text>
-                <Text style={styles.feedbackText}>
-                  Review: {feedbackItem.review}
-                </Text>
-                <Text style={styles.feedbackText}>
-                  Created at:{" "}
-                  {feedbackItem.createdAt?.toDate().toLocaleString()}
-                </Text>
-              </View>
-            ))}
-          </ScrollView>
-          <Button title="Close" onPress={onClose} />
-        </View>
-      </View>
-    </Modal>
-  );
-
   const moveToNextCard = () => {
     if (swiperRef.current) {
       // to stop moving card
@@ -534,25 +376,6 @@ export default function Swipe() {
                       Organisation: {pet.organization}
                     </Text>
                   )}
-                  {feedback[pet.organization] &&
-                    feedback[pet.organization].length > 0 && (
-                      <TouchableOpacity
-                        style={styles.feedbackButton}
-                        onPress={() => {
-                          setSelectedFeedback(feedback[pet.organization]);
-                          setModalVisible(true);
-                        }}
-                      >
-                        <Text style={styles.feedbackButtonText}>
-                          View Feedback
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  <FeedbackModal
-                    visible={modalVisible}
-                    feedback={selectedFeedback}
-                    onClose={() => setModalVisible(false)}
-                  />
                 </View>
               )}
               <View style={styles.buttons}>
@@ -629,19 +452,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  feedbackContainer: {
-    maxHeight: 400, // Adjust the maximum height as needed
-    backgroundColor: "rgba(255, 255, 255, 0.8)",
-    borderRadius: 8,
-    padding: 10,
-  },
-  feedback: {
-    marginBottom: 10,
-  },
-  feedbackText: {
-    color: "black",
-    fontSize: 10,
-  },
   petInfoContainer: {
     flex: 1, // Take up remaining space in the card
     marginBottom: 10,
@@ -660,28 +470,5 @@ const styles = StyleSheet.create({
   },
   characteristicText: {
     color: "white", // Adjust the text color as needed
-  },
-  feedbackButton: {
-    backgroundColor: "#A78D5C",
-    padding: 10,
-    borderRadius: 5,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  feedbackButtonText: {
-    color: "white",
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-  },
-  modalContent: {
-    width: "80%",
-    backgroundColor: "white",
-    borderRadius: 10,
-    padding: 20,
-    alignItems: "center",
   },
 });

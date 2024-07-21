@@ -383,6 +383,7 @@ const styles = StyleSheet.create({
     marginHorizonatal: 50,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 10,
   },
   buttons: {
     backgroundColor: "#7D5F26",
@@ -428,7 +429,7 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   characteristicText: {
-    color: "#EDD7B5",
+    color: "white",
     fontFamily: "Inknut Antiqua Regular",
   },
   textContainer: {

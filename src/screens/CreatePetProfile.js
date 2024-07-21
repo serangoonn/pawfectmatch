@@ -147,7 +147,7 @@ export default function CreatePetProfile() {
         alert("Profile saved successfully!");
         navigation.reset({
           index: 0,
-          routes: [{ name: "PawfectMatch" }],
+          routes: [{ name: "TabNavigatorPets" }],
         });
       } else {
         alert("User not logged in");

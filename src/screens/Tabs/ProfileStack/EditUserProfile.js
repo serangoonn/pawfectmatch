@@ -146,7 +146,7 @@ export default function EditUserProfile() {
         alert("Profile saved successfully!");
         navigation.reset({
           index: 0,
-          routes: [{ name: "PawfectMatch" }],
+          routes: [{ name: "TabNavigatorOwners" }],
         });
       } else {
         alert("User not logged in");

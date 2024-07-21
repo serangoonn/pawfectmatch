@@ -3,25 +3,26 @@ import { Image, Text } from "react-native";
 //import React, { useState, useEffect } from 'react';
 //import { useNavigation } from '@react-navigation/core';
 
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import LoginScreen from '../src/screens/Login';
-import HomeScreen from '../src/screens/Tabs/HomeStack/Home';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import PetOrOwner from '../src/screens/PetOrOwner';
-import CreatePetProfile from '../src/screens/CreatePetProfile';
-import CreateUserProfile from '../src/screens/CreateUserProfile';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import ProfileScreen from '../src/screens/Tabs/ProfileStack/Profile';
-import ContactListScreen from '../src/screens/Tabs/ChatStack/ContactList';
-import RegisterScreen from '../src/screens/Register';
-import SwipingScreen from '../src/screens/Tabs/HomeStack/Swipe';
-import FeedScreen from '../src/screens/Tabs/SocialStack/Feed';
-import PostScreen from '../src/screens/Tabs/SocialStack/Post';
-import ForgotPasswordScreen from '../src/screens/ForgotPassword';
-import ChatScreen from '../src/screens/Tabs/ChatStack/Chat';
-import FeedbackRating from '../src/screens/Tabs/ProfileStack/FeedbackRating';
-import EditUserProfile from '../src/screens/Tabs/ProfileStack/EditUserProfile';
-import EditPetProfile from '../src/screens/Tabs/ProfileStack/EditPetProfile';
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import LoginScreen from "../src/screens/Login";
+import HomeScreen from "../src/screens/Tabs/HomeStack/Home";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import PetOrOwner from "../src/screens/PetOrOwner";
+import CreatePetProfile from "../src/screens/CreatePetProfile";
+import CreateUserProfile from "../src/screens/CreateUserProfile";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import ProfileScreen from "../src/screens/Tabs/ProfileStack/Profile";
+import ContactListScreen from "../src/screens/Tabs/ChatStack/ContactList";
+import RegisterScreen from "../src/screens/Register";
+import SwipingScreen from "../src/screens/Tabs/HomeStack/Swipe";
+import FeedScreen from "../src/screens/Tabs/SocialStack/Feed";
+import PostScreen from "../src/screens/Tabs/SocialStack/Post";
+import ForgotPasswordScreen from "../src/screens/ForgotPassword";
+import ChatScreen from "../src/screens/Tabs/ChatStack/Chat";
+import FeedbackRating from "../src/screens/Tabs/ProfileStack/FeedbackRating";
+import EditUserProfile from "../src/screens/Tabs/ProfileStack/EditUserProfile";
+import EditPetProfile from "../src/screens/Tabs/ProfileStack/EditPetProfile";
+import FeedbackScreen from "../src/screens/Tabs/HomeStack/Feedback";
 
 //icons
 import homeicon from "../app/icons/homeicon.png";
@@ -31,22 +32,6 @@ import profileicon from "../app/icons/profileicon.png";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
-//const [tabBarVisible, setTabBarVisible] = useState(true);
-//const navigation = useNavigation();
-
-/*useEffect(() => {
-   const unsubscribe = navigation.addListener('state', (e) => {
-      const routeName = e.data.state.routes[e.data.state.index].name;
-
-      if (routeName === 'Swipe') {
-         setTabBarVisible(false);
-      } else {
-         setTabBarVisible(true);
-      }
-   });
-
-   return unsubscribe;
-}, [navigation]);*/
 
 const ChatStack = () => (
   <Stack.Navigator>
@@ -103,6 +88,13 @@ const HomeStack = () => (
       }}
     />
     <Stack.Screen
+      name="Feedback"
+      component={FeedbackScreen}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
       name="ContactList"
       component={ContactListScreen}
       options={{
@@ -113,28 +105,36 @@ const HomeStack = () => (
 );
 
 const ProfileStack = () => (
-   <Stack.Navigator>
-      <Stack.Screen name = "Profile" component={ProfileScreen} 
-      options={{ 
-         headerShown: false,
-         }} 
-         />
-      <Stack.Screen name = "EditUserProfile" component={EditUserProfile} 
-         options={{ 
-            headerShown: false,
-         }} 
-         />
-      <Stack.Screen name = "EditPetProfile" component={EditPetProfile} 
-         options={{ 
-            headerShown: false,
-         }} 
-         />
-      <Stack.Screen name = "FeedbackRating" component={FeedbackRating}
-         options={{
-            headerShown: false,
-         }}
-         />
-   </Stack.Navigator>
+  <Stack.Navigator>
+    <Stack.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="EditUserProfile"
+      component={EditUserProfile}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="EditPetProfile"
+      component={EditPetProfile}
+      options={{
+        headerShown: false,
+      }}
+    />
+    <Stack.Screen
+      name="FeedbackRating"
+      component={FeedbackRating}
+      options={{
+        headerShown: false,
+      }}
+    />
+  </Stack.Navigator>
 );
 
 const HomeTabNavigator = () => (

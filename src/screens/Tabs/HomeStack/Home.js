@@ -185,6 +185,13 @@ const Home = () => {
         />
       </TouchableOpacity>
 
+      <TouchableOpacity onPress={() => navigation.push("Feedback")}>
+        <Image
+          source={require("../HomeStack/images/feedbackbutton.png")}
+          style={styles.imageFeedbackButton}
+        />
+      </TouchableOpacity>
+
       <Text
         style={{
           alignSelf: "center",
@@ -303,6 +310,13 @@ const styles = StyleSheet.create({
   imageButtonAdoptNow: {
     width: 330,
     height: 150,
+    marginTop: 15,
+    marginLeft: 15,
+    borderRadius: 10,
+  },
+  imageFeedbackButton: {
+    width: 330,
+    height: 100,
     marginTop: 15,
     marginLeft: 15,
     borderRadius: 10,
