@@ -4,6 +4,7 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   Image,
   Alert,
   TouchableOpacity,
@@ -19,21 +20,21 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import DropDownPicker from "react-native-dropdown-picker";
 
 export default function Swipe() {
   const navigation = useNavigation();
   const [pets, setPets] = useState([]);
   const [previousPets, setPreviousPets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const swiperRef = useRef(null); // Reference for Swiper component
+  const [open, setOpen] = useState(false);
+  const swiperRef = useRef(null);
   const [username, setUsername] = useState("");
-
+  const [selectedFilters, setSelectedFilters] = useState([]);
+  const [items, setItems] = useState([]);
   // Get the current user ID
   const auth = getAuth();
   const currentUser = auth.currentUser ? auth.currentUser.uid : null;
-
-  // Refs to manage initial fetch
-  const likedProfilesFetched = useRef(false);
 
   useEffect(() => {
     const user = auth.currentUser;
@@ -47,24 +48,75 @@ export default function Swipe() {
 
   useEffect(() => {
     fetchPetProfiles();
+  }, [selectedFilters]);
+
+  useEffect(() => {
+    // Fetch unique characteristics and locations for dropdowns
+    const fetchCharacteristicsAndLocations = async () => {
+      try {
+        const petProfilesRef = collection(firestore, "petProfiles");
+        const querySnapshot = await getDocs(petProfilesRef);
+        const characteristics = new Set();
+        const locations = new Set();
+        querySnapshot.docs.forEach((doc) => {
+          const pet = doc.data();
+          if (pet.fixedCharacteristics) {
+            pet.fixedCharacteristics.forEach((char) =>
+              characteristics.add(char)
+            );
+          }
+          if (pet.location) {
+            locations.add(pet.location);
+          }
+        });
+        setItems([
+          ...[...characteristics].map((char) => ({
+            label: char,
+            value: `char_${char}`,
+          })),
+          ...[...locations].map((loc) => ({ label: loc, value: `loc_${loc}` })),
+        ]);
+      } catch (error) {
+        console.error("Error fetching characteristics and locations: ", error);
+      }
+    };
+    fetchCharacteristicsAndLocations();
   }, []);
 
   const fetchPetProfiles = async () => {
     try {
-      if (!likedProfilesFetched.current) {
-        const petProfilesRef = collection(firestore, "petProfiles");
-        const querySnapshot = await getDocs(petProfilesRef);
-        const petsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setPets(petsData);
-        setLoading(false);
-        likedProfilesFetched.current = true; // Set flag once fetched
-      }
+      const petProfilesRef = collection(firestore, "petProfiles");
+      const querySnapshot = await getDocs(petProfilesRef);
+      const petsData = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      const filteredPets = petsData.filter(
+        (pet) =>
+          selectedFilters.length === 0 ||
+          selectedFilters.every((filter) => {
+            if (filter.startsWith("char_")) {
+              return (
+                pet.fixedCharacteristics &&
+                pet.fixedCharacteristics.includes(filter.replace("char_", ""))
+              );
+            } else if (filter.startsWith("loc_")) {
+              return pet.location === filter.replace("loc_", "");
+            }
+            return false;
+          })
+      );
+
+      setPets(filteredPets);
+      setLoading(false);
     } catch (error) {
       console.error("Error fetching pet profiles: ", error);
     }
+  };
+
+  const handleFilterChange = (value) => {
+    setSelectedFilters(value);
   };
 
   const getCurrentUsername = async () => {
@@ -303,6 +355,25 @@ export default function Swipe() {
         />
       </TouchableOpacity>
 
+      <View style={styles.filtersContainer}>
+        <DropDownPicker
+          open={open}
+          value={selectedFilters}
+          items={items}
+          setOpen={setOpen}
+          setValue={handleFilterChange}
+          placeholder="Select filter"
+          multiple
+          max={3}
+          min={0}
+          mode="BADGE"
+          badgeDotColors={["#5b4636"]}
+          badgeColors={["#EDD7B5"]}
+          style={styles.dropdown}
+          dropDownContainerStyle={styles.dropdownContainer}
+        />
+      </View>
+
       <View>
         <Swiper
           ref={swiperRef}
@@ -419,6 +490,15 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
   },
+  card: {
+    marginTop: -50,
+    width: 350,
+    height: 420,
+    borderRadius: 10,
+    backgroundColor: "#5b4636",
+    padding: 20,
+    zIndex: 1,
+  },
   container: {
     flex: 1,
     alignItems: "center",
@@ -429,16 +509,39 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
   },
-  card: {
-    marginTop: -50,
-    width: 350,
-    height: 460,
-    borderRadius: 10,
-    backgroundColor: "#5b4636",
-    padding: 20,
+  filtersContainer: {
+    margin: 10,
+    zIndex: 2,
+    // flexDirection: "row",
+    //justifyContent: "space-between",
+  },
+  filterTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  dropdown: {
+    backgroundColor: "#EDD7B5",
+    borderColor: "#5b4636",
+    borderRadius: 30,
+  },
+  dropdownContainer: {
+    backgroundColor: "#EDD7B5",
+    borderColor: "#5b4636",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  backbutton: {
+    width: 50,
+    height: 50,
+    marginLeft: 10,
   },
   text: {
     color: "white",
+    fontSize: 12,
   },
   profileImage: {
     width: 160,

@@ -42,13 +42,6 @@ const ChatStack = () => (
         headerShown: false,
       }}
     />
-    <Stack.Screen
-      name="Chat"
-      component={ChatScreen}
-      options={{
-        headerShown: false,
-      }}
-    />
   </Stack.Navigator>
 );
 
@@ -61,13 +54,6 @@ const SocialStack = () => (
         headerShown: false,
       }}
     />
-    <Stack.Screen
-      name="Post"
-      component={PostScreen}
-      options={{
-        headerShown: false,
-      }}
-    />
   </Stack.Navigator>
 );
 
@@ -76,20 +62,6 @@ const HomeStack = () => (
     <Stack.Screen
       name="Home"
       component={HomeScreen}
-      options={{
-        headerShown: false,
-      }}
-    />
-    <Stack.Screen
-      name="Swipe"
-      component={SwipingScreen}
-      options={{
-        headerShown: false,
-      }}
-    />
-    <Stack.Screen
-      name="Feedback"
-      component={FeedbackScreen}
       options={{
         headerShown: false,
       }}
@@ -109,20 +81,6 @@ const ProfileStack = () => (
     <Stack.Screen
       name="Profile"
       component={ProfileScreen}
-      options={{
-        headerShown: false,
-      }}
-    />
-    <Stack.Screen
-      name="EditUserProfile"
-      component={EditUserProfile}
-      options={{
-        headerShown: false,
-      }}
-    />
-    <Stack.Screen
-      name="EditPetProfile"
-      component={EditPetProfile}
       options={{
         headerShown: false,
       }}
@@ -274,14 +232,14 @@ export default function App() {
           }}
         />
         <Stack.Screen
-          name="Pets"
+          name="CreatePetProfile"
           component={CreatePetProfile}
           options={{
             headerShown: false,
           }}
         />
         <Stack.Screen
-          name="Aspiring Pet Owners"
+          name="CreateUserProfile"
           component={CreateUserProfile}
           options={{
             headerShown: false,
@@ -290,6 +248,48 @@ export default function App() {
         <Stack.Screen
           name="PawfectMatch"
           component={HomeTabNavigator}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Swipe"
+          component={SwipingScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Feedback"
+          component={FeedbackScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={ChatScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="Post"
+          component={PostScreen}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="EditPetProfile"
+          component={EditPetProfile}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="EditUserProfile"
+          component={EditUserProfile}
           options={{
             headerShown: false,
           }}

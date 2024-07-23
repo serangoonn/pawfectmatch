@@ -4,7 +4,7 @@ import { useNavigation } from "@react-navigation/core";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { TouchableOpacity } from "react-native-gesture-handler";
 
-export default function PetOrOwner({ setUserType }) {
+export default function PetOrOwner() {
   const navigation = useNavigation();
   return (
     <ImageBackground
@@ -15,8 +15,7 @@ export default function PetOrOwner({ setUserType }) {
         <SafeAreaView style={styles.buttonContainer}>
           <TouchableOpacity
             onPress={() => {
-              setUserType("pet");
-              navigation.navigate("CreatePetProfile");
+              navigation.push("CreatePetProfile");
             }}
           >
             <Image
@@ -26,8 +25,7 @@ export default function PetOrOwner({ setUserType }) {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              setUserType("owner");
-              navigation.navigate("CreateUserProfile");
+              navigation.push("CreateUserProfile");
             }}
           >
             <Image

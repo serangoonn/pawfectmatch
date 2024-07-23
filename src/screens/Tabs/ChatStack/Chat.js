@@ -263,7 +263,7 @@ export default function Chat({ route }) {
             {image && (
               <Image source={{ uri: image }} style={styles.previewImage} />
             )}
-            <View style={{ flexDirection: "row" }}>
+            <View style={{ flexDirection: "row", marginBottom: 10 }}>
               <TouchableOpacity onPress={handleImagePick}>
                 <Image
                   source={require("../ChatStack/images/attach.png")}

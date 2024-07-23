@@ -93,7 +93,7 @@ export default function CreateUserProfile() {
 
     try {
       const isUsernameAvailable = await checkUsernameAvailability();
-      if (!isUsernameAvailable && !isEditing) {
+      if (!isUsernameAvailable) {
         alert("Username is already taken.");
         return;
       }
@@ -131,7 +131,7 @@ export default function CreateUserProfile() {
         alert("Profile saved successfully!");
         navigation.reset({
           index: 0,
-          routes: [{ name: "TabNavigatorOwners" }],
+          routes: [{ name: "PawfectMatch" }],
         });
       } else {
         alert("User not logged in");

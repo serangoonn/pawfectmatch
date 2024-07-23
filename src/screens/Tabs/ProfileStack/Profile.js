@@ -4,13 +4,27 @@ import {
   StyleSheet,
   Text,
   ScrollView,
+  Alert,
   View,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/core";
 import { firestore, storage, auth } from "../../../utils/firebase";
-import { doc, getDoc, deleteDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  deleteDoc,
+  query,
+  collection,
+  getDocs,
+  where,
+} from "firebase/firestore";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  deleteUser,
+} from "firebase/auth";
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -92,8 +106,10 @@ export default function Profile() {
           await deleteDoc(doc(firestore, "petProfiles", username));
         }
 
-        // Delete user's posts from Firestore
-        const postsQuery = query(collection(firestore, "posts", userId));
+        const postsQuery = query(
+          collection(firestore, "posts"),
+          where("username", "==", username)
+        );
         const querySnapshot = await getDocs(postsQuery);
 
         // Iterate over the documents and delete each one
