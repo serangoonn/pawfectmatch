@@ -32,6 +32,8 @@ export default function Swipe() {
   const [username, setUsername] = useState("");
   const [selectedFilters, setSelectedFilters] = useState([]);
   const [items, setItems] = useState([]);
+  const [profilephoto, setProfilephoto] = useState("");
+
   // Get the current user ID
   const auth = getAuth();
   const currentUser = auth.currentUser ? auth.currentUser.uid : null;
@@ -39,7 +41,8 @@ export default function Swipe() {
   useEffect(() => {
     const user = auth.currentUser;
     if (user) {
-      setUsername(user.displayName || "");
+      setUsername(user.displayName);
+      setProfilephoto(user.photoURL);
       setLoading(false);
     } else {
       setLoading(false);
@@ -163,7 +166,7 @@ export default function Swipe() {
           {
             profiles: arrayUnion({
               username: username,
-              imageUrl: pet.imageUrl || "",
+              imageUrl: profilephoto || "",
             }),
           },
           { merge: true }

@@ -393,126 +393,171 @@ export default function Feed() {
             {modalLoading ? (
               <ActivityIndicator size="large" color="#0000ff" />
             ) : (
-              <>
-                {isUserProfile ? (
-                  <>
-                    <Text style={styles.profileText}>Profile</Text>
-                    <Text style={styles.modalText}>
-                      Username: {profileusername}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Experience level: {experiencelevel}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Breed: {breed || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Location: {location || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>
-                      Animal: {animal || "Not provided"}
-                    </Text>
-                    <Text style={styles.modalText}>Characteristics:</Text>
-                    <FlatList
-                      data={characteristics}
-                      keyExtractor={(item, index) => index.toString()}
-                      renderItem={({ item }) => (
-                        <Text style={styles.modalText}>- {item}</Text>
-                      )}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.profileText}>
-                      @{profileusername} ({petname})
-                    </Text>
-                    <Image
-                      source={{ uri: selectedUser.profilephoto }}
-                      style={styles.profilephoto}
-                    />
-
-                    <View style={{ flexDirection: "row", marginBottom: 5 }}>
+              selectedUser && (
+                <>
+                  {isUserProfile ? (
+                    <>
+                      <Text style={styles.profileText}>@{profileusername}</Text>
                       <Image
-                        source={require("../HomeStack/images/locationmarker.png")}
-                        style={{ height: 20, width: 13, marginRight: 5 }}
+                        source={{ uri: selectedUser.profilephoto }}
+                        style={styles.profilephoto}
                       />
-                      <Text style={styles.text}>{location}</Text>
-                      <Image
-                        source={require("../HomeStack/images/paw.png")}
+                      <View style={{ flexDirection: "row", marginBottom: 5 }}>
+                        <Image
+                          source={require("../HomeStack/images/locationmarker.png")}
+                          style={{ height: 20, width: 13, marginRight: 5 }}
+                        />
+                        <Text style={styles.text}>{location}</Text>
+                        <Image
+                          source={require("../HomeStack/images/paw.png")}
+                          style={{
+                            height: 20,
+                            width: 15,
+                            marginLeft: 10,
+                            marginRight: 5,
+                          }}
+                        />
+                        <Text style={styles.text}>
+                          {animal}, {breed}
+                        </Text>
+                      </View>
+                      <Text
                         style={{
-                          height: 20,
-                          width: 15,
-                          marginLeft: 10,
-                          marginRight: 5,
+                          alignSelf: "left",
+                          color: "white",
+                          marginTop: 5,
+                          fontWeight: "bold",
                         }}
+                      >
+                        Experience level: {experiencelevel}
+                      </Text>
+                      <Text
+                        style={{
+                          alignSelf: "left",
+                          color: "white",
+                          marginTop: 5,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Characteristics:
+                      </Text>
+
+                      <View style={styles.characteristicsContainer}>
+                        <Text style={styles.text}>
+                          {Array.isArray(characteristics) &&
+                          characteristics.length > 0 ? (
+                            characteristics.map((characteristic, index) => (
+                              <View
+                                key={index}
+                                style={styles.characteristicBox}
+                              >
+                                <Text style={styles.characteristicText}>
+                                  {characteristic}
+                                </Text>
+                              </View>
+                            ))
+                          ) : (
+                            <Text style={styles.characteristicText}>-</Text>
+                          )}
+                        </Text>
+                      </View>
+                    </>
+                  ) : (
+                    <>
+                      <Text style={styles.profileText}>
+                        @{profileusername} ({petname})
+                      </Text>
+                      <Image
+                        source={{ uri: selectedUser.profilephoto }}
+                        style={styles.profilephoto}
                       />
-                      <Text style={styles.text}>
-                        {animal}, {breed}
-                      </Text>
-                    </View>
-                    <Text
-                      style={{
-                        alignSelf: "left",
-                        color: "white",
-                        marginTop: 5,
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Characteristics:
-                    </Text>
-                    <View style={styles.characteristicsContainer}>
-                      <Text style={styles.text}>
-                        {Array.isArray(characteristics) &&
-                        characteristics.length > 0 ? (
-                          characteristics.map((characteristic, index) => (
-                            <View key={index} style={styles.characteristicBox}>
-                              <Text style={styles.characteristicText}>
-                                {characteristic}
-                              </Text>
-                            </View>
-                          ))
-                        ) : (
-                          <Text style={styles.characteristicText}>-</Text>
-                        )}
-                      </Text>
-                    </View>
 
-                    <Text
-                      style={{
-                        color: "white",
-                        alignSelf: "left",
-                        fontWeight: "bold",
-                      }}
-                    >
-                      Description:
-                    </Text>
+                      <View style={{ flexDirection: "row", marginBottom: 5 }}>
+                        <Image
+                          source={require("../HomeStack/images/locationmarker.png")}
+                          style={{ height: 20, width: 13, marginRight: 5 }}
+                        />
+                        <Text style={styles.text}>{location}</Text>
+                        <Image
+                          source={require("../HomeStack/images/paw.png")}
+                          style={{
+                            height: 20,
+                            width: 15,
+                            marginLeft: 10,
+                            marginRight: 5,
+                          }}
+                        />
+                        <Text style={styles.text}>
+                          {animal}, {breed}
+                        </Text>
+                      </View>
+                      <Text
+                        style={{
+                          alignSelf: "left",
+                          color: "white",
+                          marginTop: 5,
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Characteristics:
+                      </Text>
+                      <View style={styles.characteristicsContainer}>
+                        <Text style={styles.text}>
+                          {Array.isArray(characteristics) &&
+                          characteristics.length > 0 ? (
+                            characteristics.map((characteristic, index) => (
+                              <View
+                                key={index}
+                                style={styles.characteristicBox}
+                              >
+                                <Text style={styles.characteristicText}>
+                                  {characteristic}
+                                </Text>
+                              </View>
+                            ))
+                          ) : (
+                            <Text style={styles.characteristicText}>-</Text>
+                          )}
+                        </Text>
+                      </View>
 
-                    <Text
-                      style={{
-                        color: "white",
-                        alignSelf: "left",
-                        marginTop: 3,
-                      }}
+                      <Text
+                        style={{
+                          color: "white",
+                          alignSelf: "left",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        Description:
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "white",
+                          alignSelf: "left",
+                          marginTop: 3,
+                        }}
+                      >
+                        {description}
+                      </Text>
+                    </>
+                  )}
+                  <View style={{ flexDirection: "row" }}>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => setModalVisible(!modalVisible)}
                     >
-                      {description}
-                    </Text>
-                  </>
-                )}
-                <View style={{ flexDirection: "row" }}>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => setModalVisible(!modalVisible)}
-                  >
-                    <Text style={styles.closeButtonText}>Close</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={() => handleConnect(profileusername)}
-                  >
-                    <Text style={styles.closeButtonText}>Connect</Text>
-                  </TouchableOpacity>
-                </View>
-              </>
+                      <Text style={styles.closeButtonText}>Close</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.closeButton}
+                      onPress={() => handleConnect(profileusername)}
+                    >
+                      <Text style={styles.closeButtonText}>Connect</Text>
+                    </TouchableOpacity>
+                  </View>
+                </>
+              )
             )}
           </View>
         </View>
@@ -532,7 +577,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 200,
+    height: 250,
     borderRadius: 20,
   },
   background: {
