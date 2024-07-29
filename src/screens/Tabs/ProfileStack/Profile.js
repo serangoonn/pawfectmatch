@@ -16,6 +16,7 @@ import {
   getDoc,
   deleteDoc,
   query,
+  updateDoc,
   collection,
   getDocs,
   where,
@@ -100,11 +101,12 @@ export default function Profile() {
         await reauthenticateWithCredential(user, credential);
 
         // Delete user or pet profiles from Firestore
-        if (isUserProfile) {
-          await deleteDoc(doc(firestore, "userProfiles", username));
-        } else {
-          await deleteDoc(doc(firestore, "petProfiles", username));
-        }
+        const collectionName = isUserProfile ? "userProfiles" : "petProfiles";
+        const docRef = doc(firestore, collectionName, username);
+
+        await updateDoc(docRef, {
+          username: "deleted account",
+        });
 
         const postsQuery = query(
           collection(firestore, "posts"),
@@ -217,9 +219,10 @@ export default function Profile() {
             style={{
               alignSelf: "center",
               fontFamily: "Inknut Antiqua Regular",
-              fontSize: 30,
+              fontSize: 20,
               fontWeight: "bold",
               marginLeft: 15,
+              width: 200,
             }}
           >
             @{username}
@@ -426,8 +429,10 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 90,
-    marginVertical: 10,
-    marginLeft: 50,
+    //marginVertical: 10,
+    //marginLeft: 50,
+    top: 10,
+    right: -5,
   },
   background: {
     flex: 1,

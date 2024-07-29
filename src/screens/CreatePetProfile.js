@@ -55,7 +55,7 @@ export default function CreatePetProfile() {
     { key: "4", value: "playful" },
     { key: "5", value: "disciplined" },
     { key: "6", value: "quiet" },
-    { key: "7", value: "open to rescue animals" },
+    { key: "7", value: "rescue animal" },
   ];
   const [organization, setOrganization] = useState("");
   const organizationOptions = [
@@ -233,6 +233,7 @@ export default function CreatePetProfile() {
             style={styles.input}
             value={username}
             onChangeText={setUsername}
+            maxLength={10}
           />
 
           <Text style={{ color: "white" }}> Pet's Name</Text>
@@ -358,6 +359,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderRadius: 30,
     backgroundColor: "#5b4636",
+    width: 350,
   },
   uploadButton: {
     borderRadius: 5,
@@ -404,7 +406,7 @@ const styles = StyleSheet.create({
   },
   customText: {
     fontFamily: "Roxborough CF Bold",
-    fontSize: 40,
+    fontSize: 30,
     alignSelf: "center",
   },
   imagebutton: {

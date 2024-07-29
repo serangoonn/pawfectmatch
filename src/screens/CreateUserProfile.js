@@ -234,6 +234,7 @@ export default function CreateUserProfile() {
             style={styles.input}
             value={username}
             onChangeText={setUsername}
+            maxLength={10}
           />
           <Text style={{ color: "white" }}> Your experience level</Text>
           <TextInput
@@ -266,7 +267,7 @@ export default function CreateUserProfile() {
 
           <Text style={{ color: "white", marginTop: 15 }}>
             {" "}
-            Animal Type Preference
+            Animal Preference
           </Text>
           <SelectList
             setSelected={setAnimalType}
@@ -342,6 +343,7 @@ const styles = StyleSheet.create({
     borderColor: "black",
     borderRadius: 30,
     backgroundColor: "#5b4636",
+    width: 350,
   },
   uploadButton: {
     borderRadius: 5,

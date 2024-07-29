@@ -145,7 +145,7 @@ export default function EditPetProfile() {
         alert("Profile saved successfully!");
         navigation.reset({
           index: 0,
-          routes: [{ name: "TabNavigatorPets" }],
+          routes: [{ name: "PawfectMatch" }],
         });
       } else {
         alert("User not logged in");
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   },
   customText: {
     fontFamily: "Roxborough CF Bold",
-    fontSize: 40,
+    fontSize: 30,
     alignSelf: "center",
   },
   imagebutton: {

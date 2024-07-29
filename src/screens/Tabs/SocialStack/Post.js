@@ -16,6 +16,7 @@ import { firestore, storage, auth } from "../../../utils/firebase";
 import { collection, addDoc } from "firebase/firestore";
 import { uploadBytesResumable, ref, getDownloadURL } from "firebase/storage";
 import { useNavigation } from "@react-navigation/core";
+import { ScrollView } from "react-native-gesture-handler";
 
 export default function Post() {
   const navigation = useNavigation();
@@ -116,15 +117,29 @@ export default function Post() {
           </TouchableOpacity>
           <Text style={styles.text}>Make a new post</Text>
         </View>
+        <ScrollView>
+          <View style={styles.contentContainer}>
+            <View style={styles.imageContainer}>
+              <Button
+                color="#866629"
+                onPress={handleImagePick}
+                title="Select a picture from your gallery:"
+              />
+              {image && <Image source={{ uri: image }} style={styles.image} />}
+            </View>
 
-        <View style={styles.contentContainer}>
-          <View style={styles.imageContainer}>
-            <Button
-              color="#866629"
-              onPress={handleImagePick}
-              title="Select a picture from your gallery:"
-            />
-            {image && <Image source={{ uri: image }} style={styles.image} />}
+            <View style={styles.captionContainer}>
+              <Text style={styles.captionText}>Caption:</Text>
+              <TextInput
+                placeholder="Type here..."
+                style={styles.input}
+                value={caption}
+                onChangeText={setCaption}
+              />
+              <TouchableOpacity style={styles.postbutton} onPress={submitData}>
+                <Text style={styles.posttext}>Post!</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={styles.captionContainer}>
@@ -139,7 +154,7 @@ export default function Post() {
               <Text style={styles.posttext}>Post!</Text>
             </TouchableOpacity>
           </View>
-        </View>
+        </ScrollView>
       </ImageBackground>
     </KeyboardAvoidingView>
   );
@@ -157,6 +172,10 @@ const styles = StyleSheet.create({
   },
   backbutton: {
     marginRight: 10,
+  },
+  keyboardAvoidingContainer: {
+    flex: 1,
+    backgroundColor: "#EDD7B5", // Adjust the color to match your app's theme
   },
   backbuttontext: {
     flexDirection: "row",
@@ -184,7 +203,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: 200,
+    height: 300,
     marginBottom: 20,
     borderRadius: 30,
   },
