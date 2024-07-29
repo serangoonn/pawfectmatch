@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   },
   customText: {
     fontFamily: "Roxborough CF Bold",
-    fontSize: 40,
+    fontSize: 30,
     alignSelf: "center",
   },
   imagebutton: {

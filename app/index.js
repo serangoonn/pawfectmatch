@@ -85,13 +85,6 @@ const ProfileStack = () => (
         headerShown: false,
       }}
     />
-    <Stack.Screen
-      name="FeedbackRating"
-      component={FeedbackRating}
-      options={{
-        headerShown: false,
-      }}
-    />
   </Stack.Navigator>
 );
 
@@ -290,6 +283,13 @@ export default function App() {
         <Stack.Screen
           name="EditUserProfile"
           component={EditUserProfile}
+          options={{
+            headerShown: false,
+          }}
+        />
+        <Stack.Screen
+          name="FeedbackRating"
+          component={FeedbackRating}
           options={{
             headerShown: false,
           }}

@@ -97,15 +97,22 @@ export default function FeedbackRating() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={Platform.OS === "ios" ? 50 : 0}
     >
-      <ScrollView>
-        <ImageBackground
-          source={require("../HomeStack/images/lightbrown.png")}
-          style={styles.background}
-        >
+      <ImageBackground
+        source={require("../HomeStack/images/lightbrown.png")}
+        style={styles.background}
+      >
+        <Image
+          source={require("../HomeStack/images/header.png")}
+          style={{ alignSelf: "center" }}
+        />
+
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Image
-            source={require("../HomeStack/images/header.png")}
-            style={{ alignSelf: "center" }}
+            source={require("../HomeStack/images/backbutton.png")}
+            style={styles.backbutton}
           />
+        </TouchableOpacity>
+        <ScrollView>
           <View>
             <Text
               style={{
@@ -172,7 +179,6 @@ export default function FeedbackRating() {
                 fontWeight: "bold",
                 color: "#7D5F26",
                 marginLeft: 15,
-                marginTop: 10,
                 lineHeight: 60,
               }}
             >
@@ -219,8 +225,8 @@ export default function FeedbackRating() {
               </TouchableOpacity>
             </View>
           </View>
-        </ImageBackground>
-      </ScrollView>
+        </ScrollView>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
