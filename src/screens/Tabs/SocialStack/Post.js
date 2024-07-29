@@ -135,7 +135,7 @@ export default function Post() {
               value={caption}
               onChangeText={setCaption}
             />
-            <TouchableOpacity style={styles.postbutton} onPress={submitData}>
+            <TouchableOpacity style={styles.postbutton} onPress={submitData} testID="postButton">
               <Text style={styles.posttext}>Post!</Text>
             </TouchableOpacity>
           </View>
