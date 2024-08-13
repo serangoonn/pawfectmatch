@@ -445,22 +445,34 @@ export default function Swipe() {
                 </View>
               )}
               <View style={styles.buttons}>
-                <TouchableOpacity onPress={handleUndo}>
+                <TouchableOpacity 
+                  onPress={handleUndo}
+                  testID="undoButton"
+                >
                   <Image
                     source={require("../HomeStack/images/undobutton.png")}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleCancel}>
+                <TouchableOpacity 
+                  onPress={handleCancel}
+                  testID="cancelButton"
+                >
                   <Image
                     source={require("../HomeStack/images/cancelbutton.png")}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleLike(pet)}>
+                <TouchableOpacity
+                  onPress={() => handleLike(pet)}
+                  testID="heartButton"
+                >
                   <Image
                     source={require("../HomeStack/images/likebutton.png")}
                   />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => handleStar(pet)}>
+                <TouchableOpacity 
+                  onPress={() => handleStar(pet)}
+                  testID="starButton"
+                >
                   <Image
                     source={require("../HomeStack/images/starbutton.png")}
                   />

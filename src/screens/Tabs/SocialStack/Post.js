@@ -140,6 +140,19 @@ export default function Post() {
               </TouchableOpacity>
             </View>
           </View>
+
+          <View style={styles.captionContainer}>
+            <Text style={styles.captionText}>Caption:</Text>
+            <TextInput
+              placeholder="Type here..."
+              style={styles.input}
+              value={caption}
+              onChangeText={setCaption}
+            />
+            <TouchableOpacity style={styles.postbutton} onPress={submitData} testID="postButton">
+              <Text style={styles.posttext}>Post!</Text>
+            </TouchableOpacity>
+          </View>
         </ScrollView>
       </ImageBackground>
     </KeyboardAvoidingView>

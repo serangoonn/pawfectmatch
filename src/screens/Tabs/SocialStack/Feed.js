@@ -296,7 +296,10 @@ export default function Feed() {
                 </View>
                 <Image source={{ uri: item.imageUrl }} style={styles.image} />
                 <View style={styles.likeContainer}>
-                  <TouchableOpacity onPress={() => handleLike(item.id)}>
+                  <TouchableOpacity 
+                    onPress={() => handleLike(item.id)}
+                    testID={`like-button-${item.id}`}
+                  >
                     <Image
                       source={
                         userLiked
@@ -347,6 +350,7 @@ export default function Feed() {
                   />
                   <TouchableOpacity
                     onPress={() => handleAddComment(item.id)}
+                    testID={`post-comment-button-${item.id}`}
                     style={[
                       styles.commentButton,
                       !newComment && styles.commentButtonDisabled,

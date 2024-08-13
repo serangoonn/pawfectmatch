@@ -260,7 +260,10 @@ export default function Chat({ route }) {
               <Image source={{ uri: image }} style={styles.previewImage} />
             )}
             <View style={{ flexDirection: "row", marginBottom: 10 }}>
-              <TouchableOpacity onPress={handleImagePick}>
+              <TouchableOpacity 
+                onPress={handleImagePick}
+                testID="imagePickerIcon"
+              >
                 <Image
                   source={require("../ChatStack/images/attach.png")}
                   style={styles.imagePickerIcon}
@@ -273,7 +276,11 @@ export default function Chat({ route }) {
                 placeholder="Type a message"
                 placeholderTextColor={"#7D5F26"}
               />
-              <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
+              <TouchableOpacity 
+                onPress={sendMessage} 
+                style={styles.sendButton}
+                testID="sendButton"
+              >
                 <Text style={styles.sendButtonText}>Send</Text>
               </TouchableOpacity>
             </View>
