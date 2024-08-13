@@ -174,6 +174,7 @@ export default function ContactList() {
             value={searchQuery}
             onChangeText={setSearchQuery}
             placeholderTextColor={"#7D5F26"}
+            testID="searchInput"
           />
           <TouchableOpacity onPress={refreshData}>
             <Image source={require("../ChatStack/images/refresh.png")} />
