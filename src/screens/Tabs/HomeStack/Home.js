@@ -61,7 +61,7 @@ const Home = () => {
 
   const fetchStarredPets = async () => {
     try {
-      console.log("Fetching pets for username: ", username); // Debugging line
+      // console.log("Fetching pets for username: ", username);
       if (username) {
         const docRef = doc(firestore, "StarPets", username);
         const docSnap = await getDoc(docRef);
@@ -346,8 +346,7 @@ const styles = StyleSheet.create({
   },
   information: {
     flexDirection: "column",
-    //flexWrap: "wrap",
-    maxWidth: "55%", // Adjust as needed
+    maxWidth: "55%",
     marginRight: 70,
   },
   profileImage: {
@@ -367,7 +366,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   deleteButton: {
-    // marginLeft: 10,
     padding: 5,
     backgroundColor: "#7D5F26",
     borderRadius: 5,
@@ -388,7 +386,6 @@ const styles = StyleSheet.create({
   },
   characteristicsContainer: {
     flexDirection: "row",
-    //flexWrap: "wrap",
     marginTop: 10,
   },
   characteristicBox: {
@@ -400,7 +397,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   characteristicText: {
-    color: "white", // Adjust the text color as needed
+    color: "white",
     alignSelf: "center",
     fontSize: 10,
   },

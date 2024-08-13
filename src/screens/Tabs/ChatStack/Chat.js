@@ -25,7 +25,7 @@ import { firestore } from "../../../utils/firebase";
 import { useNavigation } from "@react-navigation/core";
 import * as ImagePicker from "expo-image-picker";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
-import { storage } from "../../../utils/firebase"; // Adjust this import as needed
+import { storage } from "../../../utils/firebase";
 
 export default function Chat({ route }) {
   const chatPartner = route.params.profile;
@@ -48,8 +48,6 @@ export default function Chat({ route }) {
     const user = auth.currentUser;
     if (user) {
       setUsername(user.displayName);
-      // Assuming profile photo is stored in Firebase Storage or another location
-      // Replace 'photoURL' with your actual field containing profile photo URL
       setCurrentUserPhoto(user.photoURL);
       setLoading(false);
     } else {
@@ -57,11 +55,10 @@ export default function Chat({ route }) {
     }
   }, []);
 
-  // get chatPartner profile photo from userProfiles or petProfiles
   useEffect(() => {
     const fetchPartnerPhoto = async () => {
       try {
-        // Check in userProfiles collection
+        // userProfiles collection
         const userProfilesRef = doc(firestore, "userProfiles", chatPartner);
         const userProfilesSnap = await getDoc(userProfilesRef);
         if (userProfilesSnap.exists()) {
@@ -70,7 +67,7 @@ export default function Chat({ route }) {
           return;
         }
 
-        // Check in petProfiles collection
+        // petProfiles collection
         const petProfilesRef = doc(firestore, "petProfiles", chatPartner);
         const petProfilesSnap = await getDoc(petProfilesRef);
         if (petProfilesSnap.exists()) {
@@ -114,13 +111,13 @@ export default function Chat({ route }) {
 
       await addDoc(collection(firestore, "messages", chatDocId, "chat"), {
         text: newMessage,
-        imageUrl: imageUrl || null, // Include image URL if exists
+        imageUrl: imageUrl || null,
         sender: username,
         timestamp: new Date(),
       });
 
-      setNewMessage(""); // Clear input field after sending message
-      setImage(null); // Clear selected image
+      setNewMessage("");
+      setImage(null);
     } catch (error) {
       console.error("Error sending message:", error);
     }
@@ -259,7 +256,6 @@ export default function Chat({ route }) {
           />
 
           <View style={styles.inputContainer}>
-            {/* Image Preview */}
             {image && (
               <Image source={{ uri: image }} style={styles.previewImage} />
             )}
@@ -294,7 +290,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingContainer: {
     flex: 1,
-    backgroundColor: "#EDD7B5", // Adjust the color to match your app's theme
+    backgroundColor: "#EDD7B5",
   },
   messagesList: {
     flex: 1,
@@ -375,7 +371,6 @@ const styles = StyleSheet.create({
   background: {
     flex: 1,
     justifyContent: "center",
-    //alignItems: 'center',
   },
   backbutton: {
     alignSelf: "left",
@@ -384,7 +379,6 @@ const styles = StyleSheet.create({
   },
   usernameTop: {
     fontSize: 30,
-    //fontWeight: 'bold',
     marginLeft: 10,
   },
   imagePickerIcon: {
@@ -413,11 +407,11 @@ const styles = StyleSheet.create({
   messageTimestamp: {
     fontSize: 12,
     color: "#888",
-    alignSelf: "flex-end", // This will push the timestamp to the right
+    alignSelf: "flex-end",
   },
   messageTimestampOther: {
     fontSize: 12,
     color: "#888",
-    alignSelf: "flex-start", // This will push the timestamp to the right
+    alignSelf: "flex-start",
   },
 });

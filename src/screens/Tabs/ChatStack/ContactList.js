@@ -71,14 +71,12 @@ export default function ContactList() {
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         const profiles = docSnap.data().profiles;
-        // Fetch latest message for each profile
         const profilesWithLatestMessages = await Promise.all(
           profiles.map(async (profile) => {
             const latestMessage = await fetchLatestMessage(profile.username);
             return { ...profile, latestMessage };
           })
         );
-        // Ensure each profile has a unique key
         const uniqueProfiles = profilesWithLatestMessages.map(
           (profile, index) => ({
             ...profile,
@@ -122,7 +120,6 @@ export default function ContactList() {
   };
 
   async function handleDelete(pet) {
-    // Reference to current user's liked profiles
     const currentUserLikedProfilesRef = doc(
       firestore,
       "likedProfiles",
@@ -137,7 +134,6 @@ export default function ContactList() {
       }),
     });
 
-    // Reference to pet's liked profiles
     const petProfileRef = doc(firestore, "likedProfiles", pet.username);
 
     // Remove the current user from the pet's liked profiles

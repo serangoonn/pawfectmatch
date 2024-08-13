@@ -13,7 +13,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/core";
 import { firestore, storage } from "../../../utils/firebase";
-import { collection, setDoc, getDoc, doc } from "firebase/firestore";
+import { setDoc, getDoc, doc } from "firebase/firestore";
 import {
   SelectList,
   MultipleSelectList,
@@ -67,11 +67,11 @@ export default function EditUserProfile() {
         fetchUserProfile(user.displayName || "");
       } else {
         console.log("User is not logged in");
-        navigation.navigate("Login"); // Redirect to login page if not logged in
+        navigation.navigate("Login");
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const fetchUserProfile = async (username) => {
@@ -114,7 +114,7 @@ export default function EditUserProfile() {
     if (!validateFields()) return;
 
     try {
-      const imageUrl = await submitData(); // Get the image URL from submitData
+      const imageUrl = await submitData();
       if (!imageUrl) {
         alert("Failed to upload image.");
         return;
@@ -122,14 +122,9 @@ export default function EditUserProfile() {
       const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
-        // Update the user profile in Firebase Authentication
         await updateProfile(user, {
           photoURL: imageUrl,
         });
-
-        // Log user profile to verify
-        console.log("User displayName:", user.displayName);
-        console.log("User photoURL:", user.photoURL);
 
         // Save the user profile to Firestore with username as document ID
         await setDoc(doc(firestore, "userProfiles", username), {
@@ -212,11 +207,7 @@ export default function EditUserProfile() {
           {image && <Image source={{ uri: image }} style={styles.image} />}
 
           <Text style={{ color: "white" }}> Username</Text>
-          <TextInput
-            style={styles.input}
-            value={username}
-            editable={false} // Disable editing username
-          />
+          <TextInput style={styles.input} value={username} editable={false} />
           <Text style={{ color: "white" }}> Your experience level</Text>
           <TextInput
             style={styles.input}

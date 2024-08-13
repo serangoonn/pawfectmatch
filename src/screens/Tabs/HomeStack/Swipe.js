@@ -34,7 +34,6 @@ export default function Swipe() {
   const [items, setItems] = useState([]);
   const [profilephoto, setProfilephoto] = useState("");
 
-  // Get the current user ID
   const auth = getAuth();
   const currentUser = auth.currentUser ? auth.currentUser.uid : null;
 
@@ -54,7 +53,6 @@ export default function Swipe() {
   }, [selectedFilters]);
 
   useEffect(() => {
-    // Fetch unique characteristics and locations for dropdowns
     const fetchCharacteristicsAndLocations = async () => {
       try {
         const petProfilesRef = collection(firestore, "petProfiles");
@@ -139,7 +137,6 @@ export default function Swipe() {
   const handleLike = async (pet) => {
     if (pet && currentUser) {
       try {
-        // Get current user's username
         const username = await getCurrentUsername();
 
         // Update current user's liked profiles
@@ -185,7 +182,7 @@ export default function Swipe() {
             },
             {
               text: "Continue",
-              onPress: moveToNextCard, // Simplified to a function reference
+              onPress: moveToNextCard,
             },
           ],
           { cancelable: true }
@@ -274,14 +271,12 @@ export default function Swipe() {
     Alert.alert("User Saved", "This pet profile has been saved!");
     if (pet && username) {
       try {
-        // Get reference to current user's liked profiles document
         const currentUserLikedProfilesRef = doc(
           firestore,
           "StarPets",
           username
         );
 
-        // Create the profile data
         const petProfile = {
           username: pet.username,
           imageUrl: pet.imageUrl,
@@ -293,7 +288,6 @@ export default function Swipe() {
           organization: pet.organization,
         };
 
-        // Update the document with the new profile using pet.username as the key
         await setDoc(
           currentUserLikedProfilesRef,
           {
@@ -310,7 +304,6 @@ export default function Swipe() {
         }
       } catch (error) {
         if (error.code === "not-found") {
-          // Document doesn't exist, create a new one
           await setDoc(currentUserLikedProfilesRef, {
             profiles: {
               [pet.username]: petProfile,
@@ -329,7 +322,6 @@ export default function Swipe() {
 
   const moveToNextCard = () => {
     if (swiperRef.current) {
-      // to stop moving card
       swiperRef.current.swipeLeft();
     }
   };
@@ -559,7 +551,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   petInfoContainer: {
-    flex: 1, // Take up remaining space in the card
+    flex: 1,
     marginBottom: 10,
     marginTop: -10,
   },
@@ -575,6 +567,6 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   characteristicText: {
-    color: "white", // Adjust the text color as needed
+    color: "white",
   },
 });

@@ -266,7 +266,7 @@ const pickerSelectStyles = StyleSheet.create({
     height: 40,
   },
   placeholder: {
-    color: "#7D5F26", // Change this to your desired placeholder color
+    color: "#7D5F26",
   },
 });
 

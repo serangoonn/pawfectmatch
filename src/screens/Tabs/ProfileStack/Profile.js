@@ -10,7 +10,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { useNavigation } from "@react-navigation/core";
-import { firestore, storage, auth } from "../../../utils/firebase";
+import { firestore, auth } from "../../../utils/firebase";
 import {
   doc,
   getDoc,
@@ -84,9 +84,7 @@ export default function Profile() {
       const user = auth.currentUser;
       if (user) {
         const username = user.displayName;
-        const userId = user.uid; // Fetch user's UID from Firebase Authentication
 
-        // Collect the current password from the user
         const currentPassword = await promptForPassword();
 
         if (!currentPassword) {
@@ -119,13 +117,9 @@ export default function Profile() {
           await deleteDoc(doc.ref);
         });
 
-        /*const deletePromises = querySnapshot.docs.map((doc) => deleteDoc(doc.ref));
-        await Promise.all(deletePromises);*/
-
         // Delete the user's account from Firebase Authentication
         await deleteUser(user);
 
-        // Redirect to login after deletion
         navigation.replace("Login");
       }
     } catch (error) {
@@ -159,18 +153,18 @@ export default function Profile() {
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
 
-          setIsUserProfile(true); // Set profile type to user
+          setIsUserProfile(true);
           setImage(userData.imageUrl || "");
           setExperiencelevel(userData.experiencelevel || "");
           setBreed(userData.breed || "");
           setLocation(userData.location || "");
           setAnimal(userData.animal || "");
           setCharacteristics(userData.fixedCharacteristics || "");
-          setPetname(""); // Clear pet profile fields
+          setPetname("");
           setDescription("");
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
-          setIsUserProfile(false); // Set profile type to pet
+          setIsUserProfile(false);
           setImage(petData.imageUrl || "");
           setPetname(petData.petname || "");
           setBreed(petData.breed || "");
@@ -179,7 +173,7 @@ export default function Profile() {
           setAnimal(petData.animal || "");
           setCharacteristics(petData.fixedCharacteristics || "");
           setOrganization(petData.organization || "");
-          setExperiencelevel(""); // Clear user profile fields
+          setExperiencelevel("");
         } else {
           console.log("No profile found!");
         }
@@ -429,8 +423,6 @@ const styles = StyleSheet.create({
     width: 150,
     height: 150,
     borderRadius: 90,
-    //marginVertical: 10,
-    //marginLeft: 50,
     top: 10,
     right: -5,
   },
@@ -456,6 +448,5 @@ const styles = StyleSheet.create({
   textContainer: {
     padding: 10,
     marginLeft: 8,
-    //marginBottom: -17,
   },
 });

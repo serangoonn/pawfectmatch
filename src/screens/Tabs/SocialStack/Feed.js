@@ -12,7 +12,7 @@ import {
   Modal,
   ActivityIndicator,
 } from "react-native";
-import { firestore, auth } from "../../../utils/firebase";
+import { firestore } from "../../../utils/firebase";
 import {
   collection,
   getDocs,
@@ -36,7 +36,7 @@ export default function Feed() {
   const [newComment, setNewComment] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [modalLoading, setModalLoading] = useState(false); // Add modal loading state
+  const [modalLoading, setModalLoading] = useState(false);
 
   // pop up profile information
   const [profileusername, setProfileusername] = useState("");
@@ -103,15 +103,13 @@ export default function Feed() {
         const userIndex = likes.indexOf(user.uid);
 
         if (userIndex === -1) {
-          // User has not liked the post, so add their UID
           likes.push(user.uid);
         } else {
-          // User has liked the post, so remove their UID
           likes.splice(userIndex, 1);
         }
 
         await updateDoc(postRef, { likes });
-        fetchPosts(); // Refresh posts to reflect changes
+        fetchPosts();
       }
     } catch (error) {
       console.error("Error updating likes:", error);
@@ -138,8 +136,8 @@ export default function Feed() {
         comments.push(newCommentData);
 
         await updateDoc(postRef, { comments });
-        setNewComment(""); // Clear the comment input field
-        fetchPosts(); // Refresh posts to reflect changes
+        setNewComment("");
+        fetchPosts();
       }
     } catch (error) {
       console.error("Error adding comment:", error);
@@ -152,7 +150,7 @@ export default function Feed() {
       await updateDoc(postRef, {
         comments: arrayRemove(comment),
       });
-      fetchPosts(); // Refresh posts to reflect changes
+      fetchPosts();
     } catch (error) {
       console.error("Error deleting comment:", error);
     }
@@ -161,7 +159,7 @@ export default function Feed() {
   const handleDeletePost = async (postId) => {
     try {
       await deleteDoc(doc(firestore, "posts", postId));
-      fetchPosts(); // Refresh posts to reflect changes
+      fetchPosts();
     } catch (error) {
       console.error("Error deleting post:", error);
     }
@@ -231,24 +229,24 @@ export default function Feed() {
         if (userDocSnap.exists()) {
           const userData = userDocSnap.data();
 
-          setIsUserProfile(true); // Set profile type to user
+          setIsUserProfile(true);
           setExperiencelevel(userData.experiencelevel || "");
           setBreed(userData.breed || "");
           setLocation(userData.location || "");
           setAnimal(userData.animal || "");
           setCharacteristics(userData.fixedCharacteristics || []);
-          setPetname(""); // Clear pet profile fields
+          setPetname("");
           setDescription("");
         } else if (petDocSnap.exists()) {
           const petData = petDocSnap.data();
-          setIsUserProfile(false); // Set profile type to pet
+          setIsUserProfile(false);
           setPetname(petData.petname || "");
           setBreed(petData.breed || "");
           setDescription(petData.description || "");
           setLocation(petData.location || "");
           setAnimal(petData.animal || "");
           setCharacteristics(petData.fixedCharacteristics || []);
-          setExperiencelevel(""); // Clear user profile fields
+          setExperiencelevel("");
         } else {
           console.log("No profile found!");
         }
@@ -720,6 +718,6 @@ const styles = StyleSheet.create({
     margin: 5,
   },
   characteristicText: {
-    color: "white", // Adjust the text color as needed
+    color: "white",
   },
 });

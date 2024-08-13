@@ -13,7 +13,7 @@ import {
 import React, { useState, useEffect } from "react";
 import { useNavigation, useRoute } from "@react-navigation/core";
 import { firestore, storage } from "../../../utils/firebase";
-import { collection, setDoc, getDocs, doc, getDoc } from "firebase/firestore";
+import { setDoc, doc, getDoc } from "firebase/firestore";
 import {
   SelectList,
   MultipleSelectList,

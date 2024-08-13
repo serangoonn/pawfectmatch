@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingContainer: {
     flex: 1,
-    backgroundColor: "#EDD7B5", // Adjust the color to match your app's theme
+    backgroundColor: "#EDD7B5",
   },
   input: {
     width: "90%",
@@ -270,7 +270,6 @@ const styles = StyleSheet.create({
     marginHorizonatal: 75,
     justifyContent: "center",
     alignItems: "center",
-    //marginBottom: 20,
   },
   selectedButton: {
     backgroundColor: "#A78446",

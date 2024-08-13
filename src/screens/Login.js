@@ -1,20 +1,15 @@
-//login screen
-
 import {
   Alert,
   Image,
   ImageBackground,
   StyleSheet,
   Text,
-  View,
-  TextInput,
   TouchableOpacity,
 } from "react-native";
 import { useState, useEffect } from "react";
 import MyTextInput from "../components/MyTextInput";
 import { auth } from "../utils/firebase";
 import { useNavigation } from "@react-navigation/core";
-import { firebase } from "../utils/firebase";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
@@ -36,12 +31,9 @@ export default function Login() {
         const user = userCredential.user;
         console.log("user data,", user);
         navigation.navigate("PawfectMatch");
-        // ..
       })
       .catch((error) => {
         Alert.alert("Error", "Username and/or password incorrect");
-
-        // ..
       });
   };
 
@@ -55,7 +47,6 @@ export default function Login() {
     return unsubscribe;
   }, []);
 
-  // type in email and password & sign up button
   return (
     <ImageBackground
       source={require("../images/loginbackground.png")}

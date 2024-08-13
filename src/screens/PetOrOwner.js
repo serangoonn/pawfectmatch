@@ -1,4 +1,4 @@
-import { Image, ImageBackground, StyleSheet, Text, View } from "react-native";
+import { Image, ImageBackground, StyleSheet } from "react-native";
 import React from "react";
 import { useNavigation } from "@react-navigation/core";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -77,11 +77,11 @@ const styles = StyleSheet.create({
   },
   textButton: {
     fontSize: 18,
-    color: "black", // Customize this as needed
+    color: "black",
     textAlign: "center",
     paddingVertical: 15,
     paddingHorizontal: 20,
-    backgroundColor: "#ccc", // Customize this as needed
+    backgroundColor: "#ccc",
     borderRadius: 10,
   },
 });

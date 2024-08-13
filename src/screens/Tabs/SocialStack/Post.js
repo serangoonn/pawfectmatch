@@ -76,7 +76,6 @@ export default function Post() {
 
         console.log("Document written with ID: ", docRef.id);
 
-        // Navigate to Feed screen
         navigation.navigate("Feed");
 
         return downloadURL;
@@ -162,7 +161,7 @@ const styles = StyleSheet.create({
   },
   keyboardAvoidingContainer: {
     flex: 1,
-    backgroundColor: "#EDD7B5", // Adjust the color to match your app's theme
+    backgroundColor: "#EDD7B5",
   },
   backbuttontext: {
     flexDirection: "row",

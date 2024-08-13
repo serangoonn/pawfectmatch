@@ -24,7 +24,6 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
 export default function CreatePetProfile() {
   const navigation = useNavigation();
-
   const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [petname, setPetName] = useState("");
@@ -73,13 +72,14 @@ export default function CreatePetProfile() {
         console.log("User is logged in:", user);
       } else {
         console.log("User is not logged in");
-        navigation.navigate("Login"); // Redirect to login page if not logged in
+        navigation.navigate("Login");
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
+  // ensure that all fields are filled in
   const validateFields = () => {
     if (
       !username ||
@@ -97,6 +97,8 @@ export default function CreatePetProfile() {
     }
     return true;
   };
+
+  // save profile information
   const handleSave = async () => {
     if (!validateFields()) return;
     try {
@@ -105,8 +107,7 @@ export default function CreatePetProfile() {
         alert("Username is already taken.");
         return;
       }
-
-      const imageUrl = await submitData(); // Get the image URL from submitData
+      const imageUrl = await submitData();
       if (!imageUrl) {
         alert("Failed to upload image.");
         return;
@@ -115,17 +116,14 @@ export default function CreatePetProfile() {
       const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
-        // Update the user profile in Firebase Authentication
         await updateProfile(user, {
           displayName: username,
           photoURL: imageUrl,
         });
 
-        // Log user profile to verify
-        console.log("User displayName:", user.displayName);
-        console.log("User photoURL:", user.photoURL);
+        // console.log("User displayName:", user.displayName);
+        // console.log("User photoURL:", user.photoURL);
 
-        // Save the user profile to Firestore with username as document ID
         try {
           await setDoc(doc(firestore, "petProfiles", username), {
             uid: user.uid,
@@ -158,13 +156,27 @@ export default function CreatePetProfile() {
     }
   };
 
+  // check if username input already exist
   const checkUsernameAvailability = async () => {
     try {
-      const userProfilesRef = collection(firestore, "petProfiles");
-      const querySnapshot = await getDocs(userProfilesRef);
-      const existingUsernames = querySnapshot.docs.map(
-        (doc) => doc.data().username
-      );
+      const queries = [];
+      // user profiles
+      const userProfilesRef = collection(firestore, "userProfiles");
+      queries.push(getDocs(userProfilesRef));
+
+      // pet profiles
+      const petProfilesRef = collection(firestore, "petProfiles");
+      queries.push(getDocs(petProfilesRef));
+
+      const results = await Promise.all(queries);
+
+      let existingUsernames = [];
+      results.forEach((querySnapshot) => {
+        existingUsernames = [
+          ...existingUsernames,
+          ...querySnapshot.docs.map((doc) => doc.data().username),
+        ];
+      });
       return !existingUsernames.includes(username);
     } catch (error) {
       console.error("Error checking username availability:", error);

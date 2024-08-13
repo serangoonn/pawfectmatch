@@ -26,11 +26,9 @@ export default function Register() {
         const user = userCredential.user;
         console.log("user data,", user);
         navigation.replace("PetOrOwner");
-        // ..
       })
       .catch((error) => {
         Alert.alert("Error", "Invalid email address or password");
-        // ..
       });
   };
 

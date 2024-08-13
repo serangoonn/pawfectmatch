@@ -24,7 +24,6 @@ import { getAuth, updateProfile, onAuthStateChanged } from "firebase/auth";
 
 export default function CreateUserProfile() {
   const navigation = useNavigation();
-
   const [image, setImage] = useState("");
   const [username, setUsername] = useState("");
   const [location, setLocation] = useState("");
@@ -65,11 +64,11 @@ export default function CreateUserProfile() {
         console.log("User is logged in:", user);
       } else {
         console.log("User is not logged in");
-        navigation.navigate("Login"); // Redirect to login page if not logged in
+        navigation.navigate("Login");
       }
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
+    return () => unsubscribe();
   }, []);
 
   const validateFields = () => {
@@ -98,7 +97,7 @@ export default function CreateUserProfile() {
         return;
       }
 
-      const imageUrl = await submitData(); // Get the image URL from submitData
+      const imageUrl = await submitData();
       if (!imageUrl) {
         alert("Failed to upload image.");
         return;
@@ -106,17 +105,12 @@ export default function CreateUserProfile() {
       const auth = getAuth();
       const user = auth.currentUser;
       if (user) {
-        // Update the user profile in Firebase Authentication
         await updateProfile(user, {
           displayName: username,
           photoURL: imageUrl,
         });
-
-        // Log user profile to verify
-        console.log("User displayName:", user.displayName);
-        console.log("User photoURL:", user.photoURL);
-
-        // Save the user profile to Firestore with username as document ID
+        // console.log("User displayName:", user.displayName);
+        // console.log("User photoURL:", user.photoURL);
         await setDoc(doc(firestore, "userProfiles", username), {
           uid: user.uid,
           username,
@@ -144,21 +138,17 @@ export default function CreateUserProfile() {
 
   const checkUsernameAvailability = async () => {
     try {
-      // Array to store promises for querying both collections
       const queries = [];
-
-      // Query for 'userProfiles'
+      // user profiles
       const userProfilesRef = collection(firestore, "userProfiles");
       queries.push(getDocs(userProfilesRef));
 
-      // Query for 'petProfiles'
+      // pet profiles
       const petProfilesRef = collection(firestore, "petProfiles");
       queries.push(getDocs(petProfilesRef));
 
-      // Await all queries
       const results = await Promise.all(queries);
 
-      // Extract usernames from query results
       let existingUsernames = [];
       results.forEach((querySnapshot) => {
         existingUsernames = [
@@ -166,8 +156,6 @@ export default function CreateUserProfile() {
           ...querySnapshot.docs.map((doc) => doc.data().username),
         ];
       });
-
-      // Check if username exists in either collection
       return !existingUsernames.includes(username);
     } catch (error) {
       console.error("Error checking username availability:", error);
